@@ -12,6 +12,8 @@ from deepofc.hu_two_round import HUTwoRoundSubgame
 
 
 def main() -> None:
+    # The structural reference depends on a rank-preserving suit-only
+    # player-swap automorphism; never reintroduce rank relabeling here.
     build_started = time.perf_counter()
     game = HUTwoRoundSubgame()
     build_seconds = time.perf_counter() - build_started
