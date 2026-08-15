@@ -89,6 +89,9 @@ def validate_hu_replay_tablemap(text: str) -> list[str]:
         # placement. A later empirically validated runtime tablemap must flip
         # this symbol to 1 only after its row drop targets are proven.
         "ofc_drag_targets_calibrated": "0",
+        # Separate final execution authority. Source/target geometry may be
+        # developed and validated while actual OFC mouse execution remains off.
+        "ofc_executor_enabled": "0",
     }
     if audit.target_size != (450, 830):
         errors.append(f"target_size={audit.target_size}, expected (450, 830)")
