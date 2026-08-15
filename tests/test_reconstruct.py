@@ -53,6 +53,9 @@ def raw_from_golden(golden):
                 sitting_out=p.sitting_out,
             )
         )
+    # The supplied gameplay screenshots visibly show the gold Confirm control
+    # even while Oxy87's timer is active. Safe commit is derived separately from
+    # acting order by the reconstructor.
     return RawOFCObservation(
         players=tuple(players),
         hero_chair=golden.hero_chair,
@@ -62,7 +65,7 @@ def raw_from_golden(golden):
         hero_loose_cards=loose,
         hero_discard_tracker=golden.hero_discards,
         hero_can_prepare=golden.hero_can_prepare,
-        hero_can_confirm=golden.hero_can_confirm,
+        confirm_visible=True,
         mode=golden.mode,
     )
 
@@ -103,6 +106,18 @@ def test_stateful_reconstructor_reproduces_all_seven_golden_gameplay_frames():
         previous = rebuilt
 
 
+def test_visible_confirm_does_not_override_opponent_action_order():
+    golden = load_golden("frame000512.json")
+    raw = raw_from_golden(golden)
+    assert raw.confirm_visible
+    previous = reconstruct_observation(raw_from_golden(load_golden("frame000468.json")))
+    previous = reconstruct_observation(raw_from_golden(load_golden("frame000482.json")), previous)
+    rebuilt = reconstruct_observation(raw, previous)
+    assert rebuilt.acting_chair != rebuilt.hero_chair
+    assert not rebuilt.hero_can_confirm
+    assert not rebuilt.action_required
+
+
 def test_midhand_attach_fails_closed_without_history():
     golden = load_golden("frame000528.json")
     raw = raw_from_golden(golden)
@@ -130,7 +145,7 @@ def test_same_round_incoming_identity_change_is_rejected():
         hero_loose_cards=(Card.from_code("3c"),),
         hero_discard_tracker=bad_raw.hero_discard_tracker,
         hero_can_prepare=bad_raw.hero_can_prepare,
-        hero_can_confirm=bad_raw.hero_can_confirm,
+        confirm_visible=bad_raw.confirm_visible,
         mode=bad_raw.mode,
     )
     with pytest.raises(ReconstructionError, match="identities changed"):
