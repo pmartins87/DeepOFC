@@ -12,16 +12,9 @@ def make_terminal_state() -> tuple[OFCState, PlayerBoard]:
         middle=(C("9c"), C("9d"), C("8c"), C("7c")),
         bottom=(C("As"), C("Ks"), C("Qc"), C("Jc"), C("Tc")),
     )
+    incoming = (C("Qd"), C("9h"), C("2h"))
     opponent = PlayerBoard(
-        top=(C("Js"), C("Jh"), C("3s")),
-        middle=(C("8s"), C("8h"), C("6d"), C("5d"), C("4d")),
-        bottom=(C("Ad"), C("Kd"), C("Qd"), C("Jd"), C("Td")),
-    )
-    # Qd is already on opponent board, so use a different third incoming card.
-    incoming = (C("Qh") if False else C("Qd"), C("9h"), C("2h"))
-    # Replace opponent Qd to preserve physical uniqueness in the real state.
-    opponent = PlayerBoard(
-        top=(C("Js"), C("Jh"), C("3s")),
+        top=(C("6s"), C("5s"), C("3s")),
         middle=(C("8s"), C("8h"), C("6d"), C("5d"), C("4d")),
         bottom=(C("Ad"), C("Kd"), C("7d"), C("Jd"), C("Td")),
     )
