@@ -2,10 +2,11 @@
 
 This document is the R1 rules contract for DeepOFC. It combines:
 
-1. the supplied KKPoker in-client rule/replay evidence (`joker_ofc_frames_and_rules.zip`), and
-2. an official KKPoker website cross-check performed on 2026-08-14.
+1. the supplied KKPoker in-client rule/replay evidence (`joker_ofc_frames_and_rules.zip`),
+2. an official KKPoker website cross-check performed on 2026-08-14, and
+3. explicit project rule clarifications frozen by the user on 2026-08-15 where the client wording leaves implementation detail implicit.
 
-The in-client rules are treated as the most specific source for the exact live variant observed. The public website is used to corroborate base OFC rules and current economics. Ambiguities remain explicit; they are never silently guessed.
+The in-client rules are treated as the most specific source for the exact live variant observed. The public website is used to corroborate base OFC rules and current economics. Project-frozen clarifications are labelled as such rather than being presented as externally sourced facts.
 
 ## Target variant identity — RESOLVED
 
@@ -85,6 +86,25 @@ The in-client Advanced Play screen states:
 - a Joker can represent another playing card to form the strongest hand;
 - the resulting board must remain non-fouled.
 
+#### Project-frozen Joker substitution semantics — 2026-08-15
+
+The implementation meaning of those client rules is now frozen as follows:
+
+1. **Substitution is with replacement.** A Joker may assume the nominal identity of a standard card that already physically exists anywhere among the known cards. JK1 and JK2 may also assume the same nominal card.
+2. **The result must still be an ordinary poker hand used by this OFC hierarchy.** Five-of-a-Kind is not a hand category in this variant. A nominal assignment that would create five equal ranks is therefore invalid and is skipped, not ranked above Quads and not treated as an unresolved special hand.
+3. **Each row seeks the strongest legal poker hand, but complete-board validity is a hard constraint.** Joker choices are evaluated jointly across Top/Middle/Bottom. The chosen result is the strongest achievable board satisfying `Bottom >= Middle >= Top` whenever any legal Joker assignment can satisfy that ordering.
+4. **A Joker never causes an avoidable foul.** Example: with `AA + Joker` on Top and Two Pair in Middle, the row-local maximum `AAA` would foul the board. The Joker therefore becomes the highest kicker that keeps Top as an AA pair below Middle.
+5. **Likewise on five-card rows**, if a locally stronger Joker assignment would make Middle exceed Bottom, the Joker uses the strongest weaker standard poker hand that preserves the board ordering.
+6. **If no Joker assignment can rescue the placement, the board is genuinely fouled.** The Joker rule constrains wildcard assignment; it does not rewrite physical card placement or create a non-existent poker category.
+7. Multiple nominal substitutions that produce the same `HandRank` are strategically equivalent for scoring/royalties. DeepOFC keeps the physical identities `JK1`/`JK2` in canonical state and does not need to persist an arbitrary equivalent nominal assignment.
+
+Concrete frozen examples:
+
+- `AAAA + JK -> AAAA K` (Quad Aces with best legal kicker), never `AAAAA`;
+- `AAA + JK1 + JK2 -> AAAA K` as the best legal ordinary five-card hand when no straight/flush alternative is stronger;
+- `AA + JK` on Top may evaluate locally to `AAA`, but on a complete board it is reduced to the strongest non-fouling AA pair when Middle is only Two Pair;
+- `AAA2 + JK` in Middle evaluates locally to `AAAA2`, but if Bottom is Quad Kings it becomes `AAA22` because Full House is the strongest assignment that keeps Middle below Bottom.
+
 ### 17-card Fantasy
 
 The same screen explicitly states that **in Ultimate mode with Jokers**, a player can receive **17 cards** for entering Fantasy with trips in the top row.
@@ -125,6 +145,12 @@ The replay also proves that KKPoker **auto-sorts cards within a row after confir
 
 ## Board structure and foul — RESOLVED
 
+Terminology used by DeepOFC:
+
+- **board** = the complete 3/5/5 arrangement;
+- **row** = Top, Middle or Bottom;
+- **hand** = the poker hand/rank formed by one row.
+
 Each completed board contains:
 
 - Top: 3 cards
@@ -143,7 +169,7 @@ The in-client Basic Play screen is explicit:
 
 The public website uses looser wording such as `outrank`/`higher`, but the current client explicitly includes equality. DeepOFC therefore follows the in-client rule: **equality is legal for foul ordering**.
 
-The exact cross-size comparison contract (3-card Top vs 5-card Middle) will be implemented in R2 and frozen by golden tests.
+Joker assignment is part of this board-validity evaluation: independent row-local maxima are not allowed to manufacture a foul when a weaker Joker substitution keeps the complete board valid.
 
 ## Fantasyland
 
@@ -281,22 +307,25 @@ The client states:
 - if still sitting out when the hand ends, the player is removed;
 - while sitting out, cards are selected/set automatically.
 
-## R1 unresolved list after website cross-check
+## R1 unresolved list after 2026-08-15 Joker clarification
 
-Resolved in this pass:
+Resolved:
 
 - target product identity is `Joker Ultimate`;
 - supported player counts for DeepOFC are 2–3;
 - equality is legal in Bottom >= Middle >= Top foul ordering;
 - base OFC rake headline is 5%, cap 2 BB, no rake at pot <= 5 BB;
 - row visual slot identity is not strategic state;
-- Hero can pre-arrange before Hero is the acting player.
+- Hero can pre-arrange before Hero is the acting player;
+- Joker substitution is with replacement and may duplicate known nominal cards;
+- JK1 and JK2 may assume the same nominal card;
+- Five-of-a-Kind is not a valid category and must be skipped in wildcard enumeration;
+- Joker assignment is board-aware and must choose the strongest non-fouling assignment whenever one exists;
+- equivalent nominal assignments that yield the same HandRank need not be persisted as strategic state.
 
-Still unresolved before R1 can PASS:
+Still unresolved before the broader R1/R2 rules/economics work is fully closed:
 
-1. Exact Joker wildcard uniqueness rules: may two Jokers map to the same nominal card, and may a Joker duplicate a physical standard card already present?
-2. Exact tie-breaking/wildcard assignment rule if multiple Joker substitutions produce equivalent best hand ranks.
-3. Exact Joker Ultimate re-Fantasy card count for every stay condition, especially Bottom-quads-only re-Fantasy.
-4. Exact financial win-cap transfer/clamping algorithm under a concrete insufficient-funds example.
-5. Exact OFC rake `pot` definition and attribution for the KKPoker Joker Ultimate cash game.
-6. Whether opponent discard identities can ever become legally observable during a live hand before settlement; current replay evidence shows only hidden backs/count.
+1. Exact Joker Ultimate re-Fantasy card count for every stay condition, especially Bottom-quads-only re-Fantasy.
+2. Exact financial win-cap transfer/clamping algorithm under a concrete insufficient-funds example.
+3. Exact OFC rake `pot` definition and attribution for the KKPoker Joker Ultimate cash game.
+4. Whether opponent discard identities can ever become legally observable during a live hand before settlement; current replay evidence shows only hidden backs/count.
