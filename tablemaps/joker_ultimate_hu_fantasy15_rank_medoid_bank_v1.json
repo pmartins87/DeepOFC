@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "target_variant": "KKPoker OFC Joker Ultimate",
+  "layout": "hero_fantasy_15_card_fan",
+  "status": "replay_medoid_template_bank_not_runtime_authority",
+  "runtime_authorized": false,
+  "extraction": {
+    "identity_patch_source": "tablemaps/joker_ultimate_hu_fantasy15_450x830_geometry_v1.json",
+    "deskew_angles_degrees": [-18.85, -16.52, -14.22, -11.79, -9.31, -6.69, -4.15, -1.59, 1.08, 3.64, 6.18, 8.8, 11.39, 13.92, 16.32],
+    "rotation": "bicubic by negative slot deskew angle, white fill",
+    "rank_roi": {"y0": 1, "center_x_offset": -1, "width": 16, "height": 24},
+    "foreground_threshold": "min(R,G,B) < 140",
+    "component_selection": "area>=5 and centroid_y<0.82*24; maximize area - 2*abs(cx-8) - max(0,cy-13.2)",
+    "normalization": {"width": 16, "height": 24, "padding": 1, "resize": "nearest, preserve aspect"},
+    "rank_match": {"distance": "XOR/union", "max_translation_pixels": 2, "max_distance": 0.5, "min_margin": 0.04},
+    "suit_feature": "median RGB of the selected rank-glyph component (rank color carries suit)",
+    "suit_prototypes": {"c": [30.0,148.0,1.0], "d": [20.0,97.25,192.0], "h": [227.0,11.0,24.5], "s": [48.0,48.0,48.0]},
+    "suit_match": {"distance": "Euclidean RGB", "max_distance": 40.0, "min_margin": 80.0}
+  },
+  "template_selection": "one medoid exemplar per rank: minimum total aligned distance to same-rank samples; sole 8 necessarily selects its only exemplar",
+  "calibration_validation": {
+    "standard_card_samples": 43,
+    "rank_against_13_medoids": {"correct": 43, "total": 43, "max_correct_distance": 0.45864661654135336, "min_correct_margin": 0.0440161104718067},
+    "suit_against_frozen_prototypes": {"correct": 43, "total": 43, "max_correct_distance": 35.50704155516198, "min_correct_margin": 82.397572593773},
+    "independence_warning": "This is calibration fit, not an independent runtime certification. Rank 8 still has only one observed exemplar; 14/16/17 layouts are still unobserved.",
+    "runtime_gate": "ofc_fantasy_recognizer_calibrated remains 0"
+  },
+  "rank_templates": [
+    {"rank":"2","source_card":"2s","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":14,"rank_mask_rows":[0,0,0,15360,32256,32512,17920,16384,16384,16384,24576,30720,32256,16320,4088,510,62,62,892,1008,992,0,0,0]},
+    {"rank":"3","source_card":"3c","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":13,"rank_mask_rows":[0,0,1536,7936,32256,31744,28672,30720,32256,16128,3840,3840,7680,7168,7172,7182,7694,3870,2044,2044,1016,0,0,0]},
+    {"rank":"4","source_card":"4d","source_frame":"session_1/frame000060.bmp","source_frame_sha256":"05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99","slot_index":10,"rank_mask_rows":[0,6144,6144,15360,15872,16256,16320,8160,7648,7648,7280,3192,3134,3614,4094,8190,8190,8128,3968,2032,4080,4080,3968,0]},
+    {"rank":"5","source_card":"5h","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":11,"rank_mask_rows":[0,3968,3968,32640,32704,25536,960,224,2016,2016,8160,8160,15456,14336,14336,14336,14336,14350,15390,7998,8190,4088,2016,0]},
+    {"rank":"6","source_card":"6h","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":10,"rank_mask_rows":[0,7168,7168,16256,16320,2016,496,112,120,120,4088,4088,8190,7230,7230,15390,15390,7198,7198,7742,4088,2040,992,0]},
+    {"rank":"7","source_card":"7c","source_frame":"session_1/frame000060.bmp","source_frame_sha256":"05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99","slot_index":6,"rank_mask_rows":[0,2048,2048,8176,8188,8188,7228,7196,7168,3584,3584,3584,3584,3584,3584,3840,3840,3840,1792,1792,1792,1792,768,0]},
+    {"rank":"8","source_card":"8c","source_frame":"session_1/frame000060.bmp","source_frame_sha256":"05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99","slot_index":4,"rank_mask_rows":[0,0,480,480,1008,2040,3902,3614,3614,3614,3646,4088,8184,16368,15584,30960,28784,28784,30960,31200,16352,8128,0,0]},
+    {"rank":"9","source_card":"9c","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":7,"rank_mask_rows":[0,960,960,2032,4080,7804,7228,7228,7228,15420,15420,15996,8176,8176,8160,8128,7168,7680,3584,3968,2016,1008,240,0]},
+    {"rank":"T","source_card":"Tc","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":5,"rank_mask_rows":[0,0,0,7936,16128,32518,29582,24974,24974,24974,16798,16798,924,796,824,824,18232,20280,32632,32760,32252,0,0,0]},
+    {"rank":"J","source_card":"Jd","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":4,"rank_mask_rows":[0,768,768,960,1020,496,960,960,896,896,1920,1792,1792,1792,3840,3584,3600,3644,3644,7280,7792,4080,2016,0]},
+    {"rank":"Q","source_card":"Qc","source_frame":"session_1/frame000052.bmp","source_frame_sha256":"7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935","slot_index":4,"rank_mask_rows":[0,0,0,224,504,1020,1982,1822,3598,3598,3612,3612,7196,7228,6652,16380,16380,32368,31856,31984,16352,0,0,0]},
+    {"rank":"K","source_card":"Kh","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":2,"rank_mask_rows":[0,0,0,128,480,248,254,238,230,230,238,238,508,1020,2044,4088,16120,31984,31968,31968,6624,0,0,0]},
+    {"rank":"A","source_card":"Ac","source_frame":"session_1/frame000032.bmp","source_frame_sha256":"723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130","slot_index":1,"rank_mask_rows":[0,0,0,6,14,30,62,126,126,254,510,988,1980,4024,24568,32760,31984,31856,8160,992,0,0,0,0]}
+  ]
+}
