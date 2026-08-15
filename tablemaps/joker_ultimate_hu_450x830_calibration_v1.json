@@ -7,6 +7,10 @@
     "opponent_top": {"rgb": "22704c", "radius": 24},
     "opponent_middle": {"rgb": "257650", "radius": 24},
     "opponent_bottom": {"rgb": "297b55", "radius": 24},
+    "opponent_discard0": {"rgb": "319767", "radius": 24},
+    "opponent_discard1": {"rgb": "329869", "radius": 24},
+    "opponent_discard2": {"rgb": "308b61", "radius": 24},
+    "opponent_discard3": {"rgb": "308d61", "radius": 24},
     "hero_top": {"rgb": "2a7852", "radius": 24},
     "hero_middle": {"rgb": "1f6d49", "radius": 24},
     "hero_bottom": {"rgb": "1b6242", "radius": 24},
@@ -48,6 +52,7 @@
     "Opponent turn pixel (374,197) is yellow in frames 468/482/512/528 and green in 543/560/568.",
     "Hero turn pixel (335,395) is green in 468/482/512/528 and yellow in 543/560/568.",
     "The P0 dealer point is only a geometry prediction; all supplied frames have Hero/P1 as dealer.",
+    "Opponent discard cards are a 4-slot horizontal strip; Hero discards are a 2x2 small-card grid in the supplied HU layout.",
     "This calibration is sufficient for generating a replay-draft tablemap, not for claiming live R9 support."
   ]
 }
