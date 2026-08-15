@@ -1,6 +1,7 @@
 from deepofc.hu_two_round import (
     HUTwoRoundSubgame,
     action_public_key,
+    mirror_action,
 )
 
 
@@ -47,7 +48,8 @@ def test_round4_infosets_preserve_private_discard_perfect_recall():
     for action in game._round3_actions(outcome, first):
         groups.setdefault(action_public_key(action), []).append(action)
     pair = next(
-        actions for actions in groups.values()
+        actions
+        for actions in groups.values()
         if len(actions) >= 2 and len({action.discard for action in actions}) >= 2
     )
     first_a, first_b = pair[:2]
@@ -104,73 +106,17 @@ def test_representative_terminal_swap_symmetry_and_no_unfrozen_scoring_branch():
                 for first_r4 in first_r4_actions[:1]:
                     for second_r4 in second_r4_actions[:1]:
                         u0 = game.terminal_u0(
-                            outcome, first_r3, second_r3, first_r4, second_r4
+                            outcome,
+                            first_r3,
+                            second_r3,
+                            first_r4,
+                            second_r4,
                         )
                         mirror_u0 = game.terminal_u0(
                             mirrored,
-                            first_r3.__class__(
-                                placements=tuple(
-                                    p.__class__(
-                                        card=__import__(
-                                            'deepofc.hu_two_round',
-                                            fromlist=['mirror_card'],
-                                        ).mirror_card(p.card),
-                                        row=p.row,
-                                    )
-                                    for p in first_r3.placements
-                                ),
-                                discard=__import__(
-                                    'deepofc.hu_two_round',
-                                    fromlist=['mirror_card'],
-                                ).mirror_card(first_r3.discard),
-                            ),
-                            second_r3.__class__(
-                                placements=tuple(
-                                    p.__class__(
-                                        card=__import__(
-                                            'deepofc.hu_two_round',
-                                            fromlist=['mirror_card'],
-                                        ).mirror_card(p.card),
-                                        row=p.row,
-                                    )
-                                    for p in second_r3.placements
-                                ),
-                                discard=__import__(
-                                    'deepofc.hu_two_round',
-                                    fromlist=['mirror_card'],
-                                ).mirror_card(second_r3.discard),
-                            ),
-                            first_r4.__class__(
-                                placements=tuple(
-                                    p.__class__(
-                                        card=__import__(
-                                            'deepofc.hu_two_round',
-                                            fromlist=['mirror_card'],
-                                        ).mirror_card(p.card),
-                                        row=p.row,
-                                    )
-                                    for p in first_r4.placements
-                                ),
-                                discard=__import__(
-                                    'deepofc.hu_two_round',
-                                    fromlist=['mirror_card'],
-                                ).mirror_card(first_r4.discard),
-                            ),
-                            second_r4.__class__(
-                                placements=tuple(
-                                    p.__class__(
-                                        card=__import__(
-                                            'deepofc.hu_two_round',
-                                            fromlist=['mirror_card'],
-                                        ).mirror_card(p.card),
-                                        row=p.row,
-                                    )
-                                    for p in second_r4.placements
-                                ),
-                                discard=__import__(
-                                    'deepofc.hu_two_round',
-                                    fromlist=['mirror_card'],
-                                ).mirror_card(second_r4.discard),
-                            ),
+                            mirror_action(first_r3),
+                            mirror_action(second_r3),
+                            mirror_action(first_r4),
+                            mirror_action(second_r4),
                         )
                         assert u0 == -mirror_u0
