@@ -13,6 +13,27 @@ from deepofc.hu_two_round_mccfr import TwoRoundExternalSamplingMCCFR
 
 
 FROZEN_UNIFORM_EXPLOITABILITY = 2.099206349206
+FROZEN_PRECACHE_CURRENT = {
+    "expected_u0": 0.0,
+    "br0": 0.011904761905,
+    "br1": 0.013130252101,
+    "exploitability": 0.012517507003,
+}
+FROZEN_PRECACHE_LOCAL_AVERAGE = {
+    "expected_u0": 0.001601589197,
+    "br0": 0.173029043717,
+    "br1": 0.176124911342,
+    "exploitability": 0.174576977529,
+}
+
+
+def _assert_frozen(label, snapshot, frozen):
+    for field, expected in frozen.items():
+        observed = getattr(snapshot, field)
+        if abs(observed - expected) > 1e-10:
+            raise SystemExit(
+                f"memoization changed {label} {field}: {observed} vs {expected}"
+            )
 
 
 def main() -> None:
@@ -27,6 +48,7 @@ def main() -> None:
     current_started = time.perf_counter()
     current = solver.snapshot(profile_kind="current")
     current_eval_seconds = time.perf_counter() - current_started
+    _assert_frozen("current", current, FROZEN_PRECACHE_CURRENT)
     print(
         "profile=current "
         f"expected_u0={current.expected_u0:.12f} "
@@ -39,6 +61,9 @@ def main() -> None:
     average_started = time.perf_counter()
     average = solver.snapshot(profile_kind="behavioral_time_average")
     average_eval_seconds = time.perf_counter() - average_started
+    _assert_frozen(
+        "behavioral_time_average", average, FROZEN_PRECACHE_LOCAL_AVERAGE
+    )
     print(
         "profile=behavioral_time_average "
         f"expected_u0={average.expected_u0:.12f} "
@@ -54,6 +79,9 @@ def main() -> None:
             "deep external sampling failed to improve either evaluated policy: "
             f"best={best} uniform={FROZEN_UNIFORM_EXPLOITABILITY}"
         )
+    print(f"terminal_cache={game.terminal_u0.cache_info()}")
+    print(f"round3_board_cache={game._boards_after_round3.cache_info()}")
+    print(f"round4_info_cache={game.round4_info.cache_info()}")
     print("HU TWO-ROUND EXTERNAL-SAMPLING MCCFR: PASS")
 
 
