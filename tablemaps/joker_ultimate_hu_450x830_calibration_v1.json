@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "replay_calibration_not_live_certified",
+  "source_frames": [468, 482, 512, 528, 543, 560, 568],
+  "color_format": "RRGGBB",
+  "empty_background": {
+    "opponent_top": {"rgb": "22704c", "radius": 24},
+    "opponent_middle": {"rgb": "257650", "radius": 24},
+    "opponent_bottom": {"rgb": "297b55", "radius": 24},
+    "hero_top": {"rgb": "2a7852", "radius": 24},
+    "hero_middle": {"rgb": "1f6d49", "radius": 24},
+    "hero_bottom": {"rgb": "1b6242", "radius": 24},
+    "hero_incoming": {"rgb": "196e49", "radius": 24},
+    "hero_discard0": {"rgb": "155b3b", "radius": 22},
+    "hero_discard1": {"rgb": "1b6341", "radius": 22},
+    "hero_discard2": {"rgb": "145938", "radius": 22},
+    "hero_discard3": {"rgb": "145a3b", "radius": 22}
+  },
+  "card_back": {"rgb": "d4ae4e", "radius": 46},
+  "turn": {
+    "p0": {"point": [374, 197], "rgb": "eaec09", "radius": 28},
+    "p1": {"point": [335, 395], "rgb": "eaec09", "radius": 28}
+  },
+  "dealer": {
+    "p0": {"point": [429, 267], "rgb": "cfcfcf", "radius": 20, "confidence": "predicted_by_avatar_relative_offset_not_observed"},
+    "p1": {"point": [393, 482], "rgb": "cfcfcf", "radius": 20, "confidence": "observed_true_all_supplied_gameplay_frames"}
+  },
+  "confirm_visible": {"point": [350, 710], "rgb": "9f8945", "radius": 28},
+  "hero_discard_rects": [
+    [27, 575, 53, 614],
+    [55, 575, 81, 614],
+    [27, 615, 53, 654],
+    [55, 615, 81, 654]
+  ],
+  "opponent_discard_rects": [
+    [88, 313, 119, 354],
+    [123, 313, 154, 354],
+    [158, 313, 189, 354],
+    [193, 313, 224, 354]
+  ],
+  "joker_detector": {
+    "calibrated": false,
+    "placeholder_rgb": "ff00ff",
+    "reason": "no supplied gameplay frame visibly contains a Joker card face"
+  },
+  "notes": [
+    "Empty colors are medians/representative green pixels from known-empty centers in the supplied 450x830 replay frames.",
+    "Opponent turn pixel (374,197) is yellow in frames 468/482/512/528 and green in 543/560/568.",
+    "Hero turn pixel (335,395) is green in 468/482/512/528 and yellow in 543/560/568.",
+    "The P0 dealer point is only a geometry prediction; all supplied frames have Hero/P1 as dealer.",
+    "This calibration is sufficient for generating a replay-draft tablemap, not for claiming live R9 support."
+  ]
+}
