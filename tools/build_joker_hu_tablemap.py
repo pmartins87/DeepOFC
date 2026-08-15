@@ -25,6 +25,12 @@ def _point_region(name: str, point: tuple[int, int], *, color: str, radius: int)
     return _region(name, (x, y, x, y), color=color, radius=radius, transform="C")
 
 
+def _geometry_region(name: str, rect: list[int]) -> str:
+    # Geometry-only region: R10 reads only its rectangle. It is not evaluated
+    # as a scraper classifier and therefore carries neutral N semantics.
+    return _region(name, tuple(rect), color="000000", radius=0, transform="N")
+
+
 def _center(rect: list[int]) -> tuple[int, int]:
     l, t, r, b = rect
     return ((l + r) // 2, (t + b) // 2)
@@ -195,9 +201,10 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
         )
 
     for idx, rect in enumerate(g["hero"]["normal_incoming"]):
+        base = f"ofc_hero_in{idx}"
         new_regions.extend(
             _slot_regions(
-                f"ofc_hero_in{idx}",
+                base,
                 rect,
                 size="large",
                 empty_cfg=empty["hero_incoming"],
@@ -205,6 +212,10 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
                 joker_cfg=joker,
             )
         )
+        # This raw rectangle is deliberately ephemeral UI geometry. The scraper
+        # associates it with the physical card recognized in this exact frame;
+        # canonical strategy state never stores the visual slot identity.
+        new_regions.append(_geometry_region(base + "drag", rect))
 
     for p in (0, 1):
         turn = c["turn"][f"p{p}"]
