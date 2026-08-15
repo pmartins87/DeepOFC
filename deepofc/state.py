@@ -275,14 +275,17 @@ class OFCState:
     def confirm_shape_is_legal(self) -> bool:
         board = self.player(self.hero_chair).board
         if self.hero_is_fantasy:
+            # A Fantasy decision is one atomic construction of a fresh 13-card
+            # board. Visual pre-arrangement belongs in hero_pending; committed
+            # board cards here would mix pre- and post-Confirm semantics.
+            if board.filled_count() != 0:
+                return False
             if len(self.hero_incoming) not in range(14, 18):
                 return False
-            # Fantasy is a one-shot full-board placement. Any current visual
-            # pre-arrangement is represented by hero_pending; committed board
-            # cards, if present during reconstruction, reduce remaining slots.
-            if board.filled_count() + len(self.hero_pending) != 13:
+            if len(self.hero_pending) != 13:
                 return False
-            return len(self.unassigned_incoming()) == len(self.hero_incoming) - len(self.hero_pending)
+            unused = len(self.unassigned_incoming())
+            return unused == len(self.hero_incoming) - 13 and unused in range(1, 5)
 
         required = 5 if self.round_index == 0 else 2
         if len(self.hero_pending) != required:
