@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
 import time
+
+# Allow direct execution from tools/ without requiring installation/PYTHONPATH.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from deepofc.actions import fantasy_action_board, iter_fantasy_actions
 from deepofc.fantasy_solver import evaluate_fantasy_exact_subsets
