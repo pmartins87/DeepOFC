@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from deepofc.fantasy_recognizer import (
     BinaryTemplate,
     RANK_PROBE_MAX_DISTANCE,
@@ -10,6 +13,10 @@ from deepofc.fantasy_recognizer import (
     classify_rank_mask,
     classify_suit_rgb,
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MEDOID_BANK = ROOT / "tablemaps" / "joker_ultimate_hu_fantasy15_rank_medoid_bank_v1.json"
 
 
 def rows(*values: int) -> tuple[int, ...]:
@@ -101,11 +108,49 @@ def test_suit_classifier_rejects_ambiguous_midpoint():
 
 
 def test_probe_thresholds_remain_conservative_relative_to_measured_extrema():
-    # The replay report measured max correct rank distance ~0.48062 and minimum
-    # correct rank margin ~0.04043. The executable probe thresholds sit just
-    # outside/inside those extrema and remain separate from runtime authority.
     assert RANK_PROBE_MAX_DISTANCE == 0.50
     assert RANK_PROBE_MIN_MARGIN == 0.04
-    # Suit probe measured max correct distance ~31.90 and min margin ~89.55.
     assert SUIT_PROBE_MAX_DISTANCE == 40.0
     assert SUIT_PROBE_MIN_MARGIN == 80.0
+
+
+def test_frozen_fantasy15_medoid_bank_has_all_ranks_and_never_claims_runtime_authority():
+    bank = json.loads(MEDOID_BANK.read_text(encoding="utf-8"))
+    assert bank["target_variant"] == "KKPoker OFC Joker Ultimate"
+    assert bank["layout"] == "hero_fantasy_15_card_fan"
+    assert bank["runtime_authorized"] is False
+    assert "not_runtime_authority" in bank["status"]
+    assert bank["calibration_validation"]["runtime_gate"].endswith("remains 0")
+
+    templates = bank["rank_templates"]
+    assert [template["rank"] for template in templates] == list("23456789TJQKA")
+    assert len({template["rank"] for template in templates}) == 13
+    for template in templates:
+        assert len(template["rank_mask_rows"]) == 24
+        assert all(0 <= row < (1 << 16) for row in template["rank_mask_rows"])
+        assert len(template["source_frame_sha256"]) == 64
+
+
+def test_each_frozen_medoid_self_classifies_with_margin_against_other_ranks():
+    bank = json.loads(MEDOID_BANK.read_text(encoding="utf-8"))
+    templates = tuple(
+        BinaryTemplate(
+            label=entry["rank"],
+            rows=tuple(entry["rank_mask_rows"]),
+            width=16,
+        )
+        for entry in bank["rank_templates"]
+    )
+    config = bank["extraction"]["rank_match"]
+    for template in templates:
+        result = classify_rank_mask(
+            template.rows,
+            templates,
+            width=16,
+            max_shift=int(config["max_translation_pixels"]),
+            max_distance=float(config["max_distance"]),
+            min_margin=float(config["min_margin"]),
+        )
+        assert result.accepted, template.label
+        assert result.value == template.label
+        assert result.best_distance == 0.0
