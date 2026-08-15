@@ -6,7 +6,7 @@ import pytest
 from deepofc.observation import RawOFCObservation, RawPlayerObservation
 from deepofc.reconstruct import ReconstructionError, reconstruct_observation
 from deepofc.serde import state_from_dict
-from deepofc.state import PlayerBoard, Row
+from deepofc.state import Card, PlayerBoard, Row
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,9 +53,10 @@ def raw_from_golden(golden):
                 sitting_out=p.sitting_out,
             )
         )
-    # The supplied gameplay screenshots visibly show the gold Confirm control
-    # even while Oxy87's timer is active. Safe commit is derived separately from
-    # acting order by the reconstructor.
+    # The supplied normal gameplay screenshots visibly show the gold Confirm
+    # control even while an earlier opponent's timer is active. Safe commit is
+    # derived separately from acting order. For the real Fantasy frame53 fixture,
+    # Hero is the actor and Confirm is genuinely actionable.
     return RawOFCObservation(
         players=tuple(players),
         hero_chair=golden.hero_chair,
@@ -84,6 +85,7 @@ def state_signature(state):
         "dealer": state.dealer_chair,
         "hero": state.hero_chair,
         "boards": {p.chair: board_signature(p.board) for p in state.players},
+        "fantasy": {p.chair: p.fantasy for p in state.players},
         "hidden_incoming": {p.chair: p.hidden_incoming_count for p in state.players},
         "hidden_discards": {p.chair: p.hidden_discard_count for p in state.players},
         "incoming": frozenset(c.code for c in state.hero_incoming),
@@ -135,7 +137,6 @@ def test_same_round_incoming_identity_change_is_rejected():
     bad_raw = raw_from_golden(load_golden("frame000568.json"))
     # Replace the only loose card (2d) with an impossible unrelated card while
     # keeping the same round. The reconstructor must detect identity drift.
-    from deepofc.state import Card
     bad_raw = RawOFCObservation(
         players=bad_raw.players,
         hero_chair=bad_raw.hero_chair,
@@ -150,3 +151,82 @@ def test_same_round_incoming_identity_change_is_rejected():
     )
     with pytest.raises(ReconstructionError, match="identities changed"):
         reconstruct_observation(bad_raw, previous)
+
+
+def test_real_fantasy_frame53_reconstructs_without_prior_history():
+    golden = load_golden("fantasy_frame000053.json")
+    raw = raw_from_golden(golden)
+    assert raw.hero_is_fantasy
+    assert raw.round_index == -1
+    assert len(raw.hero_loose_cards) == 2
+
+    rebuilt = reconstruct_observation(raw, previous=None)
+    assert state_signature(rebuilt) == state_signature(golden)
+    assert rebuilt.hero_is_fantasy
+    assert rebuilt.player(rebuilt.hero_chair).board.filled_count() == 0
+    assert len(rebuilt.hero_incoming) == 15
+    assert len(rebuilt.hero_pending) == 13
+    assert {c.code for c in rebuilt.unassigned_incoming()} == {"3s", "2c"}
+    assert rebuilt.confirm_shape_is_legal()
+
+
+def test_active_fantasy_cannot_be_misclassified_as_normal_round_four():
+    golden = load_golden("fantasy_frame000053.json")
+    raw = raw_from_golden(golden)
+    with pytest.raises(ValueError, match="round_index=-1"):
+        RawOFCObservation(
+            players=raw.players,
+            hero_chair=raw.hero_chair,
+            dealer_chair=raw.dealer_chair,
+            acting_chair=raw.acting_chair,
+            round_index=4,
+            hero_loose_cards=raw.hero_loose_cards,
+            hero_discard_tracker=raw.hero_discard_tracker,
+            hero_can_prepare=raw.hero_can_prepare,
+            confirm_visible=raw.confirm_visible,
+            mode=raw.mode,
+        )
+
+
+def test_actionable_fantasy_confirm_requires_exact_13_plus_unused_shape():
+    golden = load_golden("fantasy_frame000053.json")
+    raw = raw_from_golden(golden)
+    # Move one pending Hero card back to loose while leaving Confirm visible and
+    # Hero acting. This produces only 12 pending placements; fail closed instead
+    # of exposing an actionable partial Fantasy board.
+    hero_raw = raw.player(raw.hero_chair)
+    top = tuple(c for c in hero_raw.visual_board.top if c.code != "6h")
+    players = tuple(
+        RawPlayerObservation(
+            chair=p.chair,
+            visual_board=(
+                PlayerBoard(
+                    top=top,
+                    middle=hero_raw.visual_board.middle,
+                    bottom=hero_raw.visual_board.bottom,
+                )
+                if p.chair == raw.hero_chair
+                else p.visual_board
+            ),
+            hidden_incoming_count=p.hidden_incoming_count,
+            hidden_discard_count=p.hidden_discard_count,
+            name=p.name,
+            fantasy=p.fantasy,
+            sitting_out=p.sitting_out,
+        )
+        for p in raw.players
+    )
+    bad = RawOFCObservation(
+        players=players,
+        hero_chair=raw.hero_chair,
+        dealer_chair=raw.dealer_chair,
+        acting_chair=raw.acting_chair,
+        round_index=-1,
+        hero_loose_cards=(*raw.hero_loose_cards, Card.from_code("6h")),
+        hero_discard_tracker=(),
+        hero_can_prepare=True,
+        confirm_visible=True,
+        mode=raw.mode,
+    )
+    with pytest.raises(ReconstructionError, match="13-placement"):
+        reconstruct_observation(bad)
