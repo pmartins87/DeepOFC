@@ -7,6 +7,17 @@ def C(code: str) -> Card:
     return Card.from_code(code)
 
 
+def fantasy_cards(count: int) -> tuple[Card, ...]:
+    pool = tuple(
+        C(code)
+        for code in (
+            "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "Ts",
+            "Js", "Qs", "Ks", "As", "Ah", "Kh", "Qh", "JK1",
+        )
+    )
+    return pool[:count]
+
+
 def test_standard_and_joker_cards_are_distinct_physical_cards():
     cards = {C("As"), C("Ah"), C("JK1"), C("JK2")}
     assert len(cards) == 4
@@ -90,3 +101,74 @@ def test_cannot_confirm_when_opponent_is_acting():
             hero_can_prepare=True,
             hero_can_confirm=True,
         )
+
+
+def test_runtime_mode_is_one_joker_ultimate_variant_not_separate_joker_mode():
+    with pytest.raises(ValueError, match="joker_ultimate"):
+        OFCState(
+            players=(PlayerState(chair=0), PlayerState(chair=1)),
+            hero_chair=1,
+            dealer_chair=1,
+            acting_chair=1,
+            round_index=0,
+            mode="joker",
+        )
+
+
+def test_fantasy_is_state_inside_joker_ultimate_and_uses_round_minus_one():
+    incoming = fantasy_cards(17)
+    state = OFCState(
+        players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
+        hero_chair=1,
+        dealer_chair=1,
+        acting_chair=1,
+        round_index=-1,
+        hero_incoming=incoming,
+        hero_can_prepare=True,
+        hero_can_confirm=True,
+        action_required=True,
+    )
+    assert state.mode == "joker_ultimate"
+    assert state.hero_is_fantasy
+    assert len(state.hero_incoming) == 17
+
+
+def test_fantasy_rejects_normal_round_index():
+    with pytest.raises(ValueError, match="round_index=-1"):
+        OFCState(
+            players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
+            hero_chair=1,
+            dealer_chair=1,
+            acting_chair=1,
+            round_index=0,
+            hero_incoming=fantasy_cards(14),
+        )
+
+
+def test_fantasy_confirm_shape_is_exactly_13_placed_plus_1_to_4_unused():
+    incoming = fantasy_cards(14)
+    pending = tuple(
+        [PendingPlacement(card, Row.TOP) for card in incoming[:3]]
+        + [PendingPlacement(card, Row.MIDDLE) for card in incoming[3:8]]
+        + [PendingPlacement(card, Row.BOTTOM) for card in incoming[8:13]]
+    )
+    state = OFCState(
+        players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
+        hero_chair=1,
+        dealer_chair=1,
+        acting_chair=1,
+        round_index=-1,
+        hero_incoming=incoming,
+        hero_pending=pending,
+        hero_can_prepare=True,
+        hero_can_confirm=True,
+        action_required=True,
+    )
+    assert state.confirm_shape_is_legal()
+    assert state.unassigned_incoming() == (incoming[-1],)
+
+
+def test_fantasy_hidden_incoming_count_allows_14_to_17_only_for_fantasy_player():
+    assert PlayerState(chair=0, fantasy=True, hidden_incoming_count=17).hidden_incoming_count == 17
+    with pytest.raises(ValueError, match="normal-play"):
+        PlayerState(chair=0, fantasy=False, hidden_incoming_count=17)
