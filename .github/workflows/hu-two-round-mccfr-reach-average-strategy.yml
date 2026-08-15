@@ -1,0 +1,24 @@
+name: HU two-round external-sampling CFR-average strategy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_mccfr_reach_average.py'
+      - 'tools/benchmark_hu_two_round_mccfr_reach_average_strategy.py'
+      - '.github/workflows/hu-two-round-mccfr-reach-average-strategy.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train external sampling and exact-BR evaluate current, CFR-average and local control
+        run: python tools/benchmark_hu_two_round_mccfr_reach_average_strategy.py
