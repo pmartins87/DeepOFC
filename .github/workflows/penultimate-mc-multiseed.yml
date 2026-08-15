@@ -1,0 +1,23 @@
+name: Penultimate Monte Carlo multi-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/expectimax.py'
+      - 'deepofc/monte_carlo.py'
+      - 'tools/benchmark_penultimate_mc_multiseed.py'
+      - '.github/workflows/penultimate-mc-multiseed.yml'
+  workflow_dispatch:
+
+jobs:
+  multiseed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Calibrate 8/16/32 samples across 20 deterministic seeds
+        run: python tools/benchmark_penultimate_mc_multiseed.py
