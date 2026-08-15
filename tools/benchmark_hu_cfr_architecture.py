@@ -22,9 +22,11 @@ def main() -> None:
         raise SystemExit(f"unexpected symmetry terminal count: {checks}")
 
     uniform = game.uniform_profile()
+    eval_started = time.perf_counter()
     uniform_value = game.expected_u0(uniform)
     uniform_br0 = game.best_response_value(uniform, 0)
     uniform_br1 = game.best_response_value(uniform, 1)
+    uniform_eval_seconds = time.perf_counter() - eval_started
     uniform_exploitability = 0.5 * (uniform_br0 + uniform_br1)
 
     print(
@@ -40,7 +42,8 @@ def main() -> None:
         f"expected_u0={uniform_value:.12f} "
         f"br0={uniform_br0:.12f} "
         f"br1={uniform_br1:.12f} "
-        f"exploitability={uniform_exploitability:.12f}"
+        f"exploitability={uniform_exploitability:.12f} "
+        f"exact_eval_seconds={uniform_eval_seconds:.6f}"
     )
     if abs(uniform_value) > 1e-12:
         raise SystemExit("symmetric uniform profile should have exact-zero expected value")
@@ -52,22 +55,37 @@ def main() -> None:
     for variant in ("cfr_plus", "dcfr"):
         solver = FullTreeCFR(game, variant=variant)
         previous = 0
-        variant_started = time.perf_counter()
+        cumulative_train = 0.0
+        cumulative_eval = 0.0
+        final = None
         for checkpoint in checkpoints:
+            train_started = time.perf_counter()
             solver.run(checkpoint - previous)
+            cumulative_train += time.perf_counter() - train_started
             previous = checkpoint
+
+            snapshot_started = time.perf_counter()
             snap = solver.snapshot()
+            cumulative_eval += time.perf_counter() - snapshot_started
+            final = snap.exploitability
             print(
                 f"variant={variant} iteration={checkpoint} "
                 f"expected_u0={snap.expected_u0:.12f} "
                 f"br0={snap.br0:.12f} br1={snap.br1:.12f} "
                 f"nash_conv={snap.nash_conv:.12f} "
-                f"exploitability={snap.exploitability:.12f}"
+                f"exploitability={snap.exploitability:.12f} "
+                f"cumulative_train_seconds={cumulative_train:.6f} "
+                f"cumulative_exact_eval_seconds={cumulative_eval:.6f}"
             )
-        elapsed = time.perf_counter() - variant_started
-        final = solver.snapshot().exploitability
+        assert final is not None
         finals[variant] = final
-        print(f"variant={variant} total_seconds={elapsed:.6f} final_exploitability={final:.12f}")
+        terminal_evals = checkpoints[-1] * len(game.outcomes) * 36
+        print(
+            f"variant={variant} training_seconds={cumulative_train:.6f} "
+            f"exact_evaluation_seconds={cumulative_eval:.6f} "
+            f"training_terminal_evaluations={terminal_evals} "
+            f"final_exploitability={final:.12f}"
+        )
 
     for variant, final in finals.items():
         if not final < uniform_exploitability:
