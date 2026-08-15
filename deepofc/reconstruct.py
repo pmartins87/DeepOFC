@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from .observation import RawOFCObservation
 from .state import Card, OFCState, PendingPlacement, PlayerBoard, PlayerState, Row
 
@@ -117,6 +115,10 @@ def reconstruct_observation(
     prior canonical state is rejected unless the observation is round 0, because
     a single KKPoker image cannot reliably distinguish committed Hero row cards
     from tentative pre-Confirm placements.
+
+    A visible Confirm button does not override action order. Supplied frames show
+    it while the opponent's timer is active, so canonical `hero_can_confirm` is
+    true only when Confirm is visible *and* Hero is the acting chair.
     """
 
     if previous is None:
@@ -197,6 +199,11 @@ def reconstruct_observation(
             )
         )
 
+    safe_to_confirm = (
+        observation.confirm_visible
+        and observation.acting_chair == observation.hero_chair
+    )
+
     return OFCState(
         players=tuple(players),
         hero_chair=observation.hero_chair,
@@ -207,7 +214,7 @@ def reconstruct_observation(
         hero_discards=_sorted_cards(observation.hero_discard_tracker),
         hero_pending=tuple(sorted(pending, key=lambda p: (p.row.value, p.card.code))),
         hero_can_prepare=observation.hero_can_prepare,
-        hero_can_confirm=observation.hero_can_confirm,
-        action_required=observation.hero_can_confirm,
+        hero_can_confirm=safe_to_confirm,
+        action_required=safe_to_confirm,
         mode=observation.mode,
     )
