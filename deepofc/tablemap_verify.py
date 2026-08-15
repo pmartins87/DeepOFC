@@ -42,7 +42,7 @@ def parse_tablemap(text: str) -> TablemapAudit:
 
 
 def required_hu_replay_regions() -> set[str]:
-    names: set[str] = set()
+    names: set[str] = {"ofc_fantasy_active"}
     # Persistent physical Joker identity is part of the R9 contract. The old
     # single `joker` suffix is intentionally not accepted anymore.
     suffixes = ("empty", "back", "joker1", "joker2", "rank", "suit")
