@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "frame": "session_1/frame000053.bmp",
+  "frame_sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5",
+  "frame_kind": "user_supplied_real_pixel_evidence",
+  "table_label": "Joker Ultimate",
+  "evidence_notes": [
+    "Hero is in 15-card Fantasy and has tentatively arranged exactly 13 cards into 3/5/5.",
+    "Unused 3s and 2c remain loose below the board; they are not yet in the discard tracker.",
+    "Both physical Jokers are tentatively placed in Bottom and retain distinct orange/red JK1 and gray/black JK2 identities.",
+    "Opponent has completed the visible normal-play board; Hero timer is active and Confirm is visible.",
+    "Hero committed board remains empty in canonical state until Confirm; the 13 visible Hero row cards are hero_pending."
+  ],
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "for_sho",
+        "fantasy": false,
+        "hidden_incoming_count": 0,
+        "hidden_discard_count": 0,
+        "board": {
+          "top": ["Ah", "Jc", "8h"],
+          "middle": ["6s", "5c", "4h", "3h", "2h"],
+          "bottom": ["9d", "8d", "6d", "4d", "2d"]
+        }
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "fantasy": true,
+        "hidden_incoming_count": 0,
+        "hidden_discard_count": 0,
+        "board": {
+          "top": [],
+          "middle": [],
+          "bottom": []
+        }
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 0,
+    "acting_chair": 1,
+    "round_index": -1,
+    "hero_incoming": [
+      "JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"
+    ],
+    "hero_discards": [],
+    "hero_pending": [
+      {"card": "Ac", "row": "top"},
+      {"card": "Kd", "row": "top"},
+      {"card": "6h", "row": "top"},
+      {"card": "Qc", "row": "middle"},
+      {"card": "Qd", "row": "middle"},
+      {"card": "9h", "row": "middle"},
+      {"card": "4s", "row": "middle"},
+      {"card": "4c", "row": "middle"},
+      {"card": "JK1", "row": "bottom"},
+      {"card": "JK2", "row": "bottom"},
+      {"card": "Js", "row": "bottom"},
+      {"card": "9s", "row": "bottom"},
+      {"card": "7s", "row": "bottom"}
+    ],
+    "hero_can_prepare": true,
+    "hero_can_confirm": true,
+    "action_required": true
+  }
+}
