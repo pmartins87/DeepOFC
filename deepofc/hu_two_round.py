@@ -84,6 +84,7 @@ def mirror_card_code(code: str) -> str:
     return mirror_card(Card.from_code(code)).code
 
 
+@lru_cache(maxsize=None)
 def action_public_key(action: NormalPlacementAction) -> tuple[tuple[str, str], ...]:
     return tuple(sorted((placement.card.code, placement.row.value) for placement in action.placements))
 
@@ -195,6 +196,7 @@ def _actions_for(
     return enumerate_normal_actions(state)
 
 
+@lru_cache(maxsize=None)
 def _apply(
     board: PlayerBoard,
     action: NormalPlacementAction,
@@ -221,7 +223,12 @@ def _split_actions(
 
 
 class HUTwoRoundSubgame:
-    """Reduced two-round HU OFC extensive-form benchmark with perfect recall."""
+    """Reduced two-round HU OFC extensive-form benchmark with perfect recall.
+
+    Pure state/action projections are memoized only by immutable canonical
+    arguments. These caches change no chance support, infoset identity, legal
+    action, utility or strategy semantics; they only remove repeated exact work.
+    """
 
     exact_reference_value: float = 0.0
 
@@ -255,6 +262,7 @@ class HUTwoRoundSubgame:
         elif existing != actions:
             raise AssertionError("same infoset produced different legal action sets")
 
+    @lru_cache(maxsize=None)
     def round3_first_info(self, outcome: TwoRoundChanceOutcome) -> TwoRoundInfoSet:
         player = outcome.first_player
         return TwoRoundInfoSet(
@@ -264,6 +272,7 @@ class HUTwoRoundSubgame:
             own_round3_hand=_codes(outcome.hand(player, 3)),
         )
 
+    @lru_cache(maxsize=None)
     def round3_second_info(
         self,
         outcome: TwoRoundChanceOutcome,
@@ -278,6 +287,7 @@ class HUTwoRoundSubgame:
             observed_current_first_public=action_public_key(first_action),
         )
 
+    @lru_cache(maxsize=None)
     def round4_info(
         self,
         outcome: TwoRoundChanceOutcome,
@@ -301,6 +311,7 @@ class HUTwoRoundSubgame:
             own_round4_hand=_codes(outcome.hand(player, 4)),
         )
 
+    @lru_cache(maxsize=None)
     def _round3_actions(
         self,
         outcome: TwoRoundChanceOutcome,
@@ -314,6 +325,7 @@ class HUTwoRoundSubgame:
             3,
         )
 
+    @lru_cache(maxsize=None)
     def _boards_after_round3(
         self,
         outcome: TwoRoundChanceOutcome,
@@ -325,6 +337,7 @@ class HUTwoRoundSubgame:
         board1 = _apply(BASE_BOARDS[1], action1, outcome.round3_hand1, 3)
         return board0, board1, action0, action1
 
+    @lru_cache(maxsize=None)
     def _round4_actions(
         self,
         outcome: TwoRoundChanceOutcome,
