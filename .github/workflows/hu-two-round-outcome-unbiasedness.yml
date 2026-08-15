@@ -1,0 +1,23 @@
+name: HU two-round outcome-sampling unbiasedness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_cfr.py'
+      - 'deepofc/hu_two_round_outcome_mccfr.py'
+      - 'tools/benchmark_hu_two_round_outcome_unbiasedness.py'
+      - '.github/workflows/hu-two-round-outcome-unbiasedness.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-expectation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Integrate outcome-sampling update over every sampled terminal history
+        run: python tools/benchmark_hu_two_round_outcome_unbiasedness.py
