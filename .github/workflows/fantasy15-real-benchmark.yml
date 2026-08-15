@@ -1,0 +1,23 @@
+name: Real Fantasy15 dual-Joker benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/fantasy_solver.py'
+      - 'fixtures/replay/fantasy_frame000053.json'
+      - 'tools/benchmark_real_fantasy15_frame53.py'
+      - '.github/workflows/fantasy15-real-benchmark.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-real-frame:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Solve real frame53 Fantasy15 with both Jokers
+        run: python tools/benchmark_real_fantasy15_frame53.py
