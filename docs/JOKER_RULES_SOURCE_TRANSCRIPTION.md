@@ -1,55 +1,129 @@
-# KKPoker OFC Joker — source transcription and locked facts
+# KKPoker OFC Joker Ultimate — source transcription and frozen facts
 
-This document is derived only from the supplied `joker_ofc_frames_and_rules.zip` screenshots. It deliberately separates what the screenshots prove from what still needs confirmation.
+This document is the R1 rules contract for DeepOFC. It combines:
 
-## Modes shown by KKPoker
+1. the supplied KKPoker in-client rule/replay evidence (`joker_ofc_frames_and_rules.zip`), and
+2. an official KKPoker website cross-check performed on 2026-08-14.
 
-The Advanced Play screen states that four OFC modes are available:
+The in-client rules are treated as the most specific source for the exact live variant observed. The public website is used to corroborate base OFC rules and current economics. Ambiguities remain explicit; they are never silently guessed.
 
-- Regular
-- Progressive
-- Ultimate
-- Joker
+## Target variant identity — RESOLVED
+
+The gameplay frames supplied for this project visibly label the table:
+
+`Joker Ultimate GPS/IP`
+
+and
+
+`$20 JOKER Blinds: 10¢`
+
+The Advanced Play screen states that OFC has Regular, Progressive, Ultimate and Joker features; it further states that **Ultimate mode with Jokers** enables 17-card Fantasy for trips on top.
+
+Therefore DeepOFC is now scoped to the concrete product observed in the replay:
+
+**KKPoker OFC Joker Ultimate**
+
+We are no longer treating the target as an unspecified generic `Joker` mode.
+
+## Official KKPoker website cross-check — 2026-08-14
+
+Official pages checked:
+
+- https://kkpoker.net/how-to-play/open-face-chinese-poker-ofc/
+- https://br.kkpoker.net/gamerules/
+- https://kkpoker.net/how-to-play/rake-information/
+- https://br.kkpoker.net/how-to-play/instant-rakeback-explain/
+
+The public OFC guide and game-rules page corroborate the normal Pineapple flow:
+
+- 13-card 3/5/5 board;
+- five rounds;
+- five cards initially;
+- three cards on later rounds, place two and discard one;
+- action begins to the left of BTN and proceeds clockwise;
+- QQ or better on top enters Fantasy if the board is valid;
+- Fantasy deals 14–17 cards and the player sets 13 at once;
+- re-Fantasy condition is trips on top or quads-or-better on bottom;
+- one point per row and +3 for a scoop.
+
+The public website is generic OFC documentation and still describes a standard 52-card deck. It does **not** publish the advanced Joker/Ultimate details visible in the current client. Therefore the website does not override the in-client Joker Ultimate rules.
+
+The public rake page currently states for OFC:
+
+- stakes/ante units listed from $0.01 to $2;
+- rake = 5%;
+- cap = 2 BB;
+- no rake when the pot is <= 5 BB.
+
+The public Instant Rakeback page states that OFC is eligible and the system starts at 5% and can reach 50%. Rakeback/PVI belong to the economics layer, not to raw point scoring.
+
+## Deck and modes
+
+### Regular / base OFC
+
+The in-client Basic Play screen says Regular OFC uses a 52-card deck without Jokers.
 
 ### Progressive
 
-After entering Fantasy with the top row consisting of QQ, KK or AA, players receive **14, 15 or 16 cards respectively**, but receive only **14 cards if they re-enter Fantasy**.
+After entering Fantasy with top QQ, KK or AA, the player receives respectively:
+
+- QQ -> 14 cards
+- KK -> 15 cards
+- AA -> 16 cards
+
+In Progressive, re-Fantasy receives 14 cards.
 
 ### Ultimate
 
-Ultimate uses the same rules as Progressive, except that when players enter re-Fantasy, the number of cards dealt is the same as for Fantasy rather than being fixed at 14.
+Ultimate follows Progressive rules except that re-Fantasy does not automatically drop to 14; the number dealt follows the Fantasy-card-count rule instead.
 
 ### Joker
 
-The two Jokers can represent any other playing card to form the strongest hand, provided the resulting board is not fouled.
+The in-client Advanced Play screen states:
+
+- there are two physical Jokers;
+- a Joker can represent another playing card to form the strongest hand;
+- the resulting board must remain non-fouled.
 
 ### 17-card Fantasy
 
-The supplied rule screen states that in **Ultimate mode with Jokers**, players can receive **17 cards for entering Fantasy with trips in the top row**.
+The same screen explicitly states that **in Ultimate mode with Jokers**, a player can receive **17 cards** for entering Fantasy with trips in the top row.
 
-> Open item: the screenshots do not, by themselves, state in one unambiguous sentence whether KKPoker's menu item named `Joker` is exactly `Ultimate + two Jokers` for every Fantasy/re-Fantasy rule. We must not silently assume this. It is an R1 validation item.
+This applies directly to the DeepOFC target because the actual replay table is labelled `Joker Ultimate`.
+
+## Player counts — RESOLVED for the engine scope
+
+The supplied gameplay is heads-up, proving 2-player Joker Ultimate exists.
+
+The in-client scoring rules explicitly describe a 3-player settlement order using UTG, MP and BTN, proving 3-player OFC exists.
+
+Normal Pineapple flow deals 17 physical cards per non-Fantasy player across the five rounds (5 + 3 + 3 + 3 + 3). A 52-card regular deck supports at most three such players; the Joker Ultimate deck adds two Jokers but still cannot support four players under this flow.
+
+DeepOFC therefore freezes supported normal-table player counts as:
+
+**2 or 3 players**
+
+Any future evidence of a different KKPoker deal mechanism must deliberately revise this contract.
 
 ## Basic card flow
 
-The How To Play screens state:
-
-- Regular OFC uses a 52-card deck without Jokers.
 - Cards are shuffled every hand.
-- One random player is chosen as Dealer (BTN).
-- The player to the left of BTN, UTG, acts first and action moves clockwise.
-- There are **five rounds** in each OFC hand.
-- First round: **5 cards** are dealt to each player.
-- Each subsequent round: **3 cards** are dealt to each player.
-- Cards are dealt clockwise; BTN receives cards last each round.
-- All five first-round cards must be used.
-- On every later round, **two of the three cards must be placed and one discarded**.
-- Discarded cards can be found in KKPoker's Card Tracker.
-- Once all 13 cards are set, valid boards score by comparing corresponding rows.
-- The dealer button moves clockwise after the hand.
+- One player is BTN/dealer.
+- The player immediately left of BTN acts first; action proceeds clockwise.
+- There are five normal rounds.
+- Round 1: five cards; all five must be placed.
+- Rounds 2–5: three cards; exactly two are placed and one is discarded.
+- Once a placement turn is confirmed, previously set cards cannot be moved between rows.
+- Hero's own discarded-card identities are known information.
+- Opponent discarded-card identities are not shown in the supplied live frames; only card backs/count are visible.
 
-For the hero this makes discarded cards known information. Opponent discarded cards are not proven visible in normal play by the supplied frames and therefore must initially be treated as hidden unless later evidence proves otherwise.
+### Important UI observation from supplied frames
 
-## Board structure and foul
+KKPoker allows Hero to **pre-arrange** current cards while an opponent is still the acting player. The strategic action is not committed until Hero's turn/Confirm.
+
+The replay also proves that KKPoker **auto-sorts cards within a row after confirmation**. Therefore visual slot order inside a row is not persistent strategic state. DeepOFC canonicalizes row membership; the OpenHoldem scraper may read fixed screen slots but must normalize them to row card sets.
+
+## Board structure and foul — RESOLVED
 
 Each completed board contains:
 
@@ -57,50 +131,61 @@ Each completed board contains:
 - Middle: 5 cards
 - Bottom: 5 cards
 
-The source explicitly says:
+The in-client Basic Play screen is explicit:
 
-- on the top row, only **high card, pair and three of a kind** are valid hand types;
-- the strongest possible top row is AAA;
-- Bottom must be **stronger than or equal to** Middle;
-- Middle must be **stronger than or equal to** Top;
-- if this ordering is violated, the hand is fouled;
-- a fouled hand forfeits all royalties;
-- a fouled hand loses all three rows to any valid hand and is scooped.
+- top supports only high card, pair and trips;
+- strongest possible top is AAA;
+- **Bottom must be stronger than or equal to Middle**;
+- **Middle must be stronger than or equal to Top**;
+- otherwise the board is fouled;
+- a fouled board forfeits all royalties;
+- a fouled board loses all three rows to any valid opponent and is scooped.
 
-The comparison convention for a 3-card top versus a 5-card middle is therefore part of the game engine contract and must be implemented exactly, including the `equal` wording above.
+The public website uses looser wording such as `outrank`/`higher`, but the current client explicitly includes equality. DeepOFC therefore follows the in-client rule: **equality is legal for foul ordering**.
+
+The exact cross-size comparison contract (3-card Top vs 5-card Middle) will be implemented in R2 and frozen by golden tests.
 
 ## Fantasyland
 
-The supplied rules state:
+Base entry:
 
-- a valid hand with **QQ or better in the top row** enters Fantasy on the next hand;
-- in Fantasy the player receives **14 to 17 cards at once**, depending on game mode and top-row hand type;
-- the player builds the 13-card 3/5/5 board from those cards and discards the unused card(s);
-- to remain in Fantasy, the Fantasy hand must satisfy at least one of:
-  1. trips in the top row;
-  2. quads or better in the bottom row.
+- valid Top QQ or better enters Fantasy on the next hand.
+
+Fantasy behavior:
+
+- player receives 14–17 cards depending on the applicable mode/qualifier;
+- chooses 13 cards for the 3/5/5 board at once;
+- unused cards are discarded;
+- Fantasy board remains hidden until standard OFC players finish.
+
+Stay in Fantasy if the Fantasy board has at least one of:
+
+1. trips on Top;
+2. quads or better on Bottom.
+
+### Remaining Fantasy ambiguity
+
+The source is sufficient for 14/15/16 initial Progressive entry and 17-card trips entry in Joker Ultimate. It is **not yet fully explicit for every re-Fantasy path**, especially a re-Fantasy triggered only by Bottom quads-or-better when Top itself does not independently map to QQ/KK/AA/trips.
+
+This remains an R1 validation item. The engine must not invent a card count for that path.
 
 ## Scoring
 
-Each row is scored separately.
+Each player pair is scored independently.
 
-- Winner of a row: **+1 point**.
-- Winning all three rows is a scoop and awards an additional **+3 bonus points**.
-- Thus a clean 3-row win is 6 base points before royalty differences.
-- Total points are computed from row scores, royalty differences, and scoop bonus.
-- KKPoker states: `Player's profit = total points × blind`.
+- row win: +1 point;
+- row loss: -1 point;
+- row tie: 0;
+- win all three rows: +3 scoop bonus;
+- lose all three rows: -3 scoop bonus;
+- royalties are compared as a difference between players;
+- player's profit = total points x blind/point value.
 
-The scoring screen describes pairwise scoring order for a three-player table:
+The in-client formula is:
 
-1. UTG scores against MP;
-2. UTG scores against BTN;
-3. MP scores against BTN.
+`total points = score of each row + royalties difference + scoop bonus (if any)`
 
-It also states that the maximum funds a player can win or lose is limited by the amount the player had on the table at the start of the hand, with a win-cap adjustment when a losing player cannot fully pay.
-
-> Open item: exact cap redistribution needs a deterministic worked example before the economy/settlement engine can be frozen.
-
-## Royalties
+## Royalties — FROZEN
 
 ### Top row
 
@@ -152,22 +237,66 @@ It also states that the maximum funds a player can win or lose is limited by the
 | Straight flush | 15 |
 | Royal flush | 25 |
 
+The same royalty table is also published as an image on the official KKPoker OFC webpage.
+
+## Three-player settlement and win cap
+
+The in-client Scoring screen freezes the pairwise scoring order for a 3-player table:
+
+1. UTG vs MP;
+2. UTG vs BTN;
+3. MP vs BTN.
+
+It also states:
+
+- maximum funds a player can win or lose are capped at that player's funds at the **start of the hand**;
+- if a player cannot pay in full, the winner and the next player in the scoring order may bear the gap as the win cap is applied.
+
+This proves that settlement is order-dependent when caps bind.
+
+### Remaining settlement ambiguity
+
+The screen does not provide a numeric worked example. Before R2 settlement can be certified, we still need to validate the exact transfer/clamping algorithm against a real capped hand or another source-backed example.
+
+## Economics
+
+Raw strategy/scoring and site economics are separate layers.
+
+Current official public OFC rake information (checked 2026-08-14):
+
+- rake: 5%;
+- cap: 2 BB;
+- no rake if pot <= 5 BB;
+- published OFC stake units: $0.01, $0.02, $0.05, $0.10, $0.20, $0.50, $1, $2.
+
+The supplied live table is labelled `$20 JOKER Blinds: 10¢`; its point/blind value is therefore captured separately from the player's stack cap.
+
+Exact rake attribution and how `pot` is defined for OFC settlement must be validated before the bankroll/EV layer is certified.
+
 ## Sitting out
 
-The rules state that a player is forced to sit out after taking no action for two rounds. If still sitting out when the hand ends, the player is removed from the table. While sitting out, cards are selected and set automatically.
+The client states:
 
-## Evidence from supplied replay frames
+- no action for two rounds forces sit-out;
+- if still sitting out when the hand ends, the player is removed;
+- while sitting out, cards are selected/set automatically.
 
-The replay HTML identifies itself as `OFC 10¢` and OpenHoldem 14.0.2.0. Its standard Hold'em state table still shows four generic chairs, while the OFC game screenshots visibly use the 3/5/5 board layout and a `Confirm` placement workflow. This is one reason the normal OpenHoldem chair/card model cannot be treated as the canonical OFC state.
+## R1 unresolved list after website cross-check
 
-## R1 unresolved list
+Resolved in this pass:
 
-Before `R1` can pass, we still need source-backed answers for:
+- target product identity is `Joker Ultimate`;
+- supported player counts for DeepOFC are 2–3;
+- equality is legal in Bottom >= Middle >= Top foul ordering;
+- base OFC rake headline is 5%, cap 2 BB, no rake at pot <= 5 BB;
+- row visual slot identity is not strategic state;
+- Hero can pre-arrange before Hero is the acting player.
 
-1. Is KKPoker `Joker` exactly Ultimate rules plus two Jokers, including 17-card trips Fantasy and Ultimate re-Fantasy card counts?
-2. Exact Joker substitution restrictions and tie-breaking if more than one wildcard assignment yields the same hand class.
-3. Whether two Jokers may represent the same nominal card/rank/suit when that would otherwise imply duplicate physical cards.
-4. Exact supported player counts for the Joker tables and whether scoring order/caps change heads-up.
-5. Exact financial win-cap redistribution algorithm.
-6. Exact rake trigger, cap, and attribution for the Joker OFC stake we will automate; this belongs in the economy layer, not raw point scoring.
-7. Whether opponent discards are ever observable during a live hand via Card Tracker, and if so whether using that UI is operationally legal/available before the hand finishes.
+Still unresolved before R1 can PASS:
+
+1. Exact Joker wildcard uniqueness rules: may two Jokers map to the same nominal card, and may a Joker duplicate a physical standard card already present?
+2. Exact tie-breaking/wildcard assignment rule if multiple Joker substitutions produce equivalent best hand ranks.
+3. Exact Joker Ultimate re-Fantasy card count for every stay condition, especially Bottom-quads-only re-Fantasy.
+4. Exact financial win-cap transfer/clamping algorithm under a concrete insufficient-funds example.
+5. Exact OFC rake `pot` definition and attribution for the KKPoker Joker Ultimate cash game.
+6. Whether opponent discard identities can ever become legally observable during a live hand before settlement; current replay evidence shows only hidden backs/count.
