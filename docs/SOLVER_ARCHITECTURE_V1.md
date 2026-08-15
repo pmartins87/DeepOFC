@@ -13,7 +13,7 @@ The problem must be separated into layers because OFC combines:
 - private incoming cards and hidden discards;
 - action order;
 - future Fantasy continuation value;
-- 2-player zero-sum and 3-player multi-player interaction.
+- 2-player zero-sum and 3-player multiplayer interaction.
 
 A locally strongest Hero board is not generally the strategically optimal action because points depend on row-by-row comparison, scoop, royalties, foul risk, future Fantasy and what opponents can still complete.
 
@@ -120,9 +120,11 @@ We will not select one by analogy with Hold'em. R6 must benchmark them on exact 
 
 ### Three-player
 
-Three-player OFC is not a two-player zero-sum game. Pairwise raw points still sum to zero globally, but strategic interaction is multiplayer/general-sum at the individual pairwise-decision level and standard two-player CFR convergence guarantees do not transfer automatically.
+Before rake/cash-cap, three-player raw OFC is also **zero-sum globally**: every pairwise result contributes `+x` to one player and `-x` to another, so the sum of all players' raw utilities is exactly zero.
 
-R6 must therefore treat 3-player separately and benchmark multiplayer self-play / equilibrium-approximation methods rather than silently reusing the HU solver.
+The difficulty is that this is a **multiplayer zero-sum extensive-form game**, not a two-player zero-sum game. Standard two-player CFR convergence/exploitability guarantees therefore do not transfer automatically, coalition effects and equilibrium selection become relevant, and evaluation needs multiplayer-appropriate response concepts.
+
+R6 must treat 3-player separately and benchmark multiplayer self-play / equilibrium-approximation methods rather than silently reusing the HU solver.
 
 ## Layer 5 — infinite-horizon Fantasy continuation
 
