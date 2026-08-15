@@ -7,15 +7,15 @@ The roadmap is deliberately gated. A stage is not considered complete because co
 | Gate | Status | What is already real | What still blocks PASS |
 |---|---|---|---|
 | R0 Bootstrap | ✅ Operational | repositories, pinned OH baseline, evidence manifests, replay fixtures | archival copy of supplied legacy `.tm` in repo |
-| R1 Rules/canonical state | 🟡 Advanced | target variant, 54-card physical deck, 2–3 players, 5/3/3/3/3, 3/5/5, royalties, Fantasy entry/stay, explicit one-shot Fantasy state | Joker substitution edge cases, every re-Fantasy count, capped settlement, exact rake attribution, discard-observability edge |
-| R2 Exact scoring | 🟡 Partial | standard 3-card/5-card ranking, foul, royalties, scoop, pairwise scoring tests | Joker-aware evaluator, double-foul rule, capped multiway settlement, full Fantasy triggers |
-| R3 Legal actions | 🟡 Advanced | exact normal actions plus lazy exact 14–17-card Fantasy full-board generator | Joker-dependent legality/evaluation integration and broader independent/property validation |
+| R1 Rules/canonical state | 🟡 Advanced | target variant, 54-card physical deck, 2–3 players, 5/3/3/3/3, 3/5/5, royalties, Fantasy entry/stay, explicit one-shot Fantasy state, **Joker substitution/duplication/board-validity semantics frozen** | every re-Fantasy count, capped settlement, exact rake attribution, discard-observability edge |
+| R2 Exact scoring | 🟡 Advanced | standard + Joker 3-card/5-card ranking, **board-aware strongest-valid Joker assignment**, foul, royalties, scoop, pairwise scoring tests | double-foul rule, capped multiway settlement, full Fantasy triggers, broader exhaustive/property validation |
+| R3 Legal actions | 🟡 Advanced | exact normal actions plus lazy exact 14–17-card Fantasy full-board generator | integrate board-aware Joker legality/evaluation into pruning/search and broader independent/property validation |
 | R4 Simulator | ⬜ Not started as certified gate | deterministic state primitives exist | complete deal/observation/settlement simulator and fuzzing |
 | R5 Baseline decision engine | ⬜ Not started | — | exact/search/Monte-Carlo baselines |
 | R6 Solver study | ⬜ Not started | — | architecture benchmark/selection |
 | R7 Training | ⬜ Not started | — | reproducible training pipeline if selected architecture needs learning |
 | R8 Exploitation | ⬜ Not started | — | opponent model only after strong base policy |
-| R9 OpenHoldem state/scraper | 🟡 Active critical path | isolated OFC state, tablemap gate, raw scraper, C++ reconstructor, Python↔C++ replay equality, **full Release|Win32 build green and integration persisted**, read-only guard | pixels→tablemap→raw→canonical proof, Joker calibration, first-round loose cards, Fantasy 14–17 recognition/state, 3-player geometry |
+| R9 OpenHoldem state/scraper | 🟡 Active critical path | isolated OFC state, tablemap gate, raw scraper, C++ reconstructor, Python↔C++ replay equality, full Release|Win32 build green, Fantasy pre-routing fail-close, persistent JK1/JK2 interface, cross-repo contract gate, read-only guard | pixels→tablemap→raw→canonical proof, live Joker calibration, full Fantasy 14–17 recognition/state, first-round loose cards, 3-player geometry |
 | R10 Autoplayer | 🟡 Infrastructure active / live blocked by R9 | hard no-click guard plus **arbitrary source-card→target drag primitive compiled, exported and loaded by OH** | OFC action executor, source/target resolution, discard/Confirm semantics, post-drag verification, Fantasy reflow handling |
 | R11 Shadow | ⬜ Blocked | — | sustained no-click live validation |
 | R12 Controlled live | ⬜ Blocked | — | low-stake live validation with kill switch |
@@ -88,7 +88,10 @@ Canonical state must include at least:
 - [x] Golden normal-play decision fixtures added, including frames 000543 and 000568.
 - [x] New Fantasy evidence package audited: 84 BMP + 84 HTML snapshots, 450x830, immutable ZIP hash recorded.
 - [x] Python canonical state now represents Hero Fantasy explicitly inside `joker_ultimate`, using a one-shot `round_index=-1`, 14–17 physical incoming cards and strict 13-card tentative-board Confirm shape.
-- [ ] Freeze Joker wildcard uniqueness/tie semantics.
+- [x] Joker substitution is **with replacement**: a Joker may duplicate a known nominal card and JK1/JK2 may choose the same nominal card.
+- [x] Five-of-a-Kind is explicitly **not** a valid hand category; such nominal substitutions are skipped.
+- [x] Complete-board Joker semantics frozen: choose the strongest legal assignment that preserves `Bottom >= Middle >= Top` whenever such an assignment exists; an avoidable Joker-induced foul is forbidden.
+- [x] Equivalent nominal assignments with the same HandRank are strategically interchangeable; physical JK1/JK2 identity remains canonical.
 - [ ] Freeze every Joker Ultimate re-Fantasy card-count path, especially Bottom-quads-only stay.
 - [ ] Freeze exact win-cap settlement from a concrete insufficient-funds example.
 - [ ] Freeze exact OFC rake `pot` definition/attribution for settlement.
@@ -100,7 +103,7 @@ Canonical state must include at least:
 
 ## R2 — Exact scoring engine
 
-Already implemented and tested for the non-Joker core:
+Already implemented and tested:
 
 - [x] 3-card top ranking;
 - [x] 5-card middle/bottom ranking;
@@ -109,12 +112,15 @@ Already implemented and tested for the non-Joker core:
 - [x] scoop;
 - [x] full royalty tables;
 - [x] standard pairwise point total;
-- [x] fail-closed behavior for unresolved both-player-foul case.
+- [x] fail-closed behavior for unresolved both-player-foul case;
+- [x] exact Joker substitution over all 52 nominal cards **with replacement**;
+- [x] duplicate nominal Joker assignments, including both Jokers selecting the same nominal card;
+- [x] Five-of-a-Kind substitutions excluded while continuing to the strongest ordinary poker hand (for example `AAAA + JK -> AAAA K`);
+- [x] complete-board Joker selection is board-aware rather than row-greedy: local maxima are reduced when necessary to preserve a valid board;
+- [x] no Joker rescue is invented when no legal substitution can satisfy the board ordering.
 
 Still required:
 
-- [ ] exact Joker-aware ranking over all legal substitutions;
-- [ ] Joker collision/duplicate/tie semantics from R1;
 - [ ] Fantasy/re-Fantasy trigger evaluation for every frozen path;
 - [ ] both-player-foul settlement;
 - [ ] ordered 3-player capped settlement;
@@ -147,7 +153,7 @@ This large branching factor is strategically important for R5/R6: production Fan
 
 Still required:
 
-- [ ] integrate Joker-dependent whole-board legality once wildcard semantics are frozen;
+- [ ] integrate the now-frozen board-aware Joker evaluator into whole-board legality/pruning/search;
 - [ ] broader independent/property validation beyond current combinatorial/count tests;
 - [ ] design search/pruning/state-compression strategy for practical Fantasy decision latency.
 
@@ -239,7 +245,13 @@ On `pmartins87/myoh_private:deepofc` the following is already implemented/proven
 - [x] hard R9 read-only autoplayer guard;
 - [x] HU 450x830 normal-play geometry/calibration files;
 - [x] deterministic replay-draft tablemap generator and verifier;
-- [x] replay-draft contract covers 190/190 required normal HU OFC regions with no duplicate names;
+- [x] persistent physical Joker interface standardized as `joker1` / `joker2` across tablemap generator, verifier and C++ scraper;
+- [x] cross-repository CI gate verifies the real DeepOFC tablemap inputs against the OpenHoldem scraper contract;
+- [x] replay-measured `ofc_fantasy_active` detector routes Fantasy **before** normal Hero geometry is trusted;
+- [x] C++ runtime fails closed on active Fantasy until the 14–17-card recognition path is certified;
+- [x] independent `ofc_fantasy_recognizer_calibrated=0` authority gate prevents mode detection from accidentally enabling fan recognition;
+- [x] 15-card Fantasy fan geometry frozen from three real deals;
+- [x] first Fantasy15 recognition probe extracted 43/43 ordinary-card glyphs, 43/43 suits, and 42/42 ranks among ranks with an independent second example (the sole `8` had no second training/reference sample);
 - [x] native dependency chain compiles on Windows GitHub Actions;
 - [x] **full OpenHoldem `Release|Win32` build passes with the canonical reconstructor integrated**;
 - [x] canonical heartbeat/reconstructor integration persisted on `myoh_private:deepofc` at commit `ebaa10f3d30cd0e1a2162ecc622a08d3bb73aa83`;
@@ -248,10 +260,10 @@ On `pmartins87/myoh_private:deepofc` the following is already implemented/proven
 Immediate R9 blockers:
 
 - [ ] feed real replay pixels through `.tm` -> `CScraper` -> raw OFC observation -> C++ reconstructor and compare exactly with Python golden states;
-- [ ] calibrate actual visible Joker face recognition;
+- [ ] calibrate actual visible Joker face recognition rather than the current fail-closed placeholders;
 - [ ] capture/validate normal first-round five-loose-card geometry;
-- [ ] extend the same HU tablemap to Fantasy rather than creating a separate variant tablemap;
-- [ ] scrape/identify 14–17 overlapped/rotated Fantasy fan cards reliably;
+- [ ] promote Fantasy15 from measured recognition probe to deterministic golden pixel→cards→canonical-state replay;
+- [ ] capture/validate 14-, 16- and 17-card Fantasy fan geometry/recognition;
 - [ ] add the same explicit Fantasy state semantics to the C++ raw/canonical state path and cross-language fixtures;
 - [ ] derive Fantasy deal count without confusing normal `hero_total_dealt` round inference;
 - [ ] add optional four-suit unknown-counter regions as consistency checks;
@@ -260,7 +272,7 @@ Immediate R9 blockers:
 
 ### R9 Fantasy engineering constraint
 
-The new screenshots show a curved, overlapping, rotated Fantasy card fan. This is materially harder than the normal three upright incoming cards. We must test standard OpenHoldem T1/T5 transforms against the real fan before choosing the implementation. If orientation breaks them, the tablemap/scraper needs orientation-specific transforms/templates or an equally deterministic recognition path. Approximate rectangles alone are not an acceptable PASS.
+The new screenshots show a curved, overlapping, rotated Fantasy card fan. This is materially harder than the normal three upright incoming cards. The current probe shows that deterministic deskew/glyph recognition is promising, but approximate geometry or a successful small replay probe is not sufficient to enable runtime authority. `ofc_fantasy_recognizer_calibrated` remains `0` until representative 14–17-card replay sequences agree exactly through the full state path.
 
 **Gate:** normal and Fantasy supplied replay pixels reconstruct exactly into canonical DeepOFC states, fail closed on ambiguous/invalid observations, and full OH Release|Win32 builds with the integration present.
 
