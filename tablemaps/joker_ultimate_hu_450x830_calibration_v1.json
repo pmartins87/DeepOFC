@@ -1,7 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "replay_calibration_not_live_certified",
   "source_frames": [468, 482, 512, 528, 543, 560, 568],
+  "fantasy_joker_source_frames": [52, 53, 54],
   "color_format": "RRGGBB",
   "empty_background": {
     "opponent_top": {"rgb": "22704c", "radius": 24},
@@ -44,15 +45,22 @@
   ],
   "joker_detector": {
     "calibrated": false,
-    "placeholder_rgb": "ff00ff",
-    "reason": "no supplied gameplay frame visibly contains a Joker card face"
+    "persistent_identity_evidence": true,
+    "joker1_visual_identity": "orange/red pineapple Joker",
+    "joker2_visual_identity": "gray/black pineapple Joker",
+    "confirmed_display_behavior": "gold nominal rank/suit card plus same color-coded small pineapple marker",
+    "placeholder1_rgb": "ff00ff",
+    "placeholder2_rgb": "00ffff",
+    "legacy_placeholder_rgb": "ff00ff",
+    "reason_not_yet_calibrated": "visible Joker evidence now exists, but classifier/template/hash regions have not yet been frozen and replay-validated in OpenHoldem"
   },
   "notes": [
     "Empty colors are medians/representative green pixels from known-empty centers in the supplied 450x830 replay frames.",
     "Opponent turn pixel (374,197) is yellow in frames 468/482/512/528 and green in 543/560/568.",
     "Hero turn pixel (335,395) is green in 468/482/512/528 and yellow in 543/560/568.",
-    "The P0 dealer point is only a geometry prediction; all supplied frames have Hero/P1 as dealer.",
+    "The P0 dealer point is only a geometry prediction; all original normal-play supplied frames have Hero/P1 as dealer.",
     "Opponent discard cards are a 4-slot horizontal strip; Hero discards are a 2x2 small-card grid in the supplied HU layout.",
-    "This calibration is sufficient for generating a replay-draft tablemap, not for claiming live R9 support."
+    "Fantasy frames 52/53/54 supersede the prior no-visible-Joker assumption: the two physical Jokers are visually distinguishable and retain identity after confirmation through color-coded markers.",
+    "This calibration file still does not claim a certified live Joker detector; it records the now-known visual identity contract for the next tablemap calibration pass."
   ]
 }
