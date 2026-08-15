@@ -398,8 +398,8 @@ class HUFinalRoundSubgame:
             for first_action in first_actions:
                 for second_action in second_actions:
                     u0 = self.terminal_u0(outcome, first_action, second_action)
-                    mirrored_first = second_action.mirrored()
-                    mirrored_second = first_action.mirrored()
+                    mirrored_first = first_action.mirrored()
+                    mirrored_second = second_action.mirrored()
                     mirrored_u0 = self.terminal_u0(
                         mirrored,
                         mirrored_first,
