@@ -1,0 +1,23 @@
+name: HU two-round outcome-sampling MCCFR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_outcome_mccfr.py'
+      - 'tools/benchmark_hu_two_round_outcome_mccfr.py'
+      - '.github/workflows/hu-two-round-outcome-mccfr.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train outcome sampling and exact-BR evaluate current profile
+        run: python tools/benchmark_hu_two_round_outcome_mccfr.py
