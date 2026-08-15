@@ -1,0 +1,22 @@
+name: Fantasy15 exact v2 benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/fantasy_solver_v2.py'
+      - 'tools/benchmark_fantasy15_v2_frame53.py'
+      - '.github/workflows/fantasy15-v2-benchmark.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Solve real frame53 Fantasy15 with exact V2
+        run: python tools/benchmark_fantasy15_v2_frame53.py
