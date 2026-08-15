@@ -21,6 +21,12 @@ from .state import Card, PendingPlacement, PlayerBoard, Row
 # probability 1/2. Swapping players + mirroring suits + flipping actor order is
 # therefore an automorphism that negates terminal utility. The two-player
 # zero-sum game consequently has exact value 0 before rake/cash economics.
+#
+# The fixed rows are also chosen so every K/A final placement remains in the
+# already source-frozen scoring region: Top is always a pair of 2s, Middle is
+# always a pair of 4s, and Bottom is a Q-high straight flush. No branch can foul
+# or enter Fantasy, so this R6 architecture benchmark does not depend on the
+# still-unfrozen both-player-foul or Fantasy-continuation semantics.
 
 SUIT_MIRROR = {"c": "d", "d": "c", "h": "s", "s": "h"}
 
@@ -31,13 +37,13 @@ def _cards(codes: tuple[str, ...]) -> tuple[Card, ...]:
 
 BASE_BOARDS = (
     PlayerBoard(
-        top=_cards(("2c", "3c")),
-        middle=_cards(("4c", "5c", "6c", "7c")),
+        top=_cards(("2c", "2h")),
+        middle=_cards(("4c", "4h", "5c", "6c")),
         bottom=_cards(("8c", "9c", "Tc", "Jc", "Qc")),
     ),
     PlayerBoard(
-        top=_cards(("2d", "3d")),
-        middle=_cards(("4d", "5d", "6d", "7d")),
+        top=_cards(("2d", "2s")),
+        middle=_cards(("4d", "4s", "5d", "6d")),
         bottom=_cards(("8d", "9d", "Td", "Jd", "Qd")),
     ),
 )
