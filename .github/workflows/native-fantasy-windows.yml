@@ -1,0 +1,35 @@
+name: Native Fantasy Windows MSVC gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/fantasy_exact.cpp'
+      - 'native/fantasy_exact_cases.txt'
+      - '.github/workflows/native-fantasy-windows.yml'
+  workflow_dispatch:
+
+jobs:
+  windows-native:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate Visual Studio developer environment
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          if (-not $vs) { throw 'Visual Studio installation not found' }
+          "VS_PATH=$vs" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Compile optimized x64 C++14 kernel with MSVC
+        shell: pwsh
+        run: |
+          $devcmd = Join-Path $env:VS_PATH 'Common7\Tools\VsDevCmd.bat'
+          $cmd = '"' + $devcmd + '" -arch=x64 -host_arch=x64 && cl /nologo /O2 /EHsc /std:c++14 native\fantasy_exact.cpp /Fe:native\fantasy_exact.exe'
+          cmd.exe /d /s /c $cmd
+          if ($LASTEXITCODE -ne 0) { throw "MSVC compile failed: $LASTEXITCODE" }
+      - name: Run certified cases on Windows
+        shell: pwsh
+        run: |
+          & .\native\fantasy_exact.exe .\native\fantasy_exact_cases.txt
+          if ($LASTEXITCODE -ne 0) { throw "Native Windows gate failed: $LASTEXITCODE" }
