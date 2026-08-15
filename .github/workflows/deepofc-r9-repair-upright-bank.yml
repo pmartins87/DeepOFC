@@ -1,0 +1,88 @@
+name: DeepOFC R9 repair upright bank
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deepofc-r9-repair-upright-bank.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Repair only frozen known serialization defects and validate full bank
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          path = Path('tablemaps/joker_ultimate_hu_upright_rank_bank_v1.json')
+          text = path.read_text(encoding='utf-8').strip()
+
+          good_543 = '1c1e1f790299e639894d98a267dd71b577ae631a8c11bf14fe4c96bc0e1aa13a'
+          bad_543 = '1c1e1f790299e639894d98a267dd71b577ae631a8c11bf14fe4c96bc0e1aaa13a'
+          text = text.replace(bad_543, good_543)
+
+          try:
+              data = json.loads(text)
+          except json.JSONDecodeError as exc:
+              # The creation payload has exactly one known extra trailing `}`.
+              # Remove a single final brace only if doing so yields valid JSON.
+              if exc.msg != 'Extra data' or not text.endswith('}}'):
+                  raise
+              candidate = text[:-1]
+              data = json.loads(candidate)
+              text = candidate
+
+          assert data['schema_version'] == 1
+          assert data['runtime_authorized'] is False
+          assert data['target_variant'] == 'KKPoker OFC Joker Ultimate'
+          assert data['normalized_mask'] == {'width': 16, 'height': 24}
+          assert data['alignment_pixels'] == 2
+
+          expected = list('23456789TJQKA')
+          for size in ('large', 'small'):
+              entries = data[size]
+              assert [entry['rank'] for entry in entries] == expected, size
+              assert len(entries) == 13
+              assert len({entry['rank'] for entry in entries}) == 13
+              for entry in entries:
+                  sha = entry['source_frame_sha256']
+                  assert re.fullmatch(r'[0-9a-f]{64}', sha), (size, entry['rank'], sha)
+                  assert len(entry['source_rect']) == 4
+                  rows = entry['rank_mask_rows']
+                  assert len(rows) == 24
+                  assert all(isinstance(row, int) and 0 <= row < (1 << 16) for row in rows)
+
+          # Canonical pretty serialization also prevents hidden trailing garbage.
+          path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+          # Prove the bytes now parse exactly as one JSON document.
+          roundtrip = json.loads(path.read_text(encoding='utf-8'))
+          assert roundtrip == data
+          print('PASS: upright rank bank repaired and structurally validated')
+          PY
+
+      - name: Persist repaired bank only
+        shell: bash
+        run: |
+          if git diff --quiet -- tablemaps/joker_ultimate_hu_upright_rank_bank_v1.json; then
+            echo 'Bank already valid; nothing to persist.'
+            exit 0
+          fi
+          git config user.name 'DeepOFC Integrity Gate'
+          git config user.email 'actions@users.noreply.github.com'
+          git add tablemaps/joker_ultimate_hu_upright_rank_bank_v1.json
+          git commit -m 'R9: repair and validate upright rank bank JSON'
+          git push origin HEAD:main
