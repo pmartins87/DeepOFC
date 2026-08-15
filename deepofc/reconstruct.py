@@ -53,7 +53,7 @@ def _advance_hero_committed_board(
     previous: OFCState,
     observation: RawOFCObservation,
 ) -> PlayerBoard:
-    """Apply the previous round's completed Hero action using new evidence.
+    """Apply the previous normal round's completed Hero action using new evidence.
 
     Sparse replay sampling may miss the exact Confirm frame. The next round's
     discard tracker identifies the discarded prior incoming card, while the
@@ -105,21 +105,135 @@ def _advance_hero_committed_board(
     return advanced
 
 
+def _fantasy_pending_from_visual(board: PlayerBoard) -> tuple[PendingPlacement, ...]:
+    pending = [
+        PendingPlacement(card=card, row=row)
+        for row in Row
+        for card in board.row(row)
+    ]
+    return tuple(sorted(pending, key=lambda p: (p.row.value, p.card.code)))
+
+
+def _reconstruct_fantasy_observation(
+    observation: RawOFCObservation,
+    previous: OFCState | None,
+) -> OFCState:
+    """Reconstruct active Hero Fantasy as one self-contained 14..17-card state.
+
+    Unlike a normal mid-hand frame, an active Fantasy frame is unambiguous even
+    without prior history: Hero has no committed current-hand board yet; cards
+    visible in the Hero 3/5/5 area are tentative and the remainder are loose.
+    Supplied KKPoker frame 53 additionally proves unused cards remain loose until
+    Confirm and move to the discard tracker only after commit.
+    """
+
+    if observation.round_index != -1 or not observation.hero_is_fantasy:
+        raise ReconstructionError("Fantasy reconstructor received non-Fantasy observation")
+
+    hero_raw = observation.player(observation.hero_chair)
+    pending = _fantasy_pending_from_visual(hero_raw.visual_board)
+    pending_cards = {p.card for p in pending}
+    loose_cards = set(observation.hero_loose_cards)
+    if pending_cards & loose_cards:
+        raise ReconstructionError("same Fantasy card is both loose and tentatively placed")
+    current_incoming = pending_cards | loose_cards
+    if len(current_incoming) not in range(14, 18):
+        raise ReconstructionError(
+            f"Fantasy requires 14..17 current Hero cards; got {len(current_incoming)}"
+        )
+
+    # If the previous canonical state is the same active Fantasy hand, physical
+    # incoming identities are invariant while Hero rearranges cards. A different
+    # 14..17-card set is an unambiguous new/re-Fantasy hand and therefore resets
+    # the one-shot state instead of being mistaken for identity drift.
+    same_active_fantasy = (
+        previous is not None
+        and previous.mode == observation.mode
+        and previous.hero_chair == observation.hero_chair
+        and previous.hero_is_fantasy
+        and set(previous.hero_incoming) == current_incoming
+    )
+    if same_active_fantasy:
+        if previous.player(previous.hero_chair).board.filled_count() != 0:
+            raise ReconstructionError("active Fantasy previous state unexpectedly has committed Hero board")
+        if previous.dealer_chair != observation.dealer_chair:
+            raise ReconstructionError("dealer changed inside active Fantasy hand")
+
+    players: list[PlayerState] = []
+    for raw_player in observation.players:
+        if raw_player.chair == observation.hero_chair:
+            # All current Hero row cards are still tentative until Confirm.
+            board = PlayerBoard()
+        else:
+            board = _normalize_board(raw_player.visual_board)
+            if same_active_fantasy and previous is not None:
+                old = previous.player(raw_player.chair).board
+                for row in Row:
+                    if not set(old.row(row)).issubset(set(board.row(row))):
+                        raise ReconstructionError(
+                            f"opponent committed card moved/disappeared from {row.value} during Fantasy"
+                        )
+        players.append(
+            PlayerState(
+                chair=raw_player.chair,
+                board=board,
+                name=raw_player.name,
+                fantasy=raw_player.fantasy,
+                sitting_out=raw_player.sitting_out,
+                hidden_discard_count=raw_player.hidden_discard_count,
+                hidden_incoming_count=raw_player.hidden_incoming_count,
+            )
+        )
+
+    safe_to_confirm = (
+        observation.confirm_visible
+        and observation.acting_chair == observation.hero_chair
+    )
+
+    rebuilt = OFCState(
+        players=tuple(players),
+        hero_chair=observation.hero_chair,
+        dealer_chair=observation.dealer_chair,
+        acting_chair=observation.acting_chair,
+        round_index=-1,
+        hero_incoming=_sorted_cards(current_incoming),
+        hero_discards=(),
+        hero_pending=pending,
+        hero_can_prepare=observation.hero_can_prepare,
+        hero_can_confirm=safe_to_confirm,
+        action_required=safe_to_confirm,
+        mode=observation.mode,
+    )
+
+    # A visible and legally actionable Confirm in Fantasy must correspond to the
+    # exact observed UI contract: complete tentative 3/5/5 plus 1..4 unused
+    # loose cards. Do not let a scrape error create an actionable partial board.
+    if safe_to_confirm and not rebuilt.confirm_shape_is_legal():
+        raise ReconstructionError(
+            "actionable Fantasy Confirm does not have exact 13-placement/1..4-unused shape"
+        )
+    return rebuilt
+
+
 def reconstruct_observation(
     observation: RawOFCObservation,
     previous: OFCState | None = None,
 ) -> OFCState:
     """Convert one raw visual frame into canonical DeepOFC state.
 
-    The function is intentionally history-dependent. Mid-hand attachment without
-    prior canonical state is rejected unless the observation is round 0, because
-    a single KKPoker image cannot reliably distinguish committed Hero row cards
-    from tentative pre-Confirm placements.
+    Normal play is intentionally history-dependent because a single frame cannot
+    always distinguish committed Hero row cards from pre-Confirm placements.
 
-    A visible Confirm button does not override action order. Supplied frames show
-    it while the opponent's timer is active, so canonical `hero_can_confirm` is
-    true only when Confirm is visible *and* Hero is the acting chair.
+    Active Hero Fantasy is intentionally different: its 14..17-card one-shot
+    state is self-contained and may be reconstructed with no previous state.
+
+    A visible Confirm button never overrides action order. Canonical
+    `hero_can_confirm` is true only when Confirm is visible and Hero is the
+    acting chair.
     """
+
+    if observation.hero_is_fantasy:
+        return _reconstruct_fantasy_observation(observation, previous)
 
     if previous is None:
         if observation.round_index != 0:
@@ -128,25 +242,31 @@ def reconstruct_observation(
             )
         hero_committed = PlayerBoard()
     else:
-        if observation.mode != previous.mode:
-            raise ReconstructionError("mode changed inside hand")
-        if observation.hero_chair != previous.hero_chair:
-            raise ReconstructionError("Hero chair changed inside hand")
-        if observation.dealer_chair != previous.dealer_chair:
-            raise ReconstructionError("dealer chair changed inside hand")
-        if observation.round_index < previous.round_index:
-            raise ReconstructionError("round moved backwards")
-        if observation.round_index > previous.round_index + 1:
-            raise ReconstructionError("skipped more than one round between observations")
-
-        if observation.round_index == previous.round_index + 1:
-            hero_committed = _advance_hero_committed_board(previous, observation)
+        # A prior Fantasy hand followed by normal round 0 is a new normal hand,
+        # not a backwards transition inside one hand.
+        if previous.hero_is_fantasy and observation.round_index == 0:
+            previous = None
+            hero_committed = PlayerBoard()
         else:
-            hero_committed = previous.player(previous.hero_chair).board
-            _ensure_committed_cards_still_visible(
-                hero_committed,
-                observation.player(observation.hero_chair).visual_board,
-            )
+            if observation.mode != previous.mode:
+                raise ReconstructionError("mode changed inside hand")
+            if observation.hero_chair != previous.hero_chair:
+                raise ReconstructionError("Hero chair changed inside hand")
+            if observation.dealer_chair != previous.dealer_chair:
+                raise ReconstructionError("dealer chair changed inside hand")
+            if observation.round_index < previous.round_index:
+                raise ReconstructionError("round moved backwards")
+            if observation.round_index > previous.round_index + 1:
+                raise ReconstructionError("skipped more than one round between observations")
+
+            if observation.round_index == previous.round_index + 1:
+                hero_committed = _advance_hero_committed_board(previous, observation)
+            else:
+                hero_committed = previous.player(previous.hero_chair).board
+                _ensure_committed_cards_still_visible(
+                    hero_committed,
+                    observation.player(observation.hero_chair).visual_board,
+                )
 
     hero_visual = observation.player(observation.hero_chair).visual_board
     committed_cards = set(hero_committed.cards())
