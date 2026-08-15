@@ -13,6 +13,12 @@ from deepofc.hu_two_round_cfr import TwoRoundFullTreeCFR
 
 
 FROZEN_UNIFORM_EXPLOITABILITY = 2.099206349206
+FROZEN_PRECACHE_EXPLOITABILITY = {
+    1: 2.099206349206,
+    2: 0.742551892552,
+    4: 0.303445902390,
+    8: 0.044624397410,
+}
 
 
 def max_profile_difference(left, right) -> float:
@@ -52,6 +58,12 @@ def main() -> None:
         snapshot = solver.snapshot()
         eval_seconds = time.perf_counter() - eval_started
         final_exploitability = snapshot.exploitability
+        frozen = FROZEN_PRECACHE_EXPLOITABILITY[checkpoint]
+        if abs(snapshot.exploitability - frozen) > 1e-10:
+            raise SystemExit(
+                "memoization changed certified DCFR semantics at iteration "
+                f"{checkpoint}: {snapshot.exploitability} vs {frozen}"
+            )
         print(
             f"iteration={checkpoint} expected_u0={snapshot.expected_u0:.12f} "
             f"br0={snapshot.br0:.12f} br1={snapshot.br1:.12f} "
@@ -74,6 +86,9 @@ def main() -> None:
         f"training_terminal_evaluations={terminal_evaluations} "
         f"final_exploitability={final_exploitability:.12f}"
     )
+    print(f"terminal_cache={game.terminal_u0.cache_info()}")
+    print(f"round3_board_cache={game._boards_after_round3.cache_info()}")
+    print(f"round4_info_cache={game.round4_info.cache_info()}")
     print("HU TWO-ROUND FULL-TREE DCFR: PASS")
 
 
