@@ -1,0 +1,33 @@
+name: Sync roadmap R5 continuation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/sync_roadmap_r5_continuation_20260815.py'
+      - '.github/workflows/sync-roadmap-r5-continuation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply roadmap patch
+        run: python tools/sync_roadmap_r5_continuation_20260815.py
+      - name: Persist roadmap if changed
+        run: |
+          if git diff --quiet -- docs/ROADMAP.md; then
+            echo 'Roadmap already synchronized.'
+            exit 0
+          fi
+          git config user.name 'DeepOFC Roadmap Gate'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/ROADMAP.md
+          git commit -m 'Roadmap: record exact expectimax and MC calibration'
+          git push origin HEAD:main
