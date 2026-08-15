@@ -60,6 +60,10 @@ def required_hu_replay_regions() -> set[str]:
     for i in range(3):
         base = f"ofc_hero_in{i}"
         names.update(base + suffix for suffix in suffixes)
+        # R9 recognition may work without an action layer, but the generated HU
+        # replay draft now also freezes the ephemeral geometry contract R10 will
+        # use to map a recognized physical loose card to its current drag source.
+        names.add(base + "drag")
     names.update(
         {
             "ofc_p0_turn",
