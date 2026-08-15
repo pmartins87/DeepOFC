@@ -11,7 +11,7 @@ The roadmap is deliberately gated. A stage is not considered complete because co
 | R2 Exact scoring | 🟡 Advanced | standard + Joker 3-card/5-card ranking, **board-aware strongest-valid Joker assignment**, foul, royalties, scoop, pairwise scoring tests | double-foul rule, capped multiway settlement, full Fantasy/re-Fantasy trigger evaluation, broader exhaustive/property validation |
 | R3 Legal actions | 🟡 Advanced | exact normal actions, lazy exact 14–17-card Fantasy generator, **exact board-aware Joker non-foul filter** | broader independent/property validation and practical branch-reduction/search design for the huge Fantasy space |
 | R4 Simulator | 🟡 Advanced | deterministic 54-card deck, exact normal/Fantasy action application, physical-card invariants, HU/3-way raw zero-sum settlement, Fantasy qualification primitives | full sequential hidden-state/observation environment, whole-game replay, large fuzz/property campaigns |
-| R5 Baseline decision engine | 🟡 **Advanced / active** | exact final normal-round kernel; Fantasy-14 certified against 1,009,008-action brute force; real Fantasy-15 dual-Joker exact solve; native C++ exact 14/15/17 kernel with Python rescore and Windows/MSVC gates | early-round continuation solving, hidden/incomplete-opponent Fantasy expectation, self-consistent Fantasy continuation values, broader exact/property validation |
+| R5 Baseline decision engine | 🟡 **Advanced / active** | exact final normal-round kernel; exact one-street-back expectimax reference; MC baseline calibrated against exact chance tree; Fantasy-14 brute-certified; real Fantasy-15 dual-Joker exact solve; native C++ exact 14/15/17 kernel | general early-round strategic continuation, hidden/incomplete-opponent Fantasy expectation, self-consistent Fantasy continuation values, broader exact/property validation |
 | R6 Solver study | 🟡 Active | architecture v1 frozen; exact terminal kernels and native runtime path establish reference values; HU/3-way game-theory distinction frozen | build tractable HU extensive-form subgames and benchmark MCCFR/CFR+/DCFR/re-solving/hybrid candidates by exploitability and cost |
 | R7 Training | ⬜ Not started | — | reproducible training pipeline if selected architecture needs learning |
 | R8 Exploitation | ⬜ Not started | — | opponent model only after strong base policy |
@@ -219,6 +219,11 @@ Implemented/proven:
 - [x] native kernel compiles/runs under **MSVC / Windows Server 2022**, the relevant toolchain family for future OpenHoldem integration;
 - [x] measured native Linux times on the frozen CI cases: roughly **0.018 s / 0.759 s / 3.324 s** for 14/15/17;
 - [x] measured native Windows/MSVC times on the frozen CI cases: roughly **0.026 s / 1.742 s / 5.129 s** for 14/15/17.
+- [x] exact **one-street-back last-chance expectimax** added for normal `round_index=3` subgames where opponents are already complete: every `C(pool,3)` next Hero draw is enumerated and its final street solved exactly;
+- [x] finite-population Monte Carlo baseline added with deterministic seeds, common random numbers across candidate actions, sampling without replacement and reported standard error/diagnostic 95% interval;
+- [x] Monte Carlo is regression-gated to become **bit-for-value equal to exact expectimax** when all chance branches are sampled;
+- [x] 56-branch convergence benchmark freezes exact EV **-8.714285714286** and exact collapse at 56/56 sampled branches;
+- [x] 20-seed calibration on that subgame identified an exact-best action in **20/20 seeds** at 8, 16 and 32 samples; mean RMSE fell from about **1.164 → 0.953 → 0.583**, while empirical 95% interval coverage was about **89.5% / 94.5% / 94.5%**. These are fixture-specific calibration results, not a global sample prescription.
 
 These timings are fixture/runner evidence, not universal latency guarantees. The important result is that exact Fantasy 14–17 is already computationally plausible without replacing the combinatorial solution with a learned guess.
 
@@ -226,7 +231,7 @@ Still required:
 
 - [ ] support expected utility when an opponent board is hidden/incomplete rather than pretending it is known;
 - [ ] solve self-consistent continuation values for Fantasy/re-Fantasy paths;
-- [ ] Monte Carlo/expectimax reference continuation solver for normal rounds 1–4;
+- [ ] extend continuation solving beyond the certified one-street-back last-chance subgame to general normal rounds 1–4 with opponent future actions and hidden information;
 - [ ] transposition/state hashing and mathematically valid suit/rank symmetries for stochastic search;
 - [ ] broader randomized cross-language/property gates, especially Joker-heavy cases;
 - [ ] package the native kernel as a reusable library/API only after its standalone gates remain stable.
