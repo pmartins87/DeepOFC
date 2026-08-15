@@ -28,6 +28,7 @@ def state_from_dict(data: dict[str, Any]) -> OFCState:
                 fantasy=bool(raw.get("fantasy", False)),
                 sitting_out=bool(raw.get("sitting_out", False)),
                 hidden_discard_count=int(raw.get("hidden_discard_count", 0)),
+                hidden_incoming_count=int(raw.get("hidden_incoming_count", 0)),
             )
         )
     pending = tuple(
