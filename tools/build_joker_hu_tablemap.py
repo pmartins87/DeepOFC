@@ -26,8 +26,8 @@ def _point_region(name: str, point: tuple[int, int], *, color: str, radius: int)
 
 
 def _geometry_region(name: str, rect: list[int]) -> str:
-    # Geometry-only region: R10 reads only its rectangle. It is not evaluated
-    # as a scraper classifier and therefore carries neutral N semantics.
+    # Geometry-only region: R10/read-only probes consume only its rectangle. It
+    # is not evaluated as a classifier and therefore carries neutral N semantics.
     return _region(name, tuple(rect), color="000000", radius=0, transform="N")
 
 
@@ -55,9 +55,6 @@ def _face_regions(base: str, rect: list[int], *, size: str) -> list[str]:
 
 
 def _joker_placeholder_rgb(joker_cfg: dict, joker_id: int) -> str:
-    # Schema v2+ gives each persistent physical Joker its own impossible replay
-    # placeholder. Keep backward-compatible fallbacks only so historical unit
-    # fixtures fail safely rather than making builder/schema migrations brittle.
     specific = joker_cfg.get(f"placeholder{joker_id}_rgb")
     if specific:
         return str(specific)
@@ -91,11 +88,6 @@ def _slot_regions(
             color=back_cfg["rgb"],
             radius=int(back_cfg["radius"]),
         ),
-        # Persistent Joker identity is now part of the tablemap contract:
-        # joker1 = orange/red physical Joker; joker2 = gray/black physical
-        # Joker. Until their pixels are calibrated these are deliberately
-        # impossible replay placeholders. The C++ scraper requires BOTH names
-        # and fails closed on a visible Joker rather than assigning by scan order.
         _point_region(
             base + "joker1",
             center,
@@ -131,7 +123,65 @@ def _replace_target_size(lines: list[str], width: int, height: int) -> None:
     raise ValueError("source tablemap has no z$targetsize")
 
 
-def build(source_text: str, geometry: dict, calibration: dict) -> str:
+def _fantasy15_geometry_regions(fantasy15_geometry: dict) -> list[str]:
+    """Emit measured Fantasy15 rectangles as non-classifying geometry only.
+
+    These regions are intentionally useful before recognition is certified:
+    - `ofc_fantasy15_srcXX` locates each exposed fan identity patch;
+    - `ofc_fantasy15_arrange_*` records the measured frame53 tentative-board
+      card bounds;
+    - `ofc_fantasy15_unused_span` records the two-card loose span in frame53.
+
+    None of them flips `ofc_fantasy_recognizer_calibrated`, drag-target
+    calibration, or executor authority.
+    """
+
+    if fantasy15_geometry.get("variant") != "joker_ultimate":
+        raise ValueError("Fantasy15 geometry variant must be joker_ultimate")
+    if int(fantasy15_geometry.get("fantasy_card_count", 0)) != 15:
+        raise ValueError("Fantasy15 geometry must describe exactly 15 cards")
+
+    slots = fantasy15_geometry.get("fan_slots_left_to_right") or []
+    if len(slots) != 15:
+        raise ValueError("Fantasy15 geometry requires exactly 15 fan slots")
+
+    out = ["", "// DeepOFC measured Fantasy15 geometry (N-transform; non-authoritative)"]
+    for expected_index, slot in enumerate(slots):
+        if int(slot.get("index", -1)) != expected_index:
+            raise ValueError("Fantasy15 fan slot indices must be contiguous 0..14")
+        rect = slot.get("identity_patch")
+        if not isinstance(rect, list) or len(rect) != 4:
+            raise ValueError("Fantasy15 fan identity patch must be a 4-int rectangle")
+        out.append(_geometry_region(f"ofc_fantasy15_src{expected_index:02d}", rect))
+
+    arrangement = fantasy15_geometry.get("arrangement_state_frame53") or {}
+    row_bounds = arrangement.get("hero_rows_measured_bright_card_bounds") or {}
+    expected_counts = {"top": 3, "middle": 5, "bottom": 5}
+    for row, expected_count in expected_counts.items():
+        rects = row_bounds.get(row) or []
+        if len(rects) != expected_count:
+            raise ValueError(f"Fantasy15 frame53 {row} requires {expected_count} measured rectangles")
+        for idx, rect in enumerate(rects):
+            out.append(
+                _geometry_region(
+                    f"ofc_fantasy15_arrange_{row}{idx}",
+                    rect,
+                )
+            )
+
+    unused = arrangement.get("unused_loose_combined_bright_span")
+    if not isinstance(unused, list) or len(unused) != 4:
+        raise ValueError("Fantasy15 frame53 requires measured unused loose span")
+    out.append(_geometry_region("ofc_fantasy15_unused_span", unused))
+    return out
+
+
+def build(
+    source_text: str,
+    geometry: dict,
+    calibration: dict,
+    fantasy15_geometry: dict | None = None,
+) -> str:
     lines = source_text.splitlines()
     width = int(geometry["client_size"]["width"])
     height = int(geometry["client_size"]["height"])
@@ -145,18 +195,9 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
         "ofc_hero_chair": "1",
         "ofc_tablemap_stage": "replay_draft_v1",
         "ofc_joker_detector_calibrated": "0",
-        # Detecting the Fantasy UI is only a routing fact. It must never imply
-        # that the curved 14..17-card fan itself is recognized safely. That
-        # recognizer receives an independent certification gate and remains off
-        # in replay/development drafts until pixel equality is proven.
         "ofc_fantasy_recognizer_calibrated": "0",
-        # A replay draft must never become actionable merely because future
-        # drop-region rectangles happen to be present. Only an empirically
-        # validated runtime tablemap may deliberately flip this to 1.
+        "ofc_fantasy15_geometry_measured": "1" if fantasy15_geometry is not None else "0",
         "ofc_drag_targets_calibrated": "0",
-        # Independent second gate: even after geometry exists, the transactional
-        # executor itself stays disabled until a controlled-live certification
-        # deliberately opts in. R9/R10 development drafts always remain 0.
         "ofc_executor_enabled": "0",
     }
     for name, value in symbols.items():
@@ -185,9 +226,6 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
     new_regions.append("// Generated. Do not hand-edit; see tools/build_joker_hu_tablemap.py")
     new_regions.append("// -----------------------------------------------------------------")
 
-    # This region must be evaluated BEFORE normal Hero board/incoming geometry.
-    # Supplied replay evidence shows that active Fantasy shifts/compresses Hero
-    # rows, so treating an active Fantasy frame as normal is structurally unsafe.
     new_regions.append(
         _point_region(
             "ofc_fantasy_active",
@@ -197,7 +235,6 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
         )
     )
 
-    # Canonical chair 0 = upper opponent; chair 1 = local/bottom Hero.
     for row in ("top", "middle", "bottom"):
         for idx, rect in enumerate(g["opponent"][row]):
             new_regions.extend(
@@ -234,7 +271,6 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
             )
         )
 
-    # Hero discard identities are visible as a 2x2 small-card grid.
     for idx, rect in enumerate(c["hero_discard_rects"]):
         new_regions.extend(
             _slot_regions(
@@ -259,10 +295,13 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
                 joker_cfg=joker,
             )
         )
-        # This raw rectangle is deliberately ephemeral UI geometry. The scraper
-        # associates it with the physical card recognized in this exact frame;
-        # canonical strategy state never stores the visual slot identity.
         new_regions.append(_geometry_region(base + "drag", rect))
+
+    if fantasy15_geometry is not None:
+        fantasy_size = fantasy15_geometry.get("client_size") or {}
+        if int(fantasy_size.get("width", -1)) != width or int(fantasy_size.get("height", -1)) != height:
+            raise ValueError("Fantasy15 geometry client size disagrees with base tablemap geometry")
+        new_regions.extend(_fantasy15_geometry_regions(fantasy15_geometry))
 
     for p in (0, 1):
         turn = c["turn"][f"p{p}"]
@@ -304,13 +343,19 @@ def main() -> None:
     ap.add_argument("--source-tm", type=Path, required=True)
     ap.add_argument("--geometry", type=Path, required=True)
     ap.add_argument("--calibration", type=Path, required=True)
+    ap.add_argument("--fantasy15-geometry", type=Path)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     source = args.source_tm.read_text(encoding="utf-8", errors="replace")
     geometry = json.loads(args.geometry.read_text(encoding="utf-8"))
     calibration = json.loads(args.calibration.read_text(encoding="utf-8"))
-    result = build(source, geometry, calibration)
+    fantasy15_geometry = (
+        json.loads(args.fantasy15_geometry.read_text(encoding="utf-8"))
+        if args.fantasy15_geometry is not None
+        else None
+    )
+    result = build(source, geometry, calibration, fantasy15_geometry)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(result, encoding="utf-8")
     print(args.out)
