@@ -88,11 +88,17 @@ BOTTOM_ROYALTY_BY_CATEGORY = {
     HandCategory.STRAIGHT_FLUSH: 15,
 }
 
-# Project-frozen Joker assumption (2026-08-15): each physical Joker may assume
-# any nominal standard card independently, WITH replacement. Therefore a Joker
-# may duplicate a standard card already physically present and JK1/JK2 may map
-# to the same nominal card. Physical JK1/JK2 identity remains untouched in
-# canonical state; these Card objects exist only inside the evaluator.
+# Project-frozen Joker rule (2026-08-15): each physical Joker may assume any
+# nominal standard card independently, WITH replacement. Therefore a Joker may
+# duplicate a standard card already physically present and JK1/JK2 may map to
+# the same nominal card. This freedom is constrained by two rules:
+#   1. the resulting row must be a standard poker hand category used by OFC;
+#      Five-of-a-Kind is not a valid category and is never considered;
+#   2. on a complete board, Joker substitutions are chosen jointly so the board
+#      remains valid whenever any legal assignment can satisfy
+#      Bottom >= Middle >= Top (or the explicit strict policy under test).
+# Physical JK1/JK2 identity remains untouched in canonical state; replacement
+# Card objects exist only inside the evaluator.
 _STANDARD_NOMINAL_CARDS = tuple(
     Card(rank=rank, suit=suit)
     for rank in range(2, 15)
@@ -136,16 +142,29 @@ def _rank_top_standard(cards: Sequence[Card]) -> HandRank:
     return HandRank(HandCategory.HIGH_CARD, tuple(ranks))
 
 
+def _five_nominals_form_standard_poker_hand(cards: Sequence[Card]) -> bool:
+    """Return False only for nominal Five-of-a-Kind outcomes.
+
+    Joker substitution is allowed to duplicate physical/nominal cards, but the
+    resulting five-card row still has to belong to the ordinary OFC poker-hand
+    hierarchy. A rank count of five is therefore an invalid substitution, not a
+    new hand category.
+    """
+
+    _require_standard(cards, 5)
+    ranks = [int(c.rank) for c in cards]
+    return max(ranks.count(rank) for rank in set(ranks)) <= 4
+
+
 def _rank_five_standard(cards: Sequence[Card]) -> HandRank:
     _require_standard(cards, 5)
+    if not _five_nominals_form_standard_poker_hand(cards):
+        raise ValueError("Five-of-a-Kind is not a valid KKPoker OFC hand category")
+
     ranks = [int(c.rank) for c in cards]
     suits = [str(c.suit) for c in cards]
     counts = {r: ranks.count(r) for r in set(ranks)}
     grouped = sorted(((n, r) for r, n in counts.items()), reverse=True)
-    if grouped[0][0] > 4:
-        raise NotImplementedError(
-            "five-of-a-kind ranking/royalty is not frozen for KKPoker Joker Ultimate"
-        )
     straight_high = _straight_high(ranks)
     flush = len(set(suits)) == 1
 
@@ -158,9 +177,9 @@ def _rank_five_standard(cards: Sequence[Card]) -> HandRank:
     if grouped[0][0] == 3 and grouped[1][0] == 2:
         return HandRank(HandCategory.FULL_HOUSE, (grouped[0][1], grouped[1][1]))
     if flush:
-        # Duplicate nominal cards are intentional under the frozen Joker
-        # assumption, so a wildcard flush can legitimately contain repeated
-        # rank values in its tiebreak tuple (for example A,A,9,7,2).
+        # Duplicate nominal cards are intentional under the frozen Joker rule,
+        # so a wildcard flush can legitimately contain repeated rank values in
+        # its tiebreak tuple (for example A,A,9,7,2).
         return HandRank(HandCategory.FLUSH, tuple(sorted(ranks, reverse=True)))
     if straight_high is not None:
         return HandRank(HandCategory.STRAIGHT, (straight_high,))
@@ -186,68 +205,62 @@ def _canonical_eval_key(cards: Sequence[Card], expected: int) -> tuple[Card, ...
     return tuple(sorted(cards, key=lambda card: card.code))
 
 
-def _five_of_a_kind_reachable(cards: Sequence[Card]) -> bool:
-    joker_count = sum(c.is_joker for c in cards)
-    if joker_count == 0:
-        return False
-    standard_ranks = [int(c.rank) for c in cards if not c.is_joker]
-    return any(standard_ranks.count(rank) + joker_count >= 5 for rank in set(standard_ranks))
+@lru_cache(maxsize=200_000)
+def _top_rank_candidates_cached(cards: tuple[Card, ...]) -> tuple[HandRank, ...]:
+    jokers = sum(c.is_joker for c in cards)
+    if jokers == 0:
+        return (_rank_top_standard(cards),)
+
+    standards = tuple(c for c in cards if not c.is_joker)
+    candidates: set[HandRank] = set()
+    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
+        candidates.add(_rank_top_standard((*standards, *replacements)))
+    return tuple(sorted(candidates, reverse=True))
+
+
+@lru_cache(maxsize=200_000)
+def _five_rank_candidates_cached(cards: tuple[Card, ...]) -> tuple[HandRank, ...]:
+    jokers = sum(c.is_joker for c in cards)
+    if jokers == 0:
+        return (_rank_five_standard(cards),)
+
+    standards = tuple(c for c in cards if not c.is_joker)
+    candidates: set[HandRank] = set()
+    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
+        nominal = (*standards, *replacements)
+        if not _five_nominals_form_standard_poker_hand(nominal):
+            # Duplication is legal; Five-of-a-Kind is not. Skip that nominal
+            # assignment and continue searching for the strongest valid hand.
+            continue
+        candidates.add(_rank_five_standard(nominal))
+    if not candidates:
+        raise RuntimeError("no valid standard poker-hand assignment exists for Joker row")
+    return tuple(sorted(candidates, reverse=True))
 
 
 @lru_cache(maxsize=200_000)
 def _rank_top_cached(cards: tuple[Card, ...]) -> HandRank:
-    jokers = sum(c.is_joker for c in cards)
-    if jokers == 0:
-        return _rank_top_standard(cards)
-    standards = tuple(c for c in cards if not c.is_joker)
-    best: HandRank | None = None
-    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
-        candidate = (*standards, *replacements)
-        rank = _rank_top_standard(candidate)
-        if best is None or rank > best:
-            best = rank
-    assert best is not None
-    return best
+    return _top_rank_candidates_cached(cards)[0]
 
 
 @lru_cache(maxsize=200_000)
 def _rank_five_cached(cards: tuple[Card, ...]) -> HandRank:
-    jokers = sum(c.is_joker for c in cards)
-    if jokers == 0:
-        return _rank_five_standard(cards)
-    if _five_of_a_kind_reachable(cards):
-        # The user's frozen duplication assumption makes this nominal outcome
-        # reachable, but KKPoker's supplied category/royalty table does not say
-        # how Five-of-a-Kind ranks or pays. Choosing Quads/Straight-Flush here
-        # would silently bake in a different rule, so this rare edge stays hard
-        # fail-closed until explicitly decided or observed.
-        raise NotImplementedError(
-            "Joker duplication makes five-of-a-kind reachable, but its ranking/royalty is unresolved"
-        )
-    standards = tuple(c for c in cards if not c.is_joker)
-    best: HandRank | None = None
-    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
-        candidate = (*standards, *replacements)
-        rank = _rank_five_standard(candidate)
-        if best is None or rank > best:
-            best = rank
-    assert best is not None
-    return best
+    return _five_rank_candidates_cached(cards)[0]
 
 
 def rank_top(cards: Sequence[Card]) -> HandRank:
-    """Best 3-card Top rank, with exact Joker substitution when present.
-
-    Joker substitutions are independent and sampled from all 52 nominal cards
-    with replacement. Equivalent substitutions collapse to the same HandRank;
-    no arbitrary nominal assignment is persisted into canonical physical state.
-    """
+    """Best locally valid 3-card Top rank with exact Joker substitution."""
 
     return _rank_top_cached(_canonical_eval_key(cards, 3))
 
 
 def rank_five(cards: Sequence[Card]) -> HandRank:
-    """Best 5-card rank under the project-frozen Joker duplication rule."""
+    """Best locally valid 5-card rank under the frozen Joker rule.
+
+    Five-of-a-Kind nominal assignments are ignored because they are not a valid
+    poker-hand category in this OFC variant. For example AAAA+Joker becomes the
+    best legal Quads hand with the strongest possible kicker, not Five Aces.
+    """
 
     return _rank_five_cached(_canonical_eval_key(cards, 5))
 
@@ -277,13 +290,79 @@ def royalty(row: Row, rank: HandRank) -> int:
     raise ValueError(f"unsupported row: {row}")
 
 
-def completed_board_ranks(board: PlayerBoard) -> tuple[HandRank, HandRank, HandRank]:
+def _ordered(stronger: HandRank, weaker: HandRank, *, equality_allowed: bool) -> bool:
+    return stronger >= weaker if equality_allowed else stronger > weaker
+
+
+def _completed_board_ranks_and_validity(
+    board: PlayerBoard,
+    *,
+    equality_allowed: bool,
+) -> tuple[tuple[HandRank, HandRank, HandRank], bool]:
+    """Choose the strongest Joker assignment that preserves board validity.
+
+    The three rows are not evaluated independently when Jokers are present.
+    Candidate ranks are generated for every legal nominal substitution, then
+    the evaluator selects the strongest achievable Bottom, the strongest Middle
+    that remains <= Bottom, and the strongest Top that remains <= Middle.
+
+    Because Joker substitutions are with replacement, strengthening a lower row
+    never consumes a nominal card needed by another row. Thus this descending
+    search gives the component-wise strongest legal board. If no assignment can
+    satisfy the ordering, the strongest independent ranks are returned together
+    with valid=False; the board is genuinely fouled by its placement, rather
+    than by an avoidable Joker choice.
+    """
+
     if not board.is_complete():
         raise ValueError("board must be complete")
-    top = rank_top(board.top)
-    middle = rank_five(board.middle)
-    bottom = rank_five(board.bottom)
-    return top, middle, bottom
+
+    top_candidates = _top_rank_candidates_cached(_canonical_eval_key(board.top, 3))
+    middle_candidates = _five_rank_candidates_cached(_canonical_eval_key(board.middle, 5))
+    bottom_candidates = _five_rank_candidates_cached(_canonical_eval_key(board.bottom, 5))
+
+    strongest_independent = (
+        top_candidates[0],
+        middle_candidates[0],
+        bottom_candidates[0],
+    )
+
+    for bottom in bottom_candidates:
+        middle = next(
+            (candidate for candidate in middle_candidates
+             if _ordered(bottom, candidate, equality_allowed=equality_allowed)),
+            None,
+        )
+        if middle is None:
+            continue
+        top = next(
+            (candidate for candidate in top_candidates
+             if _ordered(middle, candidate, equality_allowed=equality_allowed)),
+            None,
+        )
+        if top is None:
+            # A weaker Middle would only make the Top constraint harder.
+            continue
+        return (top, middle, bottom), True
+
+    return strongest_independent, False
+
+
+def completed_board_ranks(
+    board: PlayerBoard,
+    *,
+    equality_allowed: bool = True,
+) -> tuple[HandRank, HandRank, HandRank]:
+    """Return board-aware ranks under the strongest valid Joker assignment.
+
+    If no Joker assignment can prevent a foul, returns the strongest independent
+    row ranks; callers that need validity should use is_foul/pairwise scoring.
+    """
+
+    ranks, _ = _completed_board_ranks_and_validity(
+        board, equality_allowed=equality_allowed
+    )
+    return ranks
 
 
 def completed_board_royalties(board: PlayerBoard) -> int:
@@ -296,17 +375,17 @@ def completed_board_royalties(board: PlayerBoard) -> int:
 
 
 def is_foul(board: PlayerBoard, *, equality_allowed: bool) -> bool:
-    """Evaluate row ordering with an explicit equality policy.
+    """Evaluate row ordering after the Joker chooses the best valid board.
 
-    The supplied current-client rule says Bottom >= Middle >= Top, while the
-    generic public webpage uses stricter wording. DeepOFC's target contract uses
-    equality_allowed=True, but the parameter remains explicit for regression
-    testing and to avoid silently changing historical evidence.
+    The supplied current-client rule says Bottom >= Middle >= Top. A Joker is
+    never allowed to choose a stronger local substitution that would foul the
+    board when a weaker legal substitution keeps it valid.
     """
-    top, middle, bottom = completed_board_ranks(board)
-    if equality_allowed:
-        return not (bottom >= middle >= top)
-    return not (bottom > middle > top)
+
+    _, valid = _completed_board_ranks_and_validity(
+        board, equality_allowed=equality_allowed
+    )
+    return not valid
 
 
 def _compare_rank(hero: HandRank, opponent: HandRank) -> int:
@@ -325,25 +404,32 @@ def pairwise_points_standard(
 ) -> PairwiseScore:
     """Score two complete OFC boards exactly in raw points.
 
-    The historical function name is retained for API compatibility; row
-    evaluation now supports the project-frozen Joker-with-replacement rule.
+    The historical function name is retained for API compatibility. Joker
+    evaluation is board-aware: only ordinary poker-hand categories are valid,
+    and each complete board uses the strongest Joker assignment that preserves
+    Bottom >= Middle >= Top whenever such an assignment exists.
 
     Supported now:
-    - normal and Joker row comparison, except unresolved Five-of-a-Kind edges;
+    - normal and Joker row comparison;
+    - Joker duplication with replacement while excluding Five-of-a-Kind;
+    - board-valid Joker assignment before foul/royalty/row evaluation;
     - royalty difference;
     - scoop bonus;
     - exactly one fouled player (automatic scoop, fouled player loses royalties).
 
     Deliberately unresolved/fail-closed:
-    - Joker states where Five-of-a-Kind becomes reachable;
     - both players fouling simultaneously;
     - cash settlement/win cap/rake.
     """
 
-    hero_ranks = completed_board_ranks(hero)
-    opponent_ranks = completed_board_ranks(opponent)
-    hero_foul = is_foul(hero, equality_allowed=equality_allowed)
-    opponent_foul = is_foul(opponent, equality_allowed=equality_allowed)
+    hero_ranks, hero_valid = _completed_board_ranks_and_validity(
+        hero, equality_allowed=equality_allowed
+    )
+    opponent_ranks, opponent_valid = _completed_board_ranks_and_validity(
+        opponent, equality_allowed=equality_allowed
+    )
+    hero_foul = not hero_valid
+    opponent_foul = not opponent_valid
 
     if hero_foul and opponent_foul:
         raise NotImplementedError(
