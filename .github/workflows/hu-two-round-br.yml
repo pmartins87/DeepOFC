@@ -6,7 +6,6 @@ on:
     paths:
       - 'deepofc/hu_two_round.py'
       - 'deepofc/hu_two_round_br.py'
-      - 'tests/test_hu_two_round_br.py'
       - 'tools/benchmark_hu_two_round_br.py'
       - '.github/workflows/hu-two-round-br.yml'
   workflow_dispatch:
