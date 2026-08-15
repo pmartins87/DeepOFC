@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "project": "DeepOFC",
+  "captured_at": "2026-08-14",
+  "inputs": [
+    {
+      "name": "KKPoker_OFC.tm",
+      "kind": "OpenHoldem tablemap",
+      "sha256": "de8566692d30e4c88092b9521c94a4ed053158669672067bd485ca340b1a69e0",
+      "size_bytes": 29129,
+      "status": "supplied"
+    },
+    {
+      "name": "joker_ofc_frames_and_rules.zip",
+      "kind": "KKPoker Joker OFC replay/rule evidence",
+      "sha256": "7de5a16eee195e3f0aa318e57e6a43c8d75deb5e3d322df6a3a94419658c16c4",
+      "frames": [418, 423, 444, 451, 453, 455, 468, 482, 512, 528, 543, 560, 568],
+      "status": "supplied"
+    },
+    {
+      "name": "OpenHoldem bootstrap",
+      "kind": "Git commit",
+      "repository": "pmartins87/myoh_private",
+      "commit": "3aa8a28944e3759fecc9323fb9f7361d54d4c9af",
+      "development_branch": "deepofc",
+      "status": "pinned"
+    }
+  ],
+  "source_priority": [
+    "current KKPoker in-client Joker rule screens",
+    "current official KKPoker website",
+    "empirical deterministic client behavior",
+    "inference only when explicitly marked"
+  ],
+  "notes": [
+    "The in-client rule screens are mode-specific and may be newer than the generic public OFC page.",
+    "Any conflict between sources must remain explicit until resolved by stronger evidence."
+  ]
+}
