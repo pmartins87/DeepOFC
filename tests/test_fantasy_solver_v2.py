@@ -1,5 +1,6 @@
 from deepofc.fantasy_solver import evaluate_fantasy_exact_subsets
 from deepofc.fantasy_solver_v2 import evaluate_fantasy_exact_subsets_v2
+from deepofc.scoring import completed_board_ranks, pairwise_points_standard
 from deepofc.state import Card, OFCState, PlayerBoard, PlayerState
 
 
@@ -45,7 +46,14 @@ def test_v2_exact_value_matches_certified_v1_on_fantasy14():
     v2 = evaluate_fantasy_exact_subsets_v2(state).decision
     assert v2.current_hand_points == v1.current_hand_points == 60
     assert v2.total_value == v1.total_value
-    assert v2.resolved_ranks == v1.resolved_ranks
+
+    # V1 and V2 may select different physical boards inside an exact EV tie.
+    # V2 deliberately prefers the strongest achievable Top for a fixed B/M,
+    # whereas V1's final tie-break is lexical action.key(). What matters for
+    # exactness is that the canonical scorer independently reproduces V2's EV.
+    assert pairwise_points_standard(v2.board, opponent_board()).total_points == 60
+    assert v2.resolved_ranks == completed_board_ranks(v2.board)
+    assert v2.resolved_ranks[0] >= v1.resolved_ranks[0]
 
 
 def test_v2_exact_value_matches_v1_with_positive_refantasy_value():
