@@ -12,7 +12,7 @@ The roadmap is deliberately gated. A stage is not considered complete because co
 | R3 Legal actions | 🟡 Advanced | exact normal actions, lazy exact 14–17-card Fantasy generator, **exact board-aware Joker non-foul filter** | broader independent/property validation and practical branch-reduction/search design for the huge Fantasy space |
 | R4 Simulator | 🟡 Advanced | deterministic 54-card deck, exact normal/Fantasy action application, physical-card invariants, HU/3-way raw zero-sum settlement, Fantasy qualification primitives | full sequential hidden-state/observation environment, whole-game replay, large fuzz/property campaigns |
 | R5 Baseline decision engine | 🟡 **Advanced / active** | exact final normal-round kernel; exact one-street-back expectimax reference; MC baseline calibrated against exact chance tree; Fantasy-14 brute-certified; real Fantasy-15 dual-Joker exact solve; native C++ exact 14/15/17 kernel | general early-round strategic continuation, hidden/incomplete-opponent Fantasy expectation, self-consistent Fantasy continuation values, broader exact/property validation |
-| R6 Solver study | 🟡 Active | architecture v1 frozen; exact terminal kernels and native runtime path establish reference values; HU/3-way game-theory distinction frozen | build tractable HU extensive-form subgames and benchmark MCCFR/CFR+/DCFR/re-solving/hybrid candidates by exploitability and cost |
+| R6 Solver study | 🟡 **Advanced / active** | first exact HU imperfect-information OFC subgame; structural value=0; 40,320 terminal symmetry proof; exact BR/NashConv/exploitability; CFR+, DCFR and external-sampling MCCFR with 10-seed calibration | deeper multi-decision HU subgames; outcome-sampling/re-solving/scale benchmarks; then separate 3-player validation |
 | R7 Training | ⬜ Not started | — | reproducible training pipeline if selected architecture needs learning |
 | R8 Exploitation | ⬜ Not started | — | opponent model only after strong base policy |
 | R9 OpenHoldem state/scraper | 🟡 **Active critical path** | isolated OFC state, tablemap gate, raw scraper, Python+C++ Fantasy `round_index=-1`, normal + real Fantasy52→53 Python↔C++ equality, full Release|Win32 green, Fantasy pre-routing fail-close, persistent JK1/JK2, measured Fantasy15 geometry, fail-closed recognizer core, cross-repo gates, read-only guard | **real pixels→recognized cards→raw→canonical proof**, actual Joker visual calibration, 14/16/17 Fantasy geometry, first-round loose-card calibration, 3-player geometry |
@@ -248,18 +248,35 @@ Architecture v1 is frozen in `docs/SOLVER_ARCHITECTURE_V1.md`. Current conclusio
 - Fantasy terminal placement is well suited to exact combinatorial search and currently does **not** require ML merely for latency;
 - normal rounds 1–4 require continuation values over future chance and strategic opponent actions, so a greedy board optimizer is insufficient.
 
+First exact HU architecture benchmark now implemented/proven:
+
+- [x] constructed a real final-round HU OFC subgame with private three-card hands, hidden first-player discard, public confirmed placements and **2,352 information sets**;
+- [x] **2,240** second-player information sets merge multiple physically distinct hidden histories, so the benchmark is genuinely imperfect-information rather than a perfect-information placement toy;
+- [x] exact player-swap + suit-mirror + actor-order automorphism freezes the benchmark game value at **0**, with **40,320 / 40,320** terminal payoff-symmetry branches checked exhaustively;
+- [x] exact best response, NashConv and exploitability evaluator implemented for this one-decision-per-player benchmark;
+- [x] uniform profile frozen at exact expected value **0** but exploitability **0.428571428571**;
+- [x] full-tree CFR+ benchmark reaches exact exploitability **0.000013028071** at 256 iterations;
+- [x] full-tree DCFR (`alpha=1.5, beta=0, gamma=2`) reaches exact exploitability **0.000000076188** at 256 iterations and dominates CFR+ on this tractable tree at essentially equal full-tree cost;
+- [x] deterministic external-sampling MCCFR implemented and exact-BR evaluated; corrected single-seed 50k benchmark reaches exploitability **0.013472149428** in about **8.0 s training-only**;
+- [x] MCCFR lazy average-strategy one-iteration alignment bug found during audit, corrected, and regression-gated so iteration 1 averages exactly the policy actually used;
+- [x] corrected **10-seed** external-sampling calibration at 20k iterations gives mean exploitability **0.033331994488** and p95/max **0.034406383220**;
+- [x] training time and exact-evaluation time are reported separately so best-response diagnostics are not miscounted as solver training cost;
+- [x] benchmark and limitations frozen in `docs/HU_IMPERFECT_INFO_R6_BENCHMARK_2026-08-15.md`.
+
+Current interpretation: full-tree DCFR is the strongest measured algorithm on this **small tractable tree**, while external sampling remains relevant because it visits only a sampled fraction of the game tree. This is not yet a production architecture decision.
+
 Next benchmark program:
 
-- [ ] construct small HU extensive-form subgames whose exact/best-response value can be computed;
-- [ ] benchmark external-sampling MCCFR;
-- [ ] benchmark outcome-sampling MCCFR;
-- [ ] benchmark CFR+/DCFR on tractable abstractions/subgames;
+- [ ] construct a deeper HU subgame with **at least two decisions by the same player**, preserving perfect recall and private-discard information;
+- [ ] replace the one-action-specialized exact best response with a deeper-game independently validated BR/reference evaluator;
+- [ ] benchmark outcome-sampling MCCFR only against that validated reference rather than by training loss;
 - [ ] benchmark continual re-solving from the live public state;
+- [ ] test where full-tree DCFR becomes computationally dominated by sampled/re-solving approaches as the chance/action tree grows;
 - [ ] benchmark hybrid search + learned value/policy only after exact/search references exist;
-- [ ] measure exploitability/best response, convergence rate, memory, CPU cost and runtime latency rather than choosing by training loss alone;
+- [ ] measure exploitability/best response, convergence rate, memory, CPU cost and runtime latency rather than choosing by self-play value alone;
 - [ ] treat 3-player separately with multiplayer self-play/equilibrium-approximation validation.
 
-**Gate:** documented benchmark on representative exact subgames explains why the selected architecture is the strongest practical route toward the target near-perfect player.
+**Gate:** documented benchmarks on increasingly representative exact/reference subgames explain why the selected architecture is the strongest practical route toward the target near-perfect player.
 
 ## R7 — Training pipeline
 
