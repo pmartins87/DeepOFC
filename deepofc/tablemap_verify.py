@@ -87,6 +87,9 @@ def validate_hu_replay_tablemap(text: str) -> list[str]:
         "ofc_hero_chair": "1",
         "ofc_tablemap_stage": "replay_draft_v1",
         "ofc_joker_detector_calibrated": "0",
+        # Knowing that Fantasy is active is only a routing fact. The curved
+        # 14..17-card recognizer is independently uncertified in replay drafts.
+        "ofc_fantasy_recognizer_calibrated": "0",
         # Replay drafts are deliberately not permitted to drive physical card
         # placement. A later empirically validated runtime tablemap must flip
         # this symbol to 1 only after its row drop targets are proven.
