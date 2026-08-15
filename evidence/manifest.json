@@ -1,9 +1,18 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "target_variant": "KKPoker Joker Ultimate OFC",
   "source_archive": {
     "name": "joker_ofc_frames_and_rules.zip",
     "sha256": "7de5a16eee195e3f0aa318e57e6a43c8d75deb5e3d322df6a3a94419658c16c4"
+  },
+  "fantasy_source_archive": {
+    "name": "ofc fantasy.zip",
+    "sha256": "1b91e038bb42acee2520187907d9ef9d6f34fc303d065ac2bc5dd1e92d52027e",
+    "client_size": [450, 830],
+    "sessions": {
+      "session_0": {"bmp_frames": 19, "html_frames": 19},
+      "session_1": {"bmp_frames": 65, "html_frames": 65}
+    }
   },
   "bootstrap_tablemap": {
     "name": "KKPoker_OFC.tm",
@@ -29,6 +38,14 @@
     {"name": "frame000560.bmp", "sha256": "21392f368191fe97845ce3254919f01ee7dc730527148474d2030a9669897d84", "kind": "gameplay"},
     {"name": "frame000568.bmp", "sha256": "4fccc328f42788e519d70470541d0976dd22754997452b694a883eda73951321", "kind": "gameplay"}
   ],
+  "fantasy_frames": [
+    {"path": "session_1/frame000000.bmp", "sha256": "c90b8c74497a87aedd2aaa7c0659e9de8914678e750ba428ea51aa55bc9eddf0", "kind": "table_info_ultimate_joker"},
+    {"path": "session_1/frame000032.bmp", "sha256": "723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130", "kind": "fantasy_fan"},
+    {"path": "session_1/frame000035.bmp", "sha256": "43277bcd160efd84fa9e6bbb88f93f5e16b300f3c7c510d41dc3ef841f767de5", "kind": "fantasy_arrangement"},
+    {"path": "session_1/frame000055.bmp", "sha256": "e6f7fe547d852e456ca1896334e46605a412140138f2a33be495923968deb2f3", "kind": "fantasy_predeal_suit_counters_13_each"},
+    {"path": "session_1/frame000060.bmp", "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99", "kind": "fantasy_fan_second_sequence"},
+    {"path": "session_0/frame000010.bmp", "sha256": "581235f1ef6a17751ca9febefbe0d6a1170006c57528fe99586898ddc176b4df", "kind": "fantasy_transition"}
+  ],
   "golden_fixtures": [
     "fixtures/replay/frame000468.json",
     "fixtures/replay/frame000482.json",
@@ -37,5 +54,6 @@
     "fixtures/replay/frame000543.json",
     "fixtures/replay/frame000560.json",
     "fixtures/replay/frame000568.json"
-  ]
+  ],
+  "fantasy_golden_fixtures": []
 }
