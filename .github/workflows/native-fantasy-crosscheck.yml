@@ -1,0 +1,25 @@
+name: Native Fantasy Python cross-check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/fantasy_exact.cpp'
+      - 'native/fantasy_exact_cases.txt'
+      - 'tools/verify_native_fantasy_boards.py'
+      - '.github/workflows/native-fantasy-crosscheck.yml'
+  workflow_dispatch:
+
+jobs:
+  cross-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile optimized native kernel
+        run: g++ -O3 -DNDEBUG -std=c++14 native/fantasy_exact.cpp -o native/fantasy_exact
+      - name: Rescore every native-selected board with canonical Python scorer
+        run: python tools/verify_native_fantasy_boards.py
