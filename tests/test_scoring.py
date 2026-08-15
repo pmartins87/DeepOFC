@@ -56,11 +56,15 @@ def test_joker_evaluation_fails_closed_until_r1():
         rank_top([Card(joker_id=1), c(12, "s"), c(12, "h")])
 
 
-def test_foul_policy_must_be_chosen_explicitly():
+def test_equal_middle_and_bottom_is_legal_only_under_current_client_equality_rule():
+    # Bottom and middle are exactly equal poker ranks (AAKQJ) using distinct
+    # physical suits. Top is weaker. The supplied current-client rule says
+    # Bottom >= Middle >= Top, so this board is valid under the target rule but
+    # would foul under a strict-outrank policy.
     board = PlayerBoard(
-        top=(c(14, "s"), c(14, "h"), c(13, "d")),
-        middle=(c(14, "d"), c(14, "c"), c(12, "s"), c(11, "h"), c(9, "d")),
-        bottom=(c(2, "s"), c(3, "s"), c(4, "s"), c(5, "s"), c(6, "s")),
+        top=(c(13, "s"), c(12, "h"), c(9, "d")),
+        middle=(c(14, "s"), c(14, "h"), c(13, "d"), c(12, "c"), c(11, "h")),
+        bottom=(c(14, "d"), c(14, "c"), c(13, "h"), c(12, "s"), c(11, "d")),
     )
     assert is_foul(board, equality_allowed=True) is False
-    assert is_foul(board, equality_allowed=False) is False
+    assert is_foul(board, equality_allowed=False) is True
