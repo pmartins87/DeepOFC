@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "measured_evidence_geometry_not_runtime_certification",
   "variant": "joker_ultimate",
   "client_size": {"width": 450, "height": 830},
@@ -25,7 +25,7 @@
     },
     {
       "path": "session_1/frame000060.bmp",
-      "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99",
+      "sha256": "05689f26ba0e2d3a3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99",
       "cards_left_to_right": [
         "Ac", "Ad", "Qd", "Tc", "8c", "7h", "7c", "6d", "5c", "4h", "4d", "3s", "3c", "3d", "2s"
       ]
@@ -36,7 +36,8 @@
     "Cards overlap heavily and are rotated. The rectangles below cover the exposed rank/suit/Joker-identity strip of each fan position rather than the hidden full card body.",
     "These rectangles are suitable as source evidence for recognition experiments and candidate drag-source regions, but they are NOT certified click targets.",
     "The runtime must bind the recognized physical card to the current rectangle on every fresh scrape. It must never retain strategic fan-slot identity after a drag because the fan may reflow.",
-    "Only 15-card Fantasy geometry is directly captured here. 14/16/17 layouts remain uncalibrated."
+    "Only 15-card Fantasy geometry is directly captured here. 14/16/17 layouts remain uncalibrated.",
+    "Frame 53 proves the Hero arrangement board itself is shifted/compressed relative to normal confirmed-play geometry; the normal Hero row rectangles therefore cannot be reused while Fantasy is active."
   ],
   "fan_slots_left_to_right": [
     {"index": 0,  "identity_patch": [15,681,41,727]},
@@ -55,16 +56,40 @@
     {"index": 13, "identity_patch": [357,664,383,710]},
     {"index": 14, "identity_patch": [383,672,409,718]}
   ],
-  "related_commit_state_frames": [
-    {
-      "path": "session_1/frame000053.bmp",
-      "sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5",
-      "meaning": "both physical Jokers tentatively placed; two unused cards remain loose before Confirm"
+  "arrangement_state_frame53": {
+    "path": "session_1/frame000053.bmp",
+    "sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5",
+    "meaning": "13 cards tentatively arranged into 3/5/5; two unused cards remain loose; Confirm is available",
+    "hero_rows_measured_bright_card_bounds": {
+      "top": [
+        [112,415,160,481],
+        [167,415,216,481],
+        [223,415,271,481]
+      ],
+      "middle": [
+        [112,488,160,554],
+        [167,488,216,554],
+        [223,488,271,554],
+        [278,488,326,554],
+        [333,488,381,554]
+      ],
+      "bottom": [
+        [112,561,160,627],
+        [167,561,216,627],
+        [223,561,271,627],
+        [278,561,326,627],
+        [333,561,381,627]
+      ]
     },
+    "unused_loose_combined_bright_span": [183,646,266,715],
+    "unused_cards": ["3s", "2c"],
+    "geometry_warning": "measured visual bounds only; not certified recognition or drag rectangles"
+  },
+  "related_commit_state_frames": [
     {
       "path": "session_1/frame000054.bmp",
       "sha256": "a3bd163820c94b409f481727957a4296c4702a10895fc134d349df01bb70b17e",
-      "meaning": "after Confirm, unused cards are in discard tracker and Jokers are shown as gold substituted cards with persistent color-coded Joker icons"
+      "meaning": "after Confirm, unused cards are in discard tracker and Jokers are shown as gold substituted cards with persistent color-coded Joker icons; Hero rows return to normal confirmed geometry"
     }
   ]
 }
