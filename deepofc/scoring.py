@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum
+from functools import lru_cache
+from itertools import product
 from typing import Iterable, Sequence
 
 from .state import Card, PlayerBoard, Row
@@ -86,14 +88,27 @@ BOTTOM_ROYALTY_BY_CATEGORY = {
     HandCategory.STRAIGHT_FLUSH: 15,
 }
 
+# Project-frozen Joker assumption (2026-08-15): each physical Joker may assume
+# any nominal standard card independently, WITH replacement. Therefore a Joker
+# may duplicate a standard card already physically present and JK1/JK2 may map
+# to the same nominal card. Physical JK1/JK2 identity remains untouched in
+# canonical state; these Card objects exist only inside the evaluator.
+_STANDARD_NOMINAL_CARDS = tuple(
+    Card(rank=rank, suit=suit)
+    for rank in range(2, 15)
+    for suit in ("c", "d", "h", "s")
+)
 
-def _require_standard(cards: Sequence[Card], expected: int) -> None:
+
+def _require_count(cards: Sequence[Card], expected: int) -> None:
     if len(cards) != expected:
         raise ValueError(f"expected {expected} cards, got {len(cards)}")
+
+
+def _require_standard(cards: Sequence[Card], expected: int) -> None:
+    _require_count(cards, expected)
     if any(c.is_joker for c in cards):
-        raise NotImplementedError(
-            "Joker evaluation is deliberately blocked until R1 freezes wildcard semantics"
-        )
+        raise ValueError("internal standard-card evaluator received a physical Joker")
 
 
 def _straight_high(ranks: Iterable[int]) -> int | None:
@@ -107,7 +122,7 @@ def _straight_high(ranks: Iterable[int]) -> int | None:
     return None
 
 
-def rank_top(cards: Sequence[Card]) -> HandRank:
+def _rank_top_standard(cards: Sequence[Card]) -> HandRank:
     _require_standard(cards, 3)
     ranks = sorted((int(c.rank) for c in cards), reverse=True)
     counts = {r: ranks.count(r) for r in set(ranks)}
@@ -121,12 +136,16 @@ def rank_top(cards: Sequence[Card]) -> HandRank:
     return HandRank(HandCategory.HIGH_CARD, tuple(ranks))
 
 
-def rank_five(cards: Sequence[Card]) -> HandRank:
+def _rank_five_standard(cards: Sequence[Card]) -> HandRank:
     _require_standard(cards, 5)
     ranks = [int(c.rank) for c in cards]
     suits = [str(c.suit) for c in cards]
     counts = {r: ranks.count(r) for r in set(ranks)}
     grouped = sorted(((n, r) for r, n in counts.items()), reverse=True)
+    if grouped[0][0] > 4:
+        raise NotImplementedError(
+            "five-of-a-kind ranking/royalty is not frozen for KKPoker Joker Ultimate"
+        )
     straight_high = _straight_high(ranks)
     flush = len(set(suits)) == 1
 
@@ -139,6 +158,9 @@ def rank_five(cards: Sequence[Card]) -> HandRank:
     if grouped[0][0] == 3 and grouped[1][0] == 2:
         return HandRank(HandCategory.FULL_HOUSE, (grouped[0][1], grouped[1][1]))
     if flush:
+        # Duplicate nominal cards are intentional under the frozen Joker
+        # assumption, so a wildcard flush can legitimately contain repeated
+        # rank values in its tiebreak tuple (for example A,A,9,7,2).
         return HandRank(HandCategory.FLUSH, tuple(sorted(ranks, reverse=True)))
     if straight_high is not None:
         return HandRank(HandCategory.STRAIGHT, (straight_high,))
@@ -155,6 +177,79 @@ def rank_five(cards: Sequence[Card]) -> HandRank:
         kickers = sorted((r for r in ranks if r != pair), reverse=True)
         return HandRank(HandCategory.PAIR, (pair, *kickers))
     return HandRank(HandCategory.HIGH_CARD, tuple(sorted(ranks, reverse=True)))
+
+
+def _canonical_eval_key(cards: Sequence[Card], expected: int) -> tuple[Card, ...]:
+    _require_count(cards, expected)
+    # Row visual order is not strategic state. Sorting improves cache reuse and
+    # keeps Joker evaluation deterministic without changing physical identity.
+    return tuple(sorted(cards, key=lambda card: card.code))
+
+
+def _five_of_a_kind_reachable(cards: Sequence[Card]) -> bool:
+    joker_count = sum(c.is_joker for c in cards)
+    if joker_count == 0:
+        return False
+    standard_ranks = [int(c.rank) for c in cards if not c.is_joker]
+    return any(standard_ranks.count(rank) + joker_count >= 5 for rank in set(standard_ranks))
+
+
+@lru_cache(maxsize=200_000)
+def _rank_top_cached(cards: tuple[Card, ...]) -> HandRank:
+    jokers = sum(c.is_joker for c in cards)
+    if jokers == 0:
+        return _rank_top_standard(cards)
+    standards = tuple(c for c in cards if not c.is_joker)
+    best: HandRank | None = None
+    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
+        candidate = (*standards, *replacements)
+        rank = _rank_top_standard(candidate)
+        if best is None or rank > best:
+            best = rank
+    assert best is not None
+    return best
+
+
+@lru_cache(maxsize=200_000)
+def _rank_five_cached(cards: tuple[Card, ...]) -> HandRank:
+    jokers = sum(c.is_joker for c in cards)
+    if jokers == 0:
+        return _rank_five_standard(cards)
+    if _five_of_a_kind_reachable(cards):
+        # The user's frozen duplication assumption makes this nominal outcome
+        # reachable, but KKPoker's supplied category/royalty table does not say
+        # how Five-of-a-Kind ranks or pays. Choosing Quads/Straight-Flush here
+        # would silently bake in a different rule, so this rare edge stays hard
+        # fail-closed until explicitly decided or observed.
+        raise NotImplementedError(
+            "Joker duplication makes five-of-a-kind reachable, but its ranking/royalty is unresolved"
+        )
+    standards = tuple(c for c in cards if not c.is_joker)
+    best: HandRank | None = None
+    for replacements in product(_STANDARD_NOMINAL_CARDS, repeat=jokers):
+        candidate = (*standards, *replacements)
+        rank = _rank_five_standard(candidate)
+        if best is None or rank > best:
+            best = rank
+    assert best is not None
+    return best
+
+
+def rank_top(cards: Sequence[Card]) -> HandRank:
+    """Best 3-card Top rank, with exact Joker substitution when present.
+
+    Joker substitutions are independent and sampled from all 52 nominal cards
+    with replacement. Equivalent substitutions collapse to the same HandRank;
+    no arbitrary nominal assignment is persisted into canonical physical state.
+    """
+
+    return _rank_top_cached(_canonical_eval_key(cards, 3))
+
+
+def rank_five(cards: Sequence[Card]) -> HandRank:
+    """Best 5-card rank under the project-frozen Joker duplication rule."""
+
+    return _rank_five_cached(_canonical_eval_key(cards, 5))
 
 
 def is_royal_flush(rank: HandRank) -> bool:
@@ -228,16 +323,19 @@ def pairwise_points_standard(
     *,
     equality_allowed: bool = True,
 ) -> PairwiseScore:
-    """Score two complete standard-card OFC boards exactly in raw points.
+    """Score two complete OFC boards exactly in raw points.
+
+    The historical function name is retained for API compatibility; row
+    evaluation now supports the project-frozen Joker-with-replacement rule.
 
     Supported now:
-    - normal row comparison;
+    - normal and Joker row comparison, except unresolved Five-of-a-Kind edges;
     - royalty difference;
     - scoop bonus;
     - exactly one fouled player (automatic scoop, fouled player loses royalties).
 
     Deliberately unresolved/fail-closed:
-    - any Joker in either board;
+    - Joker states where Five-of-a-Kind becomes reachable;
     - both players fouling simultaneously;
     - cash settlement/win cap/rake.
     """
