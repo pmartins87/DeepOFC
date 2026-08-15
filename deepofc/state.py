@@ -131,7 +131,10 @@ class PlayerState:
             raise ValueError("hidden_discard_count must be non-negative")
         if self.hidden_incoming_count < 0:
             raise ValueError("hidden_incoming_count must be non-negative")
-        if self.hidden_incoming_count not in (0, 3, 5):
+        if self.fantasy:
+            if self.hidden_incoming_count not in (0, 14, 15, 16, 17):
+                raise ValueError("Fantasy hidden incoming count must be 0 or 14..17")
+        elif self.hidden_incoming_count not in (0, 3, 5):
             raise ValueError("normal-play hidden incoming count must be 0, 3 or 5")
 
 
@@ -151,42 +154,48 @@ class PendingPlacement:
 class OFCState:
     """Canonical observation/decision state shared by solver, replay and OH.
 
-    `hero_incoming` contains all current-street cards dealt to Hero, including
-    cards already dragged tentatively to a row but not yet confirmed.
+    The target runtime variant is one concrete product: KKPoker OFC Joker
+    Ultimate. Fantasy is a state of that variant, not a separate `mode`.
 
-    `hero_pending` records those tentative card->row assignments. This
-    distinction is necessary because supplied KKPoker frames show that Hero can
-    pre-arrange cards while an opponent is still the acting player. Only
-    `hero_can_confirm` marks a strategy-decision state that can be committed.
+    In normal Pineapple play, `round_index` is 0..4 and `hero_incoming` contains
+    the current 5-card first deal or 3-card later deal, including cards already
+    dragged tentatively to a row but not yet confirmed.
+
+    When Hero is in Fantasy (`player(hero_chair).fantasy == True`),
+    `round_index == -1` deliberately separates the one-shot Fantasy placement
+    from the normal five-round sequence. Hero may receive 14..17 physical cards
+    and builds the complete 13-card 3/5/5 board at once; unused cards are the
+    Hero-known Fantasy discards.
+
+    `hero_pending` records tentative card->row assignments. This distinction is
+    necessary because KKPoker allows pre-arrangement before Confirm and visibly
+    re-sorts cards inside rows. Only `hero_can_confirm` marks a state that can be
+    committed.
 
     Opponent discarded-card identities and current incoming-card identities
-    remain hidden. Supplied KKPoker frames do expose card-back counts for both,
-    so those counts are part of the observation state without inventing card
-    identities or row destinations for hidden backs.
-
-    `mode` remains `joker`, not `joker_ultimate`: current in-client evidence
-    proves that Joker and Ultimate are separate menu labels, and the public
-    KKPoker site does not prove they share every Fantasy/re-Fantasy semantic.
+    remain hidden unless separately proven observable. Counts may be retained
+    without inventing identities or row destinations.
     """
 
     players: Tuple[PlayerState, ...]
     hero_chair: int
     dealer_chair: int
     acting_chair: int
-    round_index: int  # 0..4 for normal five-round Pineapple flow
+    round_index: int  # 0..4 normal; -1 when Hero is in one-shot Fantasy
     hero_incoming: Tuple[Card, ...] = ()
     hero_discards: Tuple[Card, ...] = ()
     hero_pending: Tuple[PendingPlacement, ...] = ()
     hero_can_prepare: bool = False
     hero_can_confirm: bool = False
     action_required: bool = False
-    mode: str = "joker"
+    mode: str = "joker_ultimate"
 
     def __post_init__(self) -> None:
+        if self.mode != "joker_ultimate":
+            raise ValueError("DeepOFC canonical runtime mode must be joker_ultimate")
         # Five cards on street 1 plus four later 3-card draws require 17 dealt
-        # cards per standard player before discards; the supplied frames show 2p
-        # and 3p play. The supported KKPoker client set is therefore currently
-        # constrained to the observed/physically compatible 2-3 player modes.
+        # cards per normal player. Together with the 54-card physical deck and
+        # supplied evidence, the supported KKPoker client scope is 2-3 players.
         if len(self.players) not in (2, 3):
             raise ValueError("KKPoker Pineapple/Joker state must contain 2 or 3 players")
         chairs = [p.chair for p in self.players]
@@ -198,14 +207,27 @@ class OFCState:
             raise ValueError("dealer_chair not present")
         if self.acting_chair not in chairs:
             raise ValueError("acting_chair not present")
-        if self.round_index not in range(5):
-            raise ValueError("round_index must be 0..4")
+
+        if self.hero_is_fantasy:
+            if self.round_index != -1:
+                raise ValueError("Hero Fantasy state requires round_index=-1")
+            if self.hero_incoming and len(self.hero_incoming) not in range(14, 18):
+                raise ValueError("Hero Fantasy incoming count must be 14..17")
+            if self.action_required and len(self.hero_incoming) not in range(14, 18):
+                raise ValueError("Fantasy action requires 14..17 Hero incoming cards")
+        elif self.round_index not in range(5):
+            raise ValueError("normal round_index must be 0..4")
+
         if self.action_required and not self.hero_can_confirm:
             raise ValueError("action_required implies hero_can_confirm")
         if self.hero_can_confirm and self.acting_chair != self.hero_chair:
             raise ValueError("hero_can_confirm requires Hero to be acting chair")
         self.validate_physical_cards()
         self.validate_pending()
+
+    @property
+    def hero_is_fantasy(self) -> bool:
+        return self.player(self.hero_chair).fantasy
 
     def player(self, chair: int) -> PlayerState:
         for p in self.players:
@@ -251,6 +273,17 @@ class OFCState:
         return tuple(c for c in self.hero_incoming if c not in assigned)
 
     def confirm_shape_is_legal(self) -> bool:
+        board = self.player(self.hero_chair).board
+        if self.hero_is_fantasy:
+            if len(self.hero_incoming) not in range(14, 18):
+                return False
+            # Fantasy is a one-shot full-board placement. Any current visual
+            # pre-arrangement is represented by hero_pending; committed board
+            # cards, if present during reconstruction, reduce remaining slots.
+            if board.filled_count() + len(self.hero_pending) != 13:
+                return False
+            return len(self.unassigned_incoming()) == len(self.hero_incoming) - len(self.hero_pending)
+
         required = 5 if self.round_index == 0 else 2
         if len(self.hero_pending) != required:
             return False
