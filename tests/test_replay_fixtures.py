@@ -6,17 +6,85 @@ from deepofc.state import Card
 
 
 ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_DIR = ROOT / "fixtures" / "replay"
 
 
 def load_fixture(name: str):
-    data = json.loads((ROOT / "fixtures" / "replay" / name).read_text(encoding="utf-8"))
+    data = json.loads((FIXTURE_DIR / name).read_text(encoding="utf-8"))
     return data, state_from_dict(data["state"])
+
+
+def test_all_gameplay_fixtures_parse_and_preserve_unique_known_cards():
+    names = [
+        "frame000468.json",
+        "frame000482.json",
+        "frame000512.json",
+        "frame000528.json",
+        "frame000543.json",
+        "frame000560.json",
+        "frame000568.json",
+    ]
+    for name in names:
+        _, state = load_fixture(name)
+        assert len(state.known_cards()) == len(set(state.known_cards()))
+        assert state.mode == "joker_ultimate"
+        assert len(state.players) == 2
+
+
+def test_sampled_round_progression_has_expected_committed_counts():
+    expected = {
+        "frame000468.json": (0, 0, 0),
+        "frame000482.json": (1, 5, 5),
+        "frame000512.json": (2, 7, 7),
+        "frame000528.json": (3, 9, 9),
+        "frame000543.json": (3, 11, 9),
+        "frame000560.json": (4, 13, 11),
+        "frame000568.json": (4, 13, 11),
+    }
+    for name, (round_index, opp_count, hero_count) in expected.items():
+        _, state = load_fixture(name)
+        assert state.round_index == round_index
+        assert state.player(0).board.filled_count() == opp_count
+        assert state.player(1).board.filled_count() == hero_count
+
+
+def test_opponent_turn_frames_separate_hidden_incoming_from_old_discards():
+    expected = {
+        "frame000468.json": (5, 0),
+        "frame000482.json": (3, 0),
+        "frame000512.json": (3, 1),
+        "frame000528.json": (3, 2),
+    }
+    for name, (incoming, discards) in expected.items():
+        _, state = load_fixture(name)
+        opp = state.player(0)
+        assert state.acting_chair == 0
+        assert state.hero_can_prepare
+        assert not state.hero_can_confirm
+        assert not state.action_required
+        assert opp.hidden_incoming_count == incoming
+        assert opp.hidden_discard_count == discards
+
+
+def test_frame_468_first_round_pending_shape_is_complete_but_not_confirmable_yet():
+    _, state = load_fixture("frame000468.json")
+    assert state.confirm_shape_is_legal()
+    assert len(state.hero_pending) == 5
+    assert not state.hero_can_confirm
+
+
+def test_frame_512_tracks_tentative_nine_hearts_separately_from_committed_board():
+    _, state = load_fixture("frame000512.json")
+    hero = state.player(state.hero_chair)
+    assert Card.from_code("9h") not in hero.board.cards()
+    assert Card.from_code("9h") in {p.card for p in state.hero_pending}
+    assert set(c.code for c in state.unassigned_incoming()) == {"4h", "3d"}
+    assert tuple(c.code for c in state.hero_discards) == ("4d",)
 
 
 def test_frame_543_is_a_legal_fourth_round_hero_confirm_state():
     raw, state = load_fixture("frame000543.json")
     assert raw["frame_sha256"] == "1c1e1f790299e639894d98a267dd71b577ae631a8c11bf14fe4c96bc0e1aa13a"
-    assert state.mode == "joker_ultimate"
     assert state.round_index == 3
     assert state.hero_can_confirm
     assert state.confirm_shape_is_legal()
@@ -26,6 +94,20 @@ def test_frame_543_is_a_legal_fourth_round_hero_confirm_state():
     assert len(opp.board.middle) == 5
     assert len(opp.board.bottom) == 3
     assert opp.hidden_discard_count == 3
+    assert opp.hidden_incoming_count == 0
+
+
+def test_frame_560_to_568_is_only_tentative_hero_placement_change():
+    _, before = load_fixture("frame000560.json")
+    _, after = load_fixture("frame000568.json")
+    assert before.player(0).board == after.player(0).board
+    assert before.player(1).board == after.player(1).board
+    assert before.hero_incoming == after.hero_incoming
+    assert before.hero_discards == after.hero_discards
+    assert before.hero_pending == ()
+    assert len(after.hero_pending) == 2
+    assert after.unassigned_incoming() == (Card.from_code("2d"),)
+    assert after.confirm_shape_is_legal()
 
 
 def test_frame_568_is_a_legal_final_round_hero_confirm_state():
