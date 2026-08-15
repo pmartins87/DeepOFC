@@ -1,0 +1,22 @@
+name: HU external-sampling MCCFR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_subgame.py'
+      - 'deepofc/hu_mccfr.py'
+      - 'tools/benchmark_hu_mccfr.py'
+      - '.github/workflows/hu-mccfr.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run external-sampling MCCFR benchmark
+        run: python tools/benchmark_hu_mccfr.py
