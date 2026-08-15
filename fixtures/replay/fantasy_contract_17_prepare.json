@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "frame": "synthetic_fantasy_contract_17_prepare",
+  "frame_kind": "synthetic_contract_not_pixel_evidence",
+  "table_label": "Joker Ultimate",
+  "evidence_notes": [
+    "This is a synthetic cross-language contract fixture, not a transcription of one specific screenshot.",
+    "It freezes the already source-backed semantics that Fantasy is a state inside Joker Ultimate and that 17-card Fantasy is possible with two physical Jokers in the 54-card deck.",
+    "Hero is allowed to pre-arrange while the opponent is the canonical actor; Confirm remains false until Hero may legally commit.",
+    "The real Fantasy pixel/tablemap fixture remains a separate R9 gate."
+  ],
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "opponent",
+        "fantasy": false,
+        "hidden_incoming_count": 5,
+        "board": {
+          "top": [],
+          "middle": [],
+          "bottom": []
+        }
+      },
+      {
+        "chair": 1,
+        "name": "hero",
+        "fantasy": true,
+        "board": {
+          "top": [],
+          "middle": [],
+          "bottom": []
+        }
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 0,
+    "round_index": -1,
+    "hero_incoming": [
+      "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "Ts",
+      "Js", "Qs", "Ks", "As", "Ah", "Kh", "Qh", "JK1"
+    ],
+    "hero_discards": [],
+    "hero_pending": [
+      {"card": "2s", "row": "top"},
+      {"card": "3s", "row": "top"},
+      {"card": "4s", "row": "top"},
+      {"card": "5s", "row": "middle"},
+      {"card": "6s", "row": "middle"}
+    ],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  }
+}
