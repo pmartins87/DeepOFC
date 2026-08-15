@@ -163,6 +163,10 @@ class OFCState:
     remain hidden. Supplied KKPoker frames do expose card-back counts for both,
     so those counts are part of the observation state without inventing card
     identities or row destinations for hidden backs.
+
+    `mode` remains `joker`, not `joker_ultimate`: current in-client evidence
+    proves that Joker and Ultimate are separate menu labels, and the public
+    KKPoker site does not prove they share every Fantasy/re-Fantasy semantic.
     """
 
     players: Tuple[PlayerState, ...]
@@ -176,9 +180,13 @@ class OFCState:
     hero_can_prepare: bool = False
     hero_can_confirm: bool = False
     action_required: bool = False
-    mode: str = "joker_ultimate"
+    mode: str = "joker"
 
     def __post_init__(self) -> None:
+        # Five cards on street 1 plus four later 3-card draws require 17 dealt
+        # cards per standard player before discards; the supplied frames show 2p
+        # and 3p play. The supported KKPoker client set is therefore currently
+        # constrained to the observed/physically compatible 2-3 player modes.
         if len(self.players) not in (2, 3):
             raise ValueError("KKPoker Pineapple/Joker state must contain 2 or 3 players")
         chairs = [p.chair for p in self.players]
