@@ -5,7 +5,8 @@ from itertools import combinations, product
 from math import comb
 from typing import Iterable, Iterator
 
-from .state import Card, OFCState, PendingPlacement, ROW_CAPACITY, Row
+from .scoring import is_foul
+from .state import Card, OFCState, PendingPlacement, PlayerBoard, ROW_CAPACITY, Row
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,12 @@ class FantasyPlacementAction:
     A Fantasy action chooses the full 3/5/5 board from 14..17 physical incoming
     cards. The remaining 1..4 cards are Hero-known discards. Visual fan order
     and left-to-right order inside a row are intentionally absent.
+
+    Important distinction: KKPoker can physically allow a player to arrange a
+    fouled board. Therefore this object represents UI-legal row membership only.
+    Strategic callers that want only boards that are valid after the Jokers make
+    their strongest board-preserving assignments should use
+    `fantasy_action_is_foul()` / `iter_nonfoul_fantasy_actions()`.
     """
 
     placements: tuple[PendingPlacement, ...]
@@ -175,12 +182,18 @@ def count_fantasy_actions(state: OFCState) -> int:
 
 
 def iter_fantasy_actions(state: OFCState) -> Iterator[FantasyPlacementAction]:
-    """Lazily enumerate every canonical full-board Fantasy action exactly once.
+    """Lazily enumerate every canonical full-board Fantasy UI action exactly once.
 
     Enumeration is physical-card exact but strategically canonical: row
     membership matters, fan order and within-row visual order do not. Existing
     tentative pre-arrangement is intentionally ignored because it is not yet
     committed and the strategy is choosing the complete final board.
+
+    This is intentionally the *raw* UI action space, including boards that would
+    foul. Keeping raw enumeration separate from strategic pruning is important:
+    a placement can be legal to perform even when it loses by foul, and later
+    search code may want to prove that no non-fouling continuation exists rather
+    than having actions disappear silently.
     """
 
     incoming = _validate_fresh_fantasy_action_state(state)
@@ -206,3 +219,56 @@ def iter_fantasy_actions(state: OFCState) -> Iterator[FantasyPlacementAction]:
                     placements=placements,
                     discards=tuple(discards),
                 )
+
+
+def fantasy_action_board(action: FantasyPlacementAction) -> PlayerBoard:
+    """Materialize the canonical 3/5/5 board represented by a Fantasy action."""
+
+    by_row: dict[Row, list[Card]] = {row: [] for row in Row}
+    for placement in action.placements:
+        by_row[placement.row].append(placement.card)
+    return PlayerBoard(
+        top=tuple(by_row[Row.TOP]),
+        middle=tuple(by_row[Row.MIDDLE]),
+        bottom=tuple(by_row[Row.BOTTOM]),
+    )
+
+
+def fantasy_action_is_foul(
+    action: FantasyPlacementAction,
+    *,
+    equality_allowed: bool = True,
+) -> bool:
+    """Return foul status after the Jokers optimize for the complete board.
+
+    This delegates to the R2 board-aware evaluator. A Joker is therefore not
+    allowed to create an avoidable foul: if any ordinary-hand substitution can
+    preserve Bottom >= Middle >= Top, that strongest valid assignment is used.
+    """
+
+    return is_foul(
+        fantasy_action_board(action),
+        equality_allowed=equality_allowed,
+    )
+
+
+def iter_nonfoul_fantasy_actions(
+    state: OFCState,
+    *,
+    equality_allowed: bool = True,
+) -> Iterator[FantasyPlacementAction]:
+    """Lazily prune the raw Fantasy action space to board-valid actions.
+
+    This is an exact semantic filter, not a production search algorithm. The raw
+    14..17-card action spaces are too large for a production solver to enumerate
+    blindly, so R5/R6 still need branch reduction/search. The value of this
+    iterator is correctness: any optimized search can be regression-tested
+    against it on reduced/frozen subspaces.
+    """
+
+    for action in iter_fantasy_actions(state):
+        if not fantasy_action_is_foul(
+            action,
+            equality_allowed=equality_allowed,
+        ):
+            yield action
