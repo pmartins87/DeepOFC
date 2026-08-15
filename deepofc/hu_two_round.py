@@ -17,6 +17,10 @@ from .state import Card, OFCState, PendingPlacement, PlayerBoard, PlayerState, R
 # one-decision-per-player simplification in hu_subgame.py.
 #
 # The fixed boards and private supports use a rank-preserving suit-only mirror.
+# Bottom starts KK/QQ, Middle starts 44 and private ranks are all distinct
+# within each round and disjoint across rounds. Every legal terminal is
+# therefore non-foul: Bottom two-pair always outranks Middle pair of 4s,
+# which always outranks Top pair of 2s.
 # Chance is intentionally a reduced, uniformly weighted support of 32 physically
 # legal deal schedules rather than the full KKPoker deck law. The support is a
 # product of independent binary hand variants for P0/P1 on each of two rounds,
@@ -34,34 +38,34 @@ BASE_BOARDS = (
     PlayerBoard(
         top=_cards(("2c", "2d")),
         middle=_cards(("4c", "4d", "5c")),
-        bottom=_cards(("8c", "8d", "7c", "7d")),
+        bottom=_cards(("Kc", "Kd", "Qc", "Qd")),
     ),
     PlayerBoard(
         top=_cards(("2h", "2s")),
         middle=_cards(("4h", "4s", "5h")),
-        bottom=_cards(("8h", "8s", "7h", "7s")),
+        bottom=_cards(("Kh", "Ks", "Qh", "Qs")),
     ),
 )
 
 ROUND3_HANDS = (
     (
-        _cards(("Tc", "Jc", "Qc")),
-        _cards(("Td", "Jd", "Qd")),
+        _cards(("6c", "7c", "8c")),
+        _cards(("6d", "7d", "8d")),
     ),
     (
-        _cards(("Th", "Jh", "Qh")),
-        _cards(("Ts", "Js", "Qs")),
+        _cards(("6h", "7h", "8h")),
+        _cards(("6s", "7s", "8s")),
     ),
 )
 
 ROUND4_HANDS = (
     (
-        _cards(("Kc", "Ac", "Kd")),
-        _cards(("Kd", "Ad", "Kc")),
+        _cards(("9c", "Tc", "Jc")),
+        _cards(("9d", "Td", "Jd")),
     ),
     (
-        _cards(("Kh", "Ah", "Ks")),
-        _cards(("Ks", "As", "Kh")),
+        _cards(("9h", "Th", "Jh")),
+        _cards(("9s", "Ts", "Js")),
     ),
 )
 
