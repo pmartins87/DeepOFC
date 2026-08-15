@@ -54,6 +54,20 @@ def _face_regions(base: str, rect: list[int], *, size: str) -> list[str]:
     ]
 
 
+def _joker_placeholder_rgb(joker_cfg: dict, joker_id: int) -> str:
+    # Schema v2+ gives each persistent physical Joker its own impossible replay
+    # placeholder. Keep backward-compatible fallbacks only so historical unit
+    # fixtures fail safely rather than making builder/schema migrations brittle.
+    specific = joker_cfg.get(f"placeholder{joker_id}_rgb")
+    if specific:
+        return str(specific)
+    if joker_cfg.get("placeholder_rgb"):
+        return str(joker_cfg["placeholder_rgb"])
+    if joker_cfg.get("legacy_placeholder_rgb"):
+        return str(joker_cfg["legacy_placeholder_rgb"])
+    raise ValueError(f"joker_detector has no placeholder RGB for JK{joker_id}")
+
+
 def _slot_regions(
     base: str,
     rect: list[int],
@@ -85,13 +99,13 @@ def _slot_regions(
         _point_region(
             base + "joker1",
             center,
-            color=joker_cfg["placeholder_rgb"],
+            color=_joker_placeholder_rgb(joker_cfg, 1),
             radius=0,
         ),
         _point_region(
             base + "joker2",
             center,
-            color=joker_cfg["placeholder_rgb"],
+            color=_joker_placeholder_rgb(joker_cfg, 2),
             radius=0,
         ),
     ]
@@ -155,12 +169,28 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
     empty = c["empty_background"]
     back = c["card_back"]
     joker = c["joker_detector"]
+    fantasy_active = c.get("fantasy_active")
+    if not fantasy_active:
+        raise ValueError("calibration has no fantasy_active routing detector")
+
     new_regions: list[str] = []
     new_regions.append("")
     new_regions.append("// -----------------------------------------------------------------")
     new_regions.append("// DeepOFC Joker Ultimate 450x830 REPLAY-DRAFT regions")
     new_regions.append("// Generated. Do not hand-edit; see tools/build_joker_hu_tablemap.py")
     new_regions.append("// -----------------------------------------------------------------")
+
+    # This region must be evaluated BEFORE normal Hero board/incoming geometry.
+    # Supplied replay evidence shows that active Fantasy shifts/compresses Hero
+    # rows, so treating an active Fantasy frame as normal is structurally unsafe.
+    new_regions.append(
+        _point_region(
+            "ofc_fantasy_active",
+            tuple(fantasy_active["point"]),
+            color=fantasy_active["rgb"],
+            radius=int(fantasy_active["radius"]),
+        )
+    )
 
     # Canonical chair 0 = upper opponent; chair 1 = local/bottom Hero.
     for row in ("top", "middle", "bottom"):
