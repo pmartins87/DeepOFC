@@ -3,11 +3,14 @@ from itertools import islice
 import pytest
 
 from deepofc.actions import (
+    FantasyPlacementAction,
     count_fantasy_actions,
     enumerate_normal_actions,
+    fantasy_action_board,
+    fantasy_action_is_foul,
     iter_fantasy_actions,
 )
-from deepofc.state import Card, OFCState, PlayerBoard, PlayerState, Row
+from deepofc.state import Card, OFCState, PendingPlacement, PlayerBoard, PlayerState, Row
 
 
 def C(code: str) -> Card:
@@ -50,6 +53,24 @@ def make_fantasy_state(count: int) -> OFCState:
         hero_can_prepare=True,
         hero_can_confirm=True,
         action_required=True,
+    )
+
+
+def fantasy_action(
+    *,
+    top: tuple[str, str, str],
+    middle: tuple[str, str, str, str, str],
+    bottom: tuple[str, str, str, str, str],
+    discards: tuple[str, ...] = ("2d",),
+) -> FantasyPlacementAction:
+    placements = (
+        *(PendingPlacement(card=C(code), row=Row.TOP) for code in top),
+        *(PendingPlacement(card=C(code), row=Row.MIDDLE) for code in middle),
+        *(PendingPlacement(card=C(code), row=Row.BOTTOM) for code in bottom),
+    )
+    return FantasyPlacementAction(
+        placements=placements,
+        discards=tuple(C(code) for code in discards),
     )
 
 
@@ -143,3 +164,39 @@ def test_fantasy_iterator_supports_17_cards_without_allocating_171m_actions():
 def test_normal_generator_rejects_fantasy_state():
     with pytest.raises(ValueError, match="Fantasy"):
         enumerate_normal_actions(make_fantasy_state(14))
+
+
+def test_fantasy_action_materializes_canonical_board_without_visual_slot_semantics():
+    action = fantasy_action(
+        top=("As", "Ah", "JK1"),
+        middle=("Ks", "Kh", "Qd", "Qc", "2s"),
+        bottom=("5s", "6d", "7c", "8h", "9s"),
+    )
+    board = fantasy_action_board(action)
+    assert set(board.top) == {C("As"), C("Ah"), C("JK1")}
+    assert set(board.middle) == {C("Ks"), C("Kh"), C("Qd"), C("Qc"), C("2s")}
+    assert set(board.bottom) == {C("5s"), C("6d"), C("7c"), C("8h"), C("9s")}
+
+
+def test_fantasy_action_joker_uses_board_aware_nonfoul_assignment():
+    # Top AA+JK is locally AAA, but Middle is only two pair. The board-aware
+    # Joker evaluator must downgrade Top to AAK rather than mark this action as
+    # foul merely because the locally strongest Joker use would break the board.
+    action = fantasy_action(
+        top=("As", "Ah", "JK1"),
+        middle=("Ks", "Kh", "Qd", "Qc", "2s"),
+        bottom=("5s", "6d", "7c", "8h", "9s"),
+    )
+    assert fantasy_action_is_foul(action) is False
+
+
+def test_fantasy_action_reports_true_foul_when_no_joker_assignment_can_rescue_board():
+    # Even the weakest useful Joker substitution cannot make Top AA <= a mere
+    # Middle KK pair, so this is a genuine placement foul rather than an
+    # avoidable wildcard-choice foul.
+    action = fantasy_action(
+        top=("As", "Ah", "JK1"),
+        middle=("Ks", "Kh", "Qd", "Jc", "9s"),
+        bottom=("5d", "6d", "7d", "8d", "9d"),
+    )
+    assert fantasy_action_is_foul(action) is True
