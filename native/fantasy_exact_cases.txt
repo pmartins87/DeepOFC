@@ -1,0 +1,21 @@
+CASE	fantasy14_certified
+INCOMING	As Ah Ks Kh Qs Qh Js Jh Ts Th 9s 8s 7s 2s
+OPP_TOP	6c 6d 3c
+OPP_MIDDLE	5c 5d 4c 4d 2c
+OPP_BOTTOM	9c Tc Jc Qc Kc
+EXPECT	60
+END
+CASE	fantasy15_real_frame53_dual_joker
+INCOMING	JK1 JK2 Ac Kd Qc Qd Js 9s 9h 7s 6h 4s 4c 3s 2c
+OPP_TOP	Ah Jc 8h
+OPP_MIDDLE	6s 5c 4h 3h 2h
+OPP_BOTTOM	9d 8d 6d 4d 2d
+EXPECT	28
+END
+CASE	fantasy17_synthetic_dual_joker
+INCOMING	JK1 JK2 Ac Kd Qc Qd Js 9s 9h 7s 6h 4s 4c 3s 2c Ts Th
+OPP_TOP	Ah Jc 8h
+OPP_MIDDLE	6s 5c 4h 3h 2h
+OPP_BOTTOM	9d 8d 6d 4d 2d
+EXPECT	28
+END
