@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "frame": "frame000512.bmp",
+  "frame_sha256": "1148df990a63e90876582d4edabcd3407b9a8280544f6011f96bcb6e8aa7c210",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "frame_kind": "opponent_turn_hero_prearrange",
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 1,
+        "hidden_incoming_count": 3,
+        "board": {"top": ["7d"], "middle": ["Js", "8s", "2s"], "bottom": ["Kh", "5h", "2h"]}
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {"top": ["Ks"], "middle": ["8c", "5c"], "bottom": ["Ah", "Th", "7h", "6h"]}
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 0,
+    "round_index": 2,
+    "hero_incoming": ["9h", "4h", "3d"],
+    "hero_discards": ["4d"],
+    "hero_pending": [{"card": "9h", "row": "bottom"}],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  },
+  "evidence_notes": [
+    "One opponent prior discard is visible only as a back below the board, while three new hidden incoming backs are visible for the current round.",
+    "Hero prior discard 4d is visible in Hero's tracker; 9h has been tentatively moved to bottom while 4h and 3d remain unassigned."
+  ]
+}
