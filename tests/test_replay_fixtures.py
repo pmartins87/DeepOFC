@@ -14,6 +14,14 @@ def load_fixture(name: str):
     return data, state_from_dict(data["state"])
 
 
+def board_codes(state, chair: int) -> set[str]:
+    return {c.code for c in state.player(chair).board.cards()}
+
+
+def discard_codes(state) -> tuple[str, ...]:
+    return tuple(c.code for c in state.hero_discards)
+
+
 def test_all_gameplay_fixtures_parse_and_preserve_unique_known_cards():
     names = [
         "frame000468.json",
@@ -71,6 +79,50 @@ def test_frame_468_first_round_pending_shape_is_complete_but_not_confirmable_yet
     assert state.confirm_shape_is_legal()
     assert len(state.hero_pending) == 5
     assert not state.hero_can_confirm
+
+
+def test_sampled_hero_round_transitions_match_visible_placements_and_discards():
+    _, r2 = load_fixture("frame000482.json")
+    _, r3 = load_fixture("frame000512.json")
+    _, r4 = load_fixture("frame000528.json")
+    _, r4_confirm = load_fixture("frame000543.json")
+    _, r5 = load_fixture("frame000560.json")
+
+    # Round 2: from incoming 7h/4d/5c, Hero commits 7h + 5c and discards 4d.
+    assert board_codes(r3, 1) - board_codes(r2, 1) == {"7h", "5c"}
+    assert discard_codes(r3) == ("4d",)
+
+    # Round 3: from incoming 9h/4h/3d, Hero commits 9h + 4h and discards 3d.
+    assert board_codes(r4, 1) - board_codes(r3, 1) == {"9h", "4h"}
+    assert discard_codes(r4) == ("4d", "3d")
+
+    # Round 4: frame 543 is the confirmed action candidate; next sampled round
+    # proves Jh/Qc became committed and Ts became the new known discard.
+    assert {p.card.code for p in r4_confirm.hero_pending} == {"Jh", "Qc"}
+    assert r4_confirm.unassigned_incoming() == (Card.from_code("Ts"),)
+    assert board_codes(r5, 1) - board_codes(r4, 1) == {"Jh", "Qc"}
+    assert discard_codes(r5) == ("4d", "3d", "Ts")
+
+
+def test_sampled_opponent_round_transitions_match_revealed_cards_and_hidden_discard_count():
+    _, r2 = load_fixture("frame000482.json")
+    _, r3 = load_fixture("frame000512.json")
+    _, r4 = load_fixture("frame000528.json")
+    _, r4_done = load_fixture("frame000543.json")
+    _, r5_done = load_fixture("frame000560.json")
+
+    assert board_codes(r3, 0) - board_codes(r2, 0) == {"7d", "2s"}
+    assert r3.player(0).hidden_discard_count == r2.player(0).hidden_discard_count + 1
+
+    assert board_codes(r4, 0) - board_codes(r3, 0) == {"Ac", "Qs"}
+    assert r4.player(0).hidden_discard_count == r3.player(0).hidden_discard_count + 1
+
+    assert board_codes(r4_done, 0) - board_codes(r4, 0) == {"7c", "5s"}
+    assert r4_done.player(0).hidden_discard_count == r4.player(0).hidden_discard_count + 1
+    assert r4_done.player(0).hidden_incoming_count == 0
+
+    assert board_codes(r5_done, 0) - board_codes(r4_done, 0) == {"Kc", "Qd"}
+    assert r5_done.player(0).hidden_discard_count == r4_done.player(0).hidden_discard_count + 1
 
 
 def test_frame_512_tracks_tentative_nine_hearts_separately_from_committed_board():
