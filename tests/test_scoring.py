@@ -3,6 +3,7 @@ import pytest
 from deepofc.scoring import (
     HandCategory,
     HandRank,
+    completed_board_ranks,
     is_foul,
     pairwise_points_standard,
     rank_five,
@@ -56,7 +57,7 @@ def test_royalty_tables_match_supplied_kkpoker_frames():
     assert royalty(Row.BOTTOM, HandRank(HandCategory.STRAIGHT_FLUSH, (14,))) == 25
 
 
-def test_joker_top_uses_best_nominal_substitution():
+def test_joker_top_uses_best_nominal_substitution_when_row_is_evaluated_alone():
     assert rank_top([Card(joker_id=1), c(12, "s"), c(12, "h")]) == HandRank(
         HandCategory.TRIPS, (12,)
     )
@@ -71,7 +72,7 @@ def test_two_jokers_reproduce_observed_j_t_9_8_7_straight_flush_pattern():
 
 
 def test_joker_may_duplicate_nominal_card_already_physically_present():
-    # Project assumption frozen 2026-08-15: substitutions are WITH replacement.
+    # Project rule frozen 2026-08-15: substitutions are WITH replacement.
     # The best flush duplicates the physical As nominally, producing A,A,9,7,2.
     assert rank_five([C("As"), C("9s"), C("7s"), C("2s"), C("JK1")]) == HandRank(
         HandCategory.FLUSH, (14, 14, 9, 7, 2)
@@ -79,26 +80,79 @@ def test_joker_may_duplicate_nominal_card_already_physically_present():
 
 
 def test_both_jokers_may_choose_the_same_nominal_card():
-    # With replacement, both Jokers independently copy As. This test makes the
-    # assumption executable rather than leaving it as prose only.
+    # With replacement, both Jokers independently copy As. This remains a
+    # standard Flush, so the duplicate nominal assignments are legal.
     assert rank_five([C("As"), C("9s"), C("2s"), C("JK1"), C("JK2")]) == HandRank(
         HandCategory.FLUSH, (14, 14, 14, 9, 2)
     )
 
 
-def test_five_of_a_kind_edge_still_fails_closed_until_hierarchy_and_royalty_are_frozen():
-    # Allowing duplicates makes five Aces reachable from AAA + two Jokers. The
-    # supplied KKPoker hierarchy/royalty table does not define Five-of-a-Kind,
-    # so the evaluator must not silently pretend this is merely Quads.
-    with pytest.raises(NotImplementedError, match="five-of-a-kind"):
-        rank_five([C("As"), C("Ah"), C("Ad"), C("JK1"), C("JK2")])
+def test_five_of_a_kind_is_skipped_and_joker_uses_best_legal_quads_kicker():
+    # User-frozen rule: Five-of-a-Kind is not a valid poker hand in this mode.
+    # With four physical Aces plus a Joker, copying an Ace is therefore ignored;
+    # the strongest legal substitution is a King kicker beside Quad Aces.
+    assert rank_five([C("As"), C("Ah"), C("Ad"), C("Ac"), C("JK1")]) == HandRank(
+        HandCategory.QUADS, (14, 13)
+    )
+
+
+def test_two_jokers_never_create_five_of_a_kind_when_quads_is_best_legal_hand():
+    # AAA + two Jokers could nominally make AAAAA, but that assignment is not a
+    # valid category. The best legal result is AAAA with K kicker.
+    assert rank_five([C("As"), C("Ah"), C("Ad"), C("JK1"), C("JK2")]) == HandRank(
+        HandCategory.QUADS, (14, 13)
+    )
+
+
+def test_complete_board_joker_avoids_top_trips_when_trips_would_foul():
+    # Evaluated alone, AA+JK is AAA. On this complete board, however, Top trips
+    # would outrank the Middle two-pair and foul. The Joker must therefore use
+    # the strongest legal non-fouling assignment: AA with K kicker.
+    board = PlayerBoard(
+        top=(C("As"), C("Ah"), C("JK1")),
+        middle=(C("Ks"), C("Kh"), C("Qd"), C("Qc"), C("2s")),
+        bottom=(C("5s"), C("6d"), C("7c"), C("8h"), C("9s")),
+    )
+    assert rank_top(board.top) == HandRank(HandCategory.TRIPS, (14,))
+    top, middle, bottom = completed_board_ranks(board)
+    assert top == HandRank(HandCategory.PAIR, (14, 13))
+    assert middle == HandRank(HandCategory.TWO_PAIR, (13, 12, 2))
+    assert bottom == HandRank(HandCategory.STRAIGHT, (9,))
+    assert is_foul(board, equality_allowed=True) is False
+
+
+def test_complete_board_middle_joker_uses_best_rank_not_exceeding_bottom():
+    # Middle AAA2+JK is locally Quad Aces. Bottom is Quad Kings, so that local
+    # maximum would foul. The strongest legal Middle assignment is instead
+    # Aces full of Twos, which stays below Bottom while remaining above Top.
+    board = PlayerBoard(
+        top=(C("Qs"), C("Qh"), C("Jc")),
+        middle=(C("As"), C("Ah"), C("Ad"), C("2c"), C("JK1")),
+        bottom=(C("Ks"), C("Kh"), C("Kd"), C("Kc"), C("Ac")),
+    )
+    assert rank_five(board.middle) == HandRank(HandCategory.QUADS, (14, 13))
+    top, middle, bottom = completed_board_ranks(board)
+    assert top == HandRank(HandCategory.PAIR, (12, 11))
+    assert middle == HandRank(HandCategory.FULL_HOUSE, (14, 2))
+    assert bottom == HandRank(HandCategory.QUADS, (13, 14))
+    assert is_foul(board, equality_allowed=True) is False
+
+
+def test_board_still_fouls_when_no_joker_assignment_can_rescue_it():
+    # AA on Top is intrinsically stronger than a KK pair in Middle regardless
+    # of what the Joker chooses. The no-foul rule constrains Joker assignment;
+    # it does not magically repair a placement for which no valid assignment exists.
+    board = PlayerBoard(
+        top=(C("As"), C("Ah"), C("JK1")),
+        middle=(C("Ks"), C("Kh"), C("Qd"), C("Jc"), C("9s")),
+        bottom=(C("5d"), C("6d"), C("7d"), C("8d"), C("9d")),
+    )
+    assert is_foul(board, equality_allowed=True) is True
 
 
 def test_equal_middle_and_bottom_is_legal_only_under_current_client_equality_rule():
     # Bottom and middle are exactly equal poker ranks (AAKQJ) using distinct
-    # physical suits. Top is weaker. The supplied current-client rule says
-    # Bottom >= Middle >= Top, so this board is valid under the target rule but
-    # would foul under a strict-outrank policy.
+    # physical suits. The supplied current-client rule says Bottom >= Middle >= Top.
     board = PlayerBoard(
         top=(c(13, "s"), c(12, "h"), c(9, "d")),
         middle=(c(14, "s"), c(14, "h"), c(13, "d"), c(12, "c"), c(11, "h")),
