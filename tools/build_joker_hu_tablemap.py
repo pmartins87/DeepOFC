@@ -145,6 +145,11 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
         "ofc_hero_chair": "1",
         "ofc_tablemap_stage": "replay_draft_v1",
         "ofc_joker_detector_calibrated": "0",
+        # Detecting the Fantasy UI is only a routing fact. It must never imply
+        # that the curved 14..17-card fan itself is recognized safely. That
+        # recognizer receives an independent certification gate and remains off
+        # in replay/development drafts until pixel equality is proven.
+        "ofc_fantasy_recognizer_calibrated": "0",
         # A replay draft must never become actionable merely because future
         # drop-region rectangles happen to be present. Only an empirically
         # validated runtime tablemap may deliberately flip this to 1.
