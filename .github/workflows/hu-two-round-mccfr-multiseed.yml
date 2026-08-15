@@ -1,0 +1,23 @@
+name: HU two-round external-sampling MCCFR multi-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'tools/benchmark_hu_two_round_mccfr_multiseed.py'
+      - '.github/workflows/hu-two-round-mccfr-multiseed.yml'
+  workflow_dispatch:
+
+jobs:
+  multiseed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train five independent seeds and exact-BR evaluate current profiles
+        run: python tools/benchmark_hu_two_round_mccfr_multiseed.py
