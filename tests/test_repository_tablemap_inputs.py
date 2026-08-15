@@ -21,6 +21,7 @@ def test_repository_geometry_and_calibration_build_the_current_contract():
 
     assert audit.target_size == (450, 830)
     assert "ofc_fantasy_active" in audit.regions
+    assert audit.symbols["ofc_fantasy_recognizer_calibrated"] == "0"
     assert "ofc_p0_top0joker1" in audit.regions
     assert "ofc_p0_top0joker2" in audit.regions
     assert "ofc_p0_top0joker" not in audit.regions
