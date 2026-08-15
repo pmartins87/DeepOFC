@@ -122,15 +122,16 @@ def test_complete_board_joker_avoids_top_trips_when_trips_would_foul():
 
 
 def test_complete_board_middle_joker_uses_best_rank_not_exceeding_bottom():
-    # Middle AAA2+JK is locally Quad Aces. Bottom is Quad Kings, so that local
-    # maximum would foul. The strongest legal Middle assignment is instead
-    # Aces full of Twos, which stays below Bottom while remaining above Top.
+    # Middle AAA2+JK is locally AAAA2 (Quad Aces, kicker 2). Bottom is Quad
+    # Kings, so that local maximum would foul. The strongest legal Middle
+    # assignment is instead Aces full of Twos, which stays below Bottom while
+    # remaining above Top.
     board = PlayerBoard(
         top=(C("Qs"), C("Qh"), C("Jc")),
         middle=(C("As"), C("Ah"), C("Ad"), C("2c"), C("JK1")),
         bottom=(C("Ks"), C("Kh"), C("Kd"), C("Kc"), C("Ac")),
     )
-    assert rank_five(board.middle) == HandRank(HandCategory.QUADS, (14, 13))
+    assert rank_five(board.middle) == HandRank(HandCategory.QUADS, (14, 2))
     top, middle, bottom = completed_board_ranks(board)
     assert top == HandRank(HandCategory.PAIR, (12, 11))
     assert middle == HandRank(HandCategory.FULL_HOUSE, (14, 2))
