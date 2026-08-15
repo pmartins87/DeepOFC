@@ -124,10 +124,15 @@ class PlayerState:
     fantasy: bool = False
     sitting_out: bool = False
     hidden_discard_count: int = 0
+    hidden_incoming_count: int = 0
 
     def __post_init__(self) -> None:
         if self.hidden_discard_count < 0:
             raise ValueError("hidden_discard_count must be non-negative")
+        if self.hidden_incoming_count < 0:
+            raise ValueError("hidden_incoming_count must be non-negative")
+        if self.hidden_incoming_count not in (0, 3, 5):
+            raise ValueError("normal-play hidden incoming count must be 0, 3 or 5")
 
 
 @dataclass(frozen=True)
@@ -154,8 +159,10 @@ class OFCState:
     pre-arrange cards while an opponent is still the acting player. Only
     `hero_can_confirm` marks a strategy-decision state that can be committed.
 
-    Opponent discarded-card identities remain hidden; only their count may be
-    tracked from card-back UI evidence.
+    Opponent discarded-card identities and current incoming-card identities
+    remain hidden. Supplied KKPoker frames do expose card-back counts for both,
+    so those counts are part of the observation state without inventing card
+    identities or row destinations for hidden backs.
     """
 
     players: Tuple[PlayerState, ...]
@@ -240,5 +247,5 @@ class OFCState:
         if len(self.hero_pending) != required:
             return False
         if self.round_index == 0:
-            return len(self.unassigned_incoming()) == 0
+            return len(self.hero_incoming) == 5 and len(self.unassigned_incoming()) == 0
         return len(self.hero_incoming) == 3 and len(self.unassigned_incoming()) == 1
