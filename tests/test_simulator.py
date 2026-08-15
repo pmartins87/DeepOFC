@@ -69,14 +69,15 @@ def test_apply_round_zero_places_all_five_without_discard():
 
 
 def test_apply_later_round_places_two_and_returns_exact_discard():
+    # Round 4 begins with 11 committed cards and exactly two row slots free.
     board = PlayerBoard(
         top=(C("As"), C("Kh")),
-        middle=(C("Qc"), C("Jd"), C("Ts")),
-        bottom=(C("9s"), C("8s"), C("7s"), C("6s")),
+        middle=(C("Qc"), C("Jd"), C("Ts"), C("4c")),
+        bottom=(C("9s"), C("8s"), C("7s"), C("6s"), C("5s")),
     )
-    incoming = (C("5s"), C("4h"), C("3c"))
+    incoming = (C("Qh"), C("4h"), C("3c"))
     action = NormalPlacementAction(
-        placements=(P("5s", Row.BOTTOM), P("4h", Row.MIDDLE)),
+        placements=(P("Qh", Row.TOP), P("4h", Row.MIDDLE)),
         discard=C("3c"),
     )
     new_board, discards = apply_normal_action(
@@ -89,7 +90,7 @@ def test_apply_later_round_places_two_and_returns_exact_discard():
 def test_apply_fantasy_materializes_board_and_unused_cards():
     action = FantasyPlacementAction(
         placements=(
-            P("Qs", Row.TOP), P("Qh", Row.TOP), P("2c", Row.TOP),
+            P("6s", Row.TOP), P("6h", Row.TOP), P("2c", Row.TOP),
             P("9s", Row.MIDDLE), P("9h", Row.MIDDLE), P("8c", Row.MIDDLE), P("7d", Row.MIDDLE), P("6c", Row.MIDDLE),
             P("As", Row.BOTTOM), P("Ks", Row.BOTTOM), P("Js", Row.BOTTOM), P("Ts", Row.BOTTOM), P("5s", Row.BOTTOM),
         ),
@@ -100,63 +101,59 @@ def test_apply_fantasy_materializes_board_and_unused_cards():
     assert discards == (C("3d"), C("4h"))
 
 
-def test_hu_raw_settlement_is_antisymmetric():
-    a = PlayerBoard(
-        top=(C("Qs"), C("Qh"), C("2c")),
+def _valid_board_a() -> PlayerBoard:
+    return PlayerBoard(
+        top=(C("6s"), C("6h"), C("2c")),
         middle=(C("9s"), C("9h"), C("8c"), C("7d"), C("6c")),
         bottom=(C("As"), C("Ks"), C("Js"), C("Ts"), C("5s")),
     )
-    b = PlayerBoard(
-        top=(C("Js"), C("Jh"), C("3c")),
-        middle=(C("8s"), C("8h"), C("7c"), C("6d"), C("5c")),
+
+
+def _valid_board_b() -> PlayerBoard:
+    return PlayerBoard(
+        top=(C("5c"), C("5d"), C("3c")),
+        middle=(C("8s"), C("8h"), C("7c"), C("6d"), C("4c")),
         bottom=(C("Ad"), C("Kd"), C("Qd"), C("Td"), C("9d")),
     )
-    result = settle_raw_points((a, b))
+
+
+def test_hu_raw_settlement_is_antisymmetric():
+    result = settle_raw_points((_valid_board_a(), _valid_board_b()))
     assert result.points_by_chair[0] == -result.points_by_chair[1]
     assert result.zero_sum
 
 
 def test_three_player_raw_settlement_remains_zero_sum():
-    boards = (
-        PlayerBoard(
-            top=(C("Qs"), C("Qh"), C("2c")),
-            middle=(C("9s"), C("9h"), C("8c"), C("7d"), C("6c")),
-            bottom=(C("As"), C("Ks"), C("Js"), C("Ts"), C("5s")),
-        ),
-        PlayerBoard(
-            top=(C("Jc"), C("Jh"), C("3c")),
-            middle=(C("8s"), C("8h"), C("7c"), C("6d"), C("5c")),
-            bottom=(C("Ad"), C("Kd"), C("Qd"), C("Td"), C("9d")),
-        ),
-        PlayerBoard(
-            top=(C("Tc"), C("Th"), C("4c")),
-            middle=(C("7s"), C("7h"), C("6h"), C("5h"), C("4h")),
-            bottom=(C("Ac"), C("Kc"), C("Qc"), C("Jd"), C("9c")),
-        ),
+    c = PlayerBoard(
+        top=(C("4s"), C("4h"), C("3d")),
+        middle=(C("7s"), C("7h"), C("6h"), C("5h"), C("4d")),
+        bottom=(C("Ac"), C("Kc"), C("Qc"), C("Jc"), C("9c")),
     )
-    result = settle_raw_points(boards)
+    result = settle_raw_points((_valid_board_a(), _valid_board_b(), c))
     assert result.zero_sum
     assert sum(result.points_by_chair) == 0
 
 
 def test_progressive_normal_fantasy_entry_counts():
     def board_with_top(top):
+        # Middle straight is stronger than every qualifying Top pair/trips;
+        # Bottom straight flush is stronger than Middle, so the board is valid.
         return PlayerBoard(
             top=top,
-            middle=(C("2s"), C("3h"), C("4c"), C("5d"), C("7s")),
+            middle=(C("3c"), C("4d"), C("5h"), C("6s"), C("7c")),
             bottom=(C("9s"), C("Ts"), C("Js"), C("Qs"), C("Ks")),
         )
 
-    assert normal_fantasy_entry_cards(board_with_top((C("Qh"), C("Qd"), C("8c")))) == 14
-    assert normal_fantasy_entry_cards(board_with_top((C("Kh"), C("Kd"), C("8c")))) == 15
-    assert normal_fantasy_entry_cards(board_with_top((C("Ah"), C("Ad"), C("8c")))) == 16
+    assert normal_fantasy_entry_cards(board_with_top((C("Qh"), C("Qd"), C("2h")))) == 14
+    assert normal_fantasy_entry_cards(board_with_top((C("Kh"), C("Kd"), C("2h")))) == 15
+    assert normal_fantasy_entry_cards(board_with_top((C("Ah"), C("Ad"), C("2h")))) == 16
     assert normal_fantasy_entry_cards(board_with_top((C("8h"), C("8d"), C("8c")))) == 17
 
 
 def test_refantasy_predicate_accepts_top_trips_or_bottom_quads_plus():
     top_trips = PlayerBoard(
-        top=(C("7s"), C("7h"), C("7d")),
-        middle=(C("8s"), C("8h"), C("6c"), C("5d"), C("4c")),
+        top=(C("8s"), C("8h"), C("8d")),
+        middle=(C("3c"), C("4d"), C("5h"), C("6s"), C("7c")),
         bottom=(C("As"), C("Ks"), C("Qs"), C("Js"), C("Ts")),
     )
     assert refantasy_qualifies(top_trips)
