@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "target_variant": "KKPoker OFC Joker Ultimate",
+  "client_size": [450, 830],
+  "layout": "hero_fantasy_15_card_fan",
+  "authority": {
+    "status": "replay_probe_only",
+    "runtime_authorized": false,
+    "tablemap_gate": "ofc_fantasy_recognizer_calibrated",
+    "required_gate_value_for_runtime": "1",
+    "current_required_value": "0",
+    "note": "This file freezes replay-derived recognition parameters only. It must not enable the OpenHoldem Fantasy pixel path."
+  },
+  "geometry_source": "tablemaps/joker_ultimate_hu_fantasy15_450x830_geometry_v1.json",
+  "source_frames": [
+    "session_1/frame000032.bmp",
+    "session_1/frame000052.bmp",
+    "session_1/frame000060.bmp"
+  ],
+  "standard_card_samples": 43,
+  "joker_samples": {
+    "JK1": 1,
+    "JK2": 1,
+    "note": "Both physical Jokers are independently visible in frame52, but one source occurrence each is not sufficient for runtime certification."
+  },
+  "rank": {
+    "normalized_mask": {
+      "height": 24,
+      "width": 16
+    },
+    "distance": "minimum XOR/union distance after integer translation alignment",
+    "max_translation_pixels": 2,
+    "probe_max_distance": 0.5,
+    "probe_min_best_vs_second_rank_margin": 0.04,
+    "leave_one_sample_out": {
+      "correct": 42,
+      "total": 43,
+      "accuracy": 0.9767441860465116,
+      "max_correct_best_distance_observed": 0.48062,
+      "min_correct_margin_observed": 0.04043,
+      "only_failure": {
+        "card": "8c",
+        "source_frame": "session_1/frame000060.bmp",
+        "slot": 4,
+        "reason": "The capture contains only one rank-8 exemplar; withholding it leaves no independent rank-8 template."
+      }
+    }
+  },
+  "suit": {
+    "feature": "median RGB of the non-white suit glyph after slot-specific deskew",
+    "rgb_prototypes": {
+      "c": [30.0, 148.0, 1.0],
+      "d": [20.0, 97.25, 192.0],
+      "h": [227.0, 11.0, 24.5],
+      "s": [48.0, 48.0, 48.0]
+    },
+    "probe_max_rgb_distance": 40.0,
+    "probe_min_best_vs_second_suit_margin": 80.0,
+    "leave_one_sample_out": {
+      "correct": 43,
+      "total": 43,
+      "accuracy": 1.0,
+      "max_correct_best_distance_observed": 31.9,
+      "min_correct_margin_observed": 89.55
+    }
+  },
+  "required_before_runtime_authority": [
+    "Serialize/freeze actual rank glyph templates from replay-derived pixels with source provenance.",
+    "Prove exact full-card recognition on independent real 15-card fans, including rejection behavior rather than forced nearest class.",
+    "Acquire independent additional rank-8 evidence or another source-backed rank classifier that does not depend on a single 8 exemplar.",
+    "Calibrate JK1 and JK2 recognition with independent occurrences/visual states.",
+    "Obtain and calibrate real 14-, 16- and 17-card fan geometry; 15-card geometry must not be extrapolated silently.",
+    "Pass pixels -> recognizer -> RawOFCObservation -> Python/C++ canonical-state equality on real replay frames.",
+    "Keep ofc_fantasy_recognizer_calibrated=0 until all required evidence gates pass."
+  ]
+}
