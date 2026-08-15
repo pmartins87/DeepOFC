@@ -17,10 +17,12 @@ def rows(*values: int) -> tuple[int, ...]:
 
 
 def test_binary_distance_is_zero_for_identity_and_translation_alignment():
-    glyph = rows(0b00100, 0b01110, 0b10101, 0b00100, 0b00100)
-    assert binary_union_xor_distance(glyph, glyph, width=5) == 0.0
-    shifted = rows(0b00000, 0b01000, 0b11100, 0b01010, 0b01000)
-    assert aligned_binary_distance(glyph, shifted, width=5, max_shift=1) == 0.0
+    # Keep the glyph away from the mask edges so a 1-pixel translation does not
+    # destroy information through clipping. The aligned metric must recover it.
+    glyph = rows(0b0001000, 0b0011100, 0b0101010, 0b0001000, 0b0001000, 0)
+    assert binary_union_xor_distance(glyph, glyph, width=7) == 0.0
+    shifted = rows(0, 0b0010000, 0b0111000, 0b1010100, 0b0010000, 0b0010000)
+    assert aligned_binary_distance(glyph, shifted, width=7, max_shift=1) == 0.0
 
 
 def test_rank_classifier_requires_distance_and_margin_not_just_nearest_template():
@@ -79,11 +81,18 @@ def test_suit_probe_prototypes_accept_each_observed_color_center():
 
 
 def test_suit_classifier_rejects_ambiguous_midpoint():
-    c = SUIT_RGB_PROTOTYPES["c"]
-    d = SUIT_RGB_PROTOTYPES["d"]
-    midpoint = tuple((x + y) / 2 for x, y in zip(c, d))
+    # Isolate two artificial prototypes so the geometric midpoint is an exact
+    # tie. Using the real four-suit set here would make a third suit legitimately
+    # closer to the c/d midpoint, which would test RGB geometry rather than the
+    # intended ambiguity gate.
+    prototypes = {
+        "c": (0.0, 100.0, 0.0),
+        "d": (100.0, 0.0, 0.0),
+    }
+    midpoint = (50.0, 50.0, 0.0)
     result = classify_suit_rgb(
         midpoint,
+        prototypes=prototypes,
         max_distance=200,
         min_margin=1.0,
     )
