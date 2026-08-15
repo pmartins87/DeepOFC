@@ -1,0 +1,23 @@
+name: HU two-round full-tree DCFR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_cfr.py'
+      - 'tools/benchmark_hu_two_round_dcfr.py'
+      - '.github/workflows/hu-two-round-dcfr.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train full-tree DCFR and evaluate with exact deep best response
+        run: python tools/benchmark_hu_two_round_dcfr.py
