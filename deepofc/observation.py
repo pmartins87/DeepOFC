@@ -6,6 +6,42 @@ from typing import Tuple
 from .state import Card, PlayerBoard
 
 
+NORMAL_TOTAL_DEALT_TO_ROUND = {
+    5: 0,
+    8: 1,
+    11: 2,
+    14: 3,
+    17: 4,
+}
+
+
+def derive_normal_round_index(
+    *,
+    hero_visual_board_count: int,
+    hero_loose_count: int,
+    hero_discard_tracker_count: int,
+) -> int:
+    """Derive normal Pineapple round from Hero-visible physical-card accounting.
+
+    Hero current cards may be loose or tentatively dragged over a row, so the
+    split between visual-board and loose counts changes during pre-arrangement.
+    Their sum plus already-known Hero discards stays invariant for the street:
+    5, 8, 11, 14, 17 physical cards dealt through rounds 0..4.
+
+    Fantasy is deliberately excluded and must use a separate observation path.
+    """
+
+    counts = (hero_visual_board_count, hero_loose_count, hero_discard_tracker_count)
+    if any(v < 0 for v in counts):
+        raise ValueError("visible OFC card counts must be non-negative")
+    total = sum(counts)
+    if total not in NORMAL_TOTAL_DEALT_TO_ROUND:
+        raise ValueError(
+            f"normal OFC visible-card total must be one of {sorted(NORMAL_TOTAL_DEALT_TO_ROUND)}, got {total}"
+        )
+    return NORMAL_TOTAL_DEALT_TO_ROUND[total]
+
+
 @dataclass(frozen=True)
 class RawPlayerObservation:
     """What the KKPoker frame visibly exposes for one player.
@@ -75,6 +111,16 @@ class RawOFCObservation:
         # physical card must never be visible simultaneously in two places.
         if len(visible) != len(set(visible)):
             raise ValueError("duplicate physical card in raw visual observation")
+
+        derived_round = derive_normal_round_index(
+            hero_visual_board_count=self.player(self.hero_chair).visual_board.filled_count(),
+            hero_loose_count=len(self.hero_loose_cards),
+            hero_discard_tracker_count=len(self.hero_discard_tracker),
+        )
+        if derived_round != self.round_index:
+            raise ValueError(
+                f"round_index={self.round_index} contradicts Hero visible-card accounting round={derived_round}"
+            )
 
     def player(self, chair: int) -> RawPlayerObservation:
         for p in self.players:
