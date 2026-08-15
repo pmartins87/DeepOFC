@@ -1,0 +1,22 @@
+name: HU external-sampling MCCFR multi-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_subgame.py'
+      - 'deepofc/hu_mccfr.py'
+      - 'tools/benchmark_hu_mccfr_multiseed.py'
+      - '.github/workflows/hu-mccfr-multiseed.yml'
+  workflow_dispatch:
+
+jobs:
+  multiseed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Calibrate external-sampling MCCFR across deterministic seeds
+        run: python tools/benchmark_hu_mccfr_multiseed.py
