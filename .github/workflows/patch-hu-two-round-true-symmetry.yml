@@ -1,0 +1,28 @@
+name: Patch HU two-round true symmetry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-hu-two-round-true-symmetry.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply suit-only symmetry patch
+        run: python tools/patch_hu_two_round_true_suit_symmetry.py
+      - name: Persist benchmark fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deepofc/hu_two_round.py
+          git commit -m "R6: fix two-round benchmark to true suit-only symmetry"
+          git push origin HEAD:main
