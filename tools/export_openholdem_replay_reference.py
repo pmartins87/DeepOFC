@@ -7,9 +7,9 @@ The consumer is the native C++ COFCReconstructor self-test in the OpenHoldem
 JSON library on the legacy C++ side while preserving the Python DeepOFC model
 as the source of truth.
 
-The seven original entries are screenshot-backed normal-play fixtures. The
-final Fantasy entry is explicitly synthetic: it freezes already source-backed
-state semantics before the separate real-pixel Fantasy tablemap gate exists.
+The seven original entries are screenshot-backed normal-play fixtures. A
+synthetic 17-card fixture freezes the 17-card canonical contract, while the final
+52->53 entries are a real user-supplied 15-card Fantasy transition.
 """
 
 import argparse
@@ -31,6 +31,8 @@ SEQUENCE = [
     "frame000560.json",
     "frame000568.json",
     "fantasy_contract_17_prepare.json",
+    "fantasy_frame000052.json",
+    "fantasy_frame000053.json",
 ]
 
 RANK_INDEX = {r: i for i, r in enumerate("23456789TJQKA")}
@@ -119,10 +121,16 @@ def export(out: Path) -> None:
         golden = state_from_dict(data["state"])
         hero_visual, loose = raw_from_golden(golden)
 
-        # The original supplied screenshots visibly show the gold Confirm
-        # control during both opponent and Hero turns. Legal confirmation is
-        # derived from actor. The synthetic Fantasy contract uses the same raw
-        # safety convention: visible Confirm is not permission to commit early.
+        # For normal replay and the synthetic Fantasy contract we intentionally
+        # expose Confirm as a raw UI fact; canonical permission still derives
+        # from acting order. Real Fantasy frame52 has no safe Hero confirmation,
+        # while frame53 is actionable. `golden.hero_can_confirm` is therefore a
+        # valid conservative raw value for the real Fantasy fixtures.
+        if name.startswith("fantasy_frame"):
+            raw_confirm_visible = 1 if golden.hero_can_confirm else 0
+        else:
+            raw_confirm_visible = 1
+
         lines.append(f"FRAME|{name}")
         lines.append(
             "META|{}|{}|{}|{}|{}|{}|{}".format(
@@ -132,7 +140,7 @@ def export(out: Path) -> None:
                 golden.acting_chair,
                 golden.round_index,
                 1 if golden.hero_can_prepare else 0,
-                1,  # raw confirm_visible
+                raw_confirm_visible,
             )
         )
         for p in golden.players:
