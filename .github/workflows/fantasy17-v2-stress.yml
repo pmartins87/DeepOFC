@@ -1,0 +1,22 @@
+name: Fantasy17 exact v2 stress
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/fantasy_solver_v2.py'
+      - 'tools/benchmark_fantasy17_v2_dual_joker.py'
+      - '.github/workflows/fantasy17-v2-stress.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-v2-stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Solve synthetic 17-card dual-Joker Fantasy exactly
+        run: python tools/benchmark_fantasy17_v2_dual_joker.py
