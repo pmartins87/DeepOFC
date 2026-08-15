@@ -1,0 +1,23 @@
+name: Penultimate Monte Carlo convergence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/expectimax.py'
+      - 'deepofc/monte_carlo.py'
+      - 'tools/benchmark_penultimate_mc_convergence.py'
+      - '.github/workflows/penultimate-mc-convergence.yml'
+  workflow_dispatch:
+
+jobs:
+  convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compare 8/16/32/56 sampled branches with exact 56-branch expectimax
+        run: python tools/benchmark_penultimate_mc_convergence.py
