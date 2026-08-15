@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
 import time
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from deepofc.hu_cfr import FullTreeCFR
 from deepofc.hu_subgame import HUFinalRoundSubgame
