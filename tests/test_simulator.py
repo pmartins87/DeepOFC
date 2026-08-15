@@ -126,7 +126,7 @@ def test_hu_raw_settlement_is_antisymmetric():
 def test_three_player_raw_settlement_remains_zero_sum():
     c = PlayerBoard(
         top=(C("4s"), C("4h"), C("3d")),
-        middle=(C("7s"), C("7h"), C("6h"), C("5h"), C("4d")),
+        middle=(C("7s"), C("7h"), C("5h"), C("3h"), C("2d")),
         bottom=(C("Ac"), C("Kc"), C("Qc"), C("Jc"), C("9c")),
     )
     result = settle_raw_points((_valid_board_a(), _valid_board_b(), c))
