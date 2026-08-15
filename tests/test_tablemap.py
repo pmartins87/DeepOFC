@@ -89,6 +89,19 @@ def test_builder_output_passes_hu_replay_contract_verifier():
     assert "r$ofc_p0_top0empty" in result
     assert "r$ofc_p1_bottom4rank" in result
     assert "r$ofc_hero_in2suit" in result
+    assert "r$ofc_hero_in0drag" in result
+    assert "r$ofc_hero_in1drag" in result
+    assert "r$ofc_hero_in2drag" in result
+
+
+def test_normal_incoming_drag_regions_preserve_visual_geometry_but_not_action_authority():
+    result = build(_source_tm(), _geometry(), _calibration())
+    audit = parse_tablemap(result)
+    assert {"ofc_hero_in0drag", "ofc_hero_in1drag", "ofc_hero_in2drag"} <= set(audit.regions)
+    # Source geometry can be known while destination/action calibration remains
+    # deliberately disabled. This separation prevents scraper progress from
+    # accidentally enabling the autoplayer.
+    assert audit.symbols["ofc_drag_targets_calibrated"] == "0"
 
 
 def test_replay_draft_is_explicitly_non_actionable_even_if_future_drop_regions_exist():
