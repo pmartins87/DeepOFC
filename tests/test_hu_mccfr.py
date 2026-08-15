@@ -11,6 +11,18 @@ def _assert_profile(game, profile):
         assert abs(sum(dist.values()) - 1.0) < 1e-12
 
 
+def test_first_completed_iteration_averages_the_strategy_that_was_actually_used():
+    game = HUFinalRoundSubgame()
+    solver = ExternalSamplingMCCFR(game, seed=7)
+    initial = game.uniform_profile()
+    solver.run(1)
+
+    # Regrets may already have changed, but iteration 1 was traversed entirely
+    # with the initial uniform strategy. Therefore its time-average must be
+    # exactly uniform, not the post-update regret-matching strategy.
+    assert solver.average_profile() == initial
+
+
 def test_external_sampling_is_seed_deterministic_and_profiles_remain_valid():
     game = HUFinalRoundSubgame()
     left = ExternalSamplingMCCFR(game, seed=12345)
