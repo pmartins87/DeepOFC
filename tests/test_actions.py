@@ -1,5 +1,13 @@
-from deepofc.actions import enumerate_normal_actions
-from deepofc.state import Card, OFCState, PlayerBoard, PlayerState
+from itertools import islice
+
+import pytest
+
+from deepofc.actions import (
+    count_fantasy_actions,
+    enumerate_normal_actions,
+    iter_fantasy_actions,
+)
+from deepofc.state import Card, OFCState, PlayerBoard, PlayerState, Row
 
 
 def C(code: str) -> Card:
@@ -14,6 +22,31 @@ def make_state(*, round_index: int, board: PlayerBoard, incoming: tuple[Card, ..
         acting_chair=1,
         round_index=round_index,
         hero_incoming=incoming,
+        hero_can_prepare=True,
+        hero_can_confirm=True,
+        action_required=True,
+    )
+
+
+def fantasy_cards(count: int) -> tuple[Card, ...]:
+    pool = tuple(
+        C(code)
+        for code in (
+            "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "Ts",
+            "Js", "Qs", "Ks", "As", "Ah", "Kh", "Qh", "JK1",
+        )
+    )
+    return pool[:count]
+
+
+def make_fantasy_state(count: int) -> OFCState:
+    return OFCState(
+        players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
+        hero_chair=1,
+        dealer_chair=1,
+        acting_chair=1,
+        round_index=-1,
+        hero_incoming=fantasy_cards(count),
         hero_can_prepare=True,
         hero_can_confirm=True,
         action_required=True,
@@ -77,3 +110,36 @@ def test_actions_cover_each_incoming_card_exactly_once_as_place_or_discard():
         assert action.discard is not None
         assert action.placed_cards | {action.discard} == incoming
         assert not (action.placed_cards & {action.discard})
+
+
+def test_fantasy_action_space_counts_are_exact_but_not_materialized():
+    assert count_fantasy_actions(make_fantasy_state(14)) == 1_009_008
+    assert count_fantasy_actions(make_fantasy_state(15)) == 7_567_560
+    assert count_fantasy_actions(make_fantasy_state(16)) == 40_360_320
+    assert count_fantasy_actions(make_fantasy_state(17)) == 171_531_360
+
+
+def test_first_fantasy_actions_fill_3_5_5_and_partition_every_physical_card():
+    state = make_fantasy_state(14)
+    incoming = set(state.hero_incoming)
+    for action in islice(iter_fantasy_actions(state), 20):
+        assert len(action.placements) == 13
+        assert len(action.discards) == 1
+        assert action.placed_cards | set(action.discards) == incoming
+        assert not (action.placed_cards & set(action.discards))
+        rows = [placement.row for placement in action.placements]
+        assert rows.count(Row.TOP) == 3
+        assert rows.count(Row.MIDDLE) == 5
+        assert rows.count(Row.BOTTOM) == 5
+
+
+def test_fantasy_iterator_supports_17_cards_without_allocating_171m_actions():
+    state = make_fantasy_state(17)
+    first = next(iter_fantasy_actions(state))
+    assert len(first.discards) == 4
+    assert len(first.placements) == 13
+
+
+def test_normal_generator_rejects_fantasy_state():
+    with pytest.raises(ValueError, match="Fantasy"):
+        enumerate_normal_actions(make_fantasy_state(14))
