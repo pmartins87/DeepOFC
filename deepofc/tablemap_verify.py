@@ -43,7 +43,9 @@ def parse_tablemap(text: str) -> TablemapAudit:
 
 def required_hu_replay_regions() -> set[str]:
     names: set[str] = set()
-    suffixes = ("empty", "back", "joker", "rank", "suit")
+    # Persistent physical Joker identity is part of the R9 contract. The old
+    # single `joker` suffix is intentionally not accepted anymore.
+    suffixes = ("empty", "back", "joker1", "joker2", "rank", "suit")
     for chair, rows in (
         (0, {"top": 3, "middle": 5, "bottom": 5}),
         (1, {"top": 3, "middle": 5, "bottom": 5}),
@@ -61,8 +63,8 @@ def required_hu_replay_regions() -> set[str]:
         base = f"ofc_hero_in{i}"
         names.update(base + suffix for suffix in suffixes)
         # R9 recognition may work without an action layer, but the generated HU
-        # replay draft now also freezes the ephemeral geometry contract R10 will
-        # use to map a recognized physical loose card to its current drag source.
+        # replay draft also freezes the ephemeral geometry contract R10 uses to
+        # map a recognized physical loose card to its current drag source.
         names.add(base + "drag")
     names.update(
         {
@@ -101,6 +103,16 @@ def validate_hu_replay_tablemap(text: str) -> list[str]:
     missing = sorted(required_hu_replay_regions() - set(audit.regions))
     if missing:
         errors.append("missing regions: " + ", ".join(missing))
+
+    # No generated replay contract may retain the legacy single-Joker slot
+    # suffix. Its presence would let the Python/tablemap side drift away from
+    # the C++ scraper contract again.
+    legacy = sorted(
+        name for name in audit.regions
+        if name.endswith("joker") and not name.endswith("joker1") and not name.endswith("joker2")
+    )
+    if legacy:
+        errors.append("legacy single-Joker regions present: " + ", ".join(legacy))
     return errors
 
 
