@@ -94,6 +94,29 @@ def test_builder_output_passes_hu_replay_contract_verifier():
     assert "r$ofc_hero_in2drag" in result
 
 
+def test_every_card_slot_uses_two_persistent_joker_identity_regions():
+    result = build(_source_tm(), _geometry(), _calibration())
+    audit = parse_tablemap(result)
+    for base in (
+        "ofc_p0_top0",
+        "ofc_p1_bottom4",
+        "ofc_p0_discard0",
+        "ofc_hero_discard3",
+        "ofc_hero_in2",
+    ):
+        assert base + "joker1" in audit.regions
+        assert base + "joker2" in audit.regions
+        assert base + "joker" not in audit.regions
+
+
+def test_verifier_rejects_legacy_single_joker_contract_even_if_other_regions_exist():
+    result = build(_source_tm(), _geometry(), _calibration())
+    legacy = result.replace("r$ofc_p0_top0joker1", "r$ofc_p0_top0joker")
+    errors = validate_hu_replay_tablemap(legacy)
+    assert any("missing regions" in error and "joker1" in error for error in errors)
+    assert any("legacy single-Joker" in error for error in errors)
+
+
 def test_normal_incoming_drag_regions_preserve_visual_geometry_but_not_action_authority():
     result = build(_source_tm(), _geometry(), _calibration())
     audit = parse_tablemap(result)
