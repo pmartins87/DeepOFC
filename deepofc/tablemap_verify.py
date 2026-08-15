@@ -81,6 +81,10 @@ def validate_hu_replay_tablemap(text: str) -> list[str]:
         "ofc_hero_chair": "1",
         "ofc_tablemap_stage": "replay_draft_v1",
         "ofc_joker_detector_calibrated": "0",
+        # Replay drafts are deliberately not permitted to drive physical card
+        # placement. A later empirically validated runtime tablemap must flip
+        # this symbol to 1 only after its row drop targets are proven.
+        "ofc_drag_targets_calibrated": "0",
     }
     if audit.target_size != (450, 830):
         errors.append(f"target_size={audit.target_size}, expected (450, 830)")
