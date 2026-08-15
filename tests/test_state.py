@@ -192,13 +192,15 @@ def test_fantasy_confirm_shape_rejects_only_12_tentative_placements():
 def test_fantasy_confirm_shape_rejects_mixed_committed_and_pending_board():
     incoming = fantasy_cards(14)
     committed = C("2h")
-    # Use 12 tentative cards so the combined visual total is 13; this used to
-    # pass the weaker shape check even though it mixes post-Confirm board state
-    # with pre-Confirm Fantasy placement semantics.
+    # Use 12 tentative cards so the combined visual total is 13 without
+    # overflowing any row: the omitted tentative card is from Bottom and the
+    # committed card occupies that Bottom capacity. The shape is capacity-legal
+    # but semantically invalid because it mixes post-Confirm board state with a
+    # fresh pre-Confirm Fantasy decision.
     state = OFCState(
         players=(
             PlayerState(chair=0),
-            PlayerState(chair=1, fantasy=True, board=PlayerBoard(top=(committed,))),
+            PlayerState(chair=1, fantasy=True, board=PlayerBoard(bottom=(committed,))),
         ),
         hero_chair=1,
         dealer_chair=1,
