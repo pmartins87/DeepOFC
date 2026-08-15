@@ -28,7 +28,8 @@ def derive_normal_round_index(
     Their sum plus already-known Hero discards stays invariant for the street:
     5, 8, 11, 14, 17 physical cards dealt through rounds 0..4.
 
-    Fantasy is deliberately excluded and must use a separate observation path.
+    Fantasy is deliberately excluded and uses `round_index=-1` plus its own
+    14..17-card one-shot accounting below.
     """
 
     counts = (hero_visual_board_count, hero_loose_count, hero_discard_tracker_count)
@@ -64,20 +65,31 @@ class RawPlayerObservation:
             raise ValueError("hidden_incoming_count must be non-negative")
         if self.hidden_discard_count < 0:
             raise ValueError("hidden_discard_count must be non-negative")
+        if self.fantasy:
+            if self.hidden_incoming_count not in (0, 14, 15, 16, 17):
+                raise ValueError("Fantasy hidden incoming count must be 0 or 14..17")
+        elif self.hidden_incoming_count not in (0, 3, 5):
+            raise ValueError("normal hidden incoming count must be 0, 3 or 5")
 
 
 @dataclass(frozen=True)
 class RawOFCObservation:
     """Frame-level visual observation before strategic interpretation.
 
-    This layer intentionally does not say which Hero row cards are committed.
-    The stateful reconstructor compares it with previous confirmed state and the
-    discard tracker to classify committed vs tentative cards.
+    In normal play this layer intentionally does not say which Hero row cards
+    are committed; the stateful reconstructor uses previous state plus the
+    discard tracker.
+
+    In active Hero Fantasy the semantics are different and intentionally
+    self-contained: every visible Hero row card is tentative, every remaining
+    current card is loose in the 14..17-card Fantasy set, and `round_index=-1`.
+    This lets DeepOFC attach safely to a fresh/mid-arrangement Fantasy frame
+    without pretending it is normal round 3/4 merely because 14/17 physical
+    cards happen to be visible.
 
     KKPoker replay evidence shows the gold Confirm button while the earlier
     opponent's timer is still active. Therefore `confirm_visible` is a raw UI
-    fact and is deliberately different from canonical `hero_can_confirm`, which
-    means it is strategically/legal-order safe for Hero to commit now.
+    fact and is deliberately different from canonical `hero_can_confirm`.
     """
 
     players: Tuple[RawPlayerObservation, ...]
@@ -100,8 +112,9 @@ class RawOFCObservation:
         for chair in (self.hero_chair, self.dealer_chair, self.acting_chair):
             if chair not in chairs:
                 raise ValueError("hero/dealer/actor chair missing from observation")
-        if self.round_index not in range(5):
-            raise ValueError("round_index must be 0..4")
+        if self.mode != "joker_ultimate":
+            raise ValueError("raw DeepOFC runtime mode must be joker_ultimate")
+
         visible = []
         for p in self.players:
             visible.extend(p.visual_board.cards())
@@ -112,15 +125,38 @@ class RawOFCObservation:
         if len(visible) != len(set(visible)):
             raise ValueError("duplicate physical card in raw visual observation")
 
-        derived_round = derive_normal_round_index(
-            hero_visual_board_count=self.player(self.hero_chair).visual_board.filled_count(),
-            hero_loose_count=len(self.hero_loose_cards),
-            hero_discard_tracker_count=len(self.hero_discard_tracker),
-        )
-        if derived_round != self.round_index:
-            raise ValueError(
-                f"round_index={self.round_index} contradicts Hero visible-card accounting round={derived_round}"
+        hero = self.player(self.hero_chair)
+        if hero.fantasy:
+            if self.round_index != -1:
+                raise ValueError("active Hero Fantasy requires round_index=-1")
+            # During the active one-shot arrangement, unused current Fantasy
+            # cards remain loose. The current hand's discard tracker is populated
+            # only after Confirm, as proven by supplied frames 53 -> 54.
+            if self.hero_discard_tracker:
+                raise ValueError(
+                    "active pre-Confirm Hero Fantasy must keep unused cards loose, not in discard tracker"
+                )
+            total_current = hero.visual_board.filled_count() + len(self.hero_loose_cards)
+            if total_current not in range(14, 18):
+                raise ValueError(
+                    f"active Hero Fantasy must expose exactly 14..17 current cards, got {total_current}"
+                )
+        else:
+            if self.round_index not in range(5):
+                raise ValueError("normal round_index must be 0..4")
+            derived_round = derive_normal_round_index(
+                hero_visual_board_count=hero.visual_board.filled_count(),
+                hero_loose_count=len(self.hero_loose_cards),
+                hero_discard_tracker_count=len(self.hero_discard_tracker),
             )
+            if derived_round != self.round_index:
+                raise ValueError(
+                    f"round_index={self.round_index} contradicts Hero visible-card accounting round={derived_round}"
+                )
+
+    @property
+    def hero_is_fantasy(self) -> bool:
+        return self.player(self.hero_chair).fantasy
 
     def player(self, chair: int) -> RawPlayerObservation:
         for p in self.players:
