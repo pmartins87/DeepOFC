@@ -77,11 +77,19 @@ def _slot_regions(
             color=back_cfg["rgb"],
             radius=int(back_cfg["radius"]),
         ),
-        # Replay-only fail-closed placeholder until a visible Joker face is
-        # captured. A Joker will fail rank/suit recognition rather than being
-        # silently treated as a standard card.
+        # Persistent Joker identity is now part of the tablemap contract:
+        # joker1 = orange/red physical Joker; joker2 = gray/black physical
+        # Joker. Until their pixels are calibrated these are deliberately
+        # impossible replay placeholders. The C++ scraper requires BOTH names
+        # and fails closed on a visible Joker rather than assigning by scan order.
         _point_region(
-            base + "joker",
+            base + "joker1",
+            center,
+            color=joker_cfg["placeholder_rgb"],
+            radius=0,
+        ),
+        _point_region(
+            base + "joker2",
             center,
             color=joker_cfg["placeholder_rgb"],
             radius=0,
