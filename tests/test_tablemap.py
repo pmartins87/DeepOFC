@@ -1,5 +1,5 @@
 from tools.build_joker_hu_tablemap import build
-from deepofc.tablemap_verify import validate_hu_replay_tablemap
+from deepofc.tablemap_verify import parse_tablemap, validate_hu_replay_tablemap
 
 
 def _source_tm() -> str:
@@ -91,8 +91,28 @@ def test_builder_output_passes_hu_replay_contract_verifier():
     assert "r$ofc_hero_in2suit" in result
 
 
+def test_replay_draft_is_explicitly_non_actionable_even_if_future_drop_regions_exist():
+    result = build(_source_tm(), _geometry(), _calibration())
+    audit = parse_tablemap(result)
+    assert audit.symbols["ofc_drag_targets_calibrated"] == "0"
+
+    # A guessed/future rectangle must never silently flip replay evidence into
+    # an actionable runtime map. Calibration is a separate deliberate gate.
+    result_with_drop_rects = result.replace(
+        "// fonts",
+        "r$ofc_drop_top 100 200 140 240 ff000000 0 N 1 0 0 0 -1\n"
+        "r$ofc_drop_middle 100 300 140 340 ff000000 0 N 1 0 0 0 -1\n"
+        "r$ofc_drop_bottom 100 400 140 440 ff000000 0 N 1 0 0 0 -1\n"
+        "// fonts",
+    )
+    audit = parse_tablemap(result_with_drop_rects)
+    assert audit.symbols["ofc_drag_targets_calibrated"] == "0"
+    assert {"ofc_drop_top", "ofc_drop_middle", "ofc_drop_bottom"} <= set(audit.regions)
+
+
 def test_verifier_rejects_unmodified_holdem_style_tablemap():
     errors = validate_hu_replay_tablemap(_source_tm())
     assert errors
     assert any("target_size" in error for error in errors)
     assert any("missing regions" in error for error in errors)
+    assert any("ofc_drag_targets_calibrated" in error for error in errors)
