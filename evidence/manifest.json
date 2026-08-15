@@ -42,6 +42,8 @@
     {"path": "session_1/frame000000.bmp", "sha256": "c90b8c74497a87aedd2aaa7c0659e9de8914678e750ba428ea51aa55bc9eddf0", "kind": "table_info_ultimate_joker"},
     {"path": "session_1/frame000032.bmp", "sha256": "723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130", "kind": "fantasy_fan"},
     {"path": "session_1/frame000035.bmp", "sha256": "43277bcd160efd84fa9e6bbb88f93f5e16b300f3c7c510d41dc3ef841f767de5", "kind": "fantasy_arrangement"},
+    {"path": "session_1/frame000052.bmp", "sha256": "7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935", "kind": "fantasy_15_fan_both_jokers"},
+    {"path": "session_1/frame000053.bmp", "sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5", "kind": "fantasy_15_arranged_13_plus_2_loose"},
     {"path": "session_1/frame000055.bmp", "sha256": "e6f7fe547d852e456ca1896334e46605a412140138f2a33be495923968deb2f3", "kind": "fantasy_predeal_suit_counters_13_each"},
     {"path": "session_1/frame000060.bmp", "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99", "kind": "fantasy_fan_second_sequence"},
     {"path": "session_0/frame000010.bmp", "sha256": "581235f1ef6a17751ca9febefbe0d6a1170006c57528fe99586898ddc176b4df", "kind": "fantasy_transition"}
@@ -55,5 +57,9 @@
     "fixtures/replay/frame000560.json",
     "fixtures/replay/frame000568.json"
   ],
-  "fantasy_golden_fixtures": []
+  "fantasy_golden_fixtures": [
+    "fixtures/replay/fantasy_contract_17_prepare.json",
+    "fixtures/replay/fantasy_frame000052.json",
+    "fixtures/replay/fantasy_frame000053.json"
+  ]
 }
