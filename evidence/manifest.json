@@ -30,7 +30,12 @@
     {"name": "frame000568.bmp", "sha256": "4fccc328f42788e519d70470541d0976dd22754997452b694a883eda73951321", "kind": "gameplay"}
   ],
   "golden_fixtures": [
+    "fixtures/replay/frame000468.json",
+    "fixtures/replay/frame000482.json",
+    "fixtures/replay/frame000512.json",
+    "fixtures/replay/frame000528.json",
     "fixtures/replay/frame000543.json",
+    "fixtures/replay/frame000560.json",
     "fixtures/replay/frame000568.json"
   ]
 }
