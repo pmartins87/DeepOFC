@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "frame": "frame000468.bmp",
+  "frame_sha256": "dfedb9488edda3ab1a3e7d1dd64d261a84292760715c1d76f95775dbe624de5f",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "frame_kind": "opponent_turn_hero_prearrange",
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {"chair": 0, "name": "Oxy87", "hidden_discard_count": 0, "hidden_incoming_count": 5, "board": {}},
+      {"chair": 1, "name": "kk733526", "board": {}}
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 0,
+    "round_index": 0,
+    "hero_incoming": ["Ks", "8c", "Th", "6h", "Ah"],
+    "hero_discards": [],
+    "hero_pending": [
+      {"card": "Ks", "row": "bottom"},
+      {"card": "8c", "row": "bottom"},
+      {"card": "Th", "row": "bottom"},
+      {"card": "6h", "row": "bottom"},
+      {"card": "Ah", "row": "bottom"}
+    ],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  },
+  "evidence_notes": [
+    "Opponent timer is active and five opponent current cards are visible only as backs.",
+    "Hero has already tentatively arranged all five initial cards in the bottom visual row; this is not committed state until Hero acts/Confirms."
+  ]
+}
