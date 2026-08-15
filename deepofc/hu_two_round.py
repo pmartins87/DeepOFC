@@ -16,14 +16,14 @@ from .state import Card, OFCState, PendingPlacement, PlayerBoard, PlayerState, R
 # hand. This is the first benchmark that forces perfect recall beyond the
 # one-decision-per-player simplification in hu_subgame.py.
 #
+# The fixed boards and private supports use a rank-preserving suit-only mirror.
 # Chance is intentionally a reduced, uniformly weighted support of 32 physically
 # legal deal schedules rather than the full KKPoker deck law. The support is a
 # product of independent binary hand variants for P0/P1 on each of two rounds,
 # plus the first-actor bit. That keeps the tree exact and tractable while still
 # leaving opponent private cards/discards genuinely unknown.
 
-SUIT_MIRROR = {"c": "d", "d": "c", "h": "s", "s": "h"}
-RANK_MIRROR = {8: 9, 9: 8}
+SUIT_MIRROR = {"c": "h", "h": "c", "d": "s", "s": "d"}
 
 
 def _cards(codes: tuple[str, ...]) -> tuple[Card, ...]:
@@ -32,36 +32,36 @@ def _cards(codes: tuple[str, ...]) -> tuple[Card, ...]:
 
 BASE_BOARDS = (
     PlayerBoard(
-        top=_cards(("2c", "2h")),
-        middle=_cards(("4c", "4h", "5c")),
-        bottom=_cards(("8c", "8d", "8h", "7c")),
+        top=_cards(("2c", "2d")),
+        middle=_cards(("4c", "4d", "5c")),
+        bottom=_cards(("8c", "8d", "7c", "7d")),
     ),
     PlayerBoard(
-        top=_cards(("2d", "2s")),
-        middle=_cards(("4d", "4s", "5d")),
-        bottom=_cards(("9d", "9c", "9s", "7d")),
+        top=_cards(("2h", "2s")),
+        middle=_cards(("4h", "4s", "5h")),
+        bottom=_cards(("8h", "8s", "7h", "7s")),
     ),
 )
 
 ROUND3_HANDS = (
     (
         _cards(("Tc", "Jc", "Qc")),
-        _cards(("Th", "Jh", "Qh")),
+        _cards(("Td", "Jd", "Qd")),
     ),
     (
-        _cards(("Td", "Jd", "Qd")),
+        _cards(("Th", "Jh", "Qh")),
         _cards(("Ts", "Js", "Qs")),
     ),
 )
 
 ROUND4_HANDS = (
     (
-        _cards(("Kc", "Ac", "Kh")),
-        _cards(("Kh", "Ah", "Kc")),
+        _cards(("Kc", "Ac", "Kd")),
+        _cards(("Kd", "Ad", "Kc")),
     ),
     (
-        _cards(("Kd", "Ad", "Ks")),
-        _cards(("Ks", "As", "Kd")),
+        _cards(("Kh", "Ah", "Ks")),
+        _cards(("Ks", "As", "Kh")),
     ),
 )
 
@@ -71,7 +71,7 @@ def mirror_card(card: Card) -> Card:
         raise ValueError("two-round R6 benchmark does not use Jokers")
     assert card.rank is not None and card.suit is not None
     return Card(
-        rank=RANK_MIRROR.get(card.rank, card.rank),
+        rank=card.rank,
         suit=SUIT_MIRROR[card.suit],
     )
 
