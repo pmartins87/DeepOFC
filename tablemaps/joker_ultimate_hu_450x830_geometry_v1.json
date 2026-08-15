@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "status": "evidence_geometry_only_not_runtime_tablemap",
+  "source_frames": [
+    "frame000468.bmp",
+    "frame000482.bmp",
+    "frame000512.bmp",
+    "frame000528.bmp",
+    "frame000543.bmp",
+    "frame000560.bmp",
+    "frame000568.bmp"
+  ],
+  "client_size": {"width": 450, "height": 830},
+  "notes": [
+    "Coordinates are for the supplied HU Joker Ultimate replay client only.",
+    "Opponent and Hero cards render at different sizes.",
+    "These rectangles are visual-source slots; DeepOFC canonical state stores row membership, not persistent slot identity.",
+    "Pending Hero cards can occupy Hero row rectangles before confirmation, so committed/pending classification is stateful.",
+    "Opponent hidden current cards are backs; their visual positions do not imply future row destinations."
+  ],
+  "opponent": {
+    "top": [
+      [87, 104, 134, 168],
+      [138, 104, 185, 168],
+      [189, 104, 236, 168]
+    ],
+    "middle": [
+      [87, 171, 134, 235],
+      [138, 171, 185, 235],
+      [189, 171, 236, 235],
+      [240, 171, 287, 235],
+      [291, 171, 338, 235]
+    ],
+    "bottom": [
+      [87, 238, 134, 303],
+      [138, 238, 185, 303],
+      [189, 238, 236, 303],
+      [240, 238, 287, 303],
+      [291, 238, 338, 303]
+    ],
+    "discard_back_strip_approx": [87, 311, 236, 356]
+  },
+  "hero": {
+    "top": [
+      [109, 425, 164, 500],
+      [169, 425, 224, 500],
+      [229, 425, 284, 500]
+    ],
+    "middle": [
+      [109, 504, 164, 579],
+      [169, 504, 224, 579],
+      [229, 504, 284, 579],
+      [289, 504, 344, 579],
+      [349, 504, 404, 579]
+    ],
+    "bottom": [
+      [109, 583, 164, 659],
+      [169, 583, 224, 659],
+      [229, 583, 284, 659],
+      [289, 583, 344, 659],
+      [349, 583, 404, 659]
+    ],
+    "normal_incoming": [
+      [111, 673, 161, 741],
+      [166, 673, 216, 741],
+      [221, 673, 271, 741]
+    ],
+    "normal_incoming_first_round_visual_span": [109, 583, 404, 659],
+    "discard_tracker_approx": [25, 573, 88, 658],
+    "confirm_button": [294, 688, 408, 731]
+  },
+  "player_identity_regions_approx": {
+    "opponent_name": [354, 268, 416, 287],
+    "hero_name": [309, 467, 376, 493],
+    "dealer_marker_hero": [381, 470, 405, 496],
+    "opponent_timer": [368, 194, 411, 218],
+    "hero_timer": [330, 390, 371, 416]
+  },
+  "future_required_evidence": [
+    "3-player Joker Ultimate frame geometry",
+    "Fantasy 14-card geometry",
+    "Fantasy 15-card geometry",
+    "Fantasy 16-card geometry",
+    "Fantasy 17-card geometry",
+    "Joker card-face template evidence",
+    "confirmed enabled/disabled behavior of Confirm while earlier opponent is acting"
+  ]
+}
