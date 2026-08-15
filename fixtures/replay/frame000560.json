@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "frame": "frame000560.bmp",
+  "frame_sha256": "21392f368191fe97845ce3254919f01ee7dc730527148474d2030a9669897d84",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "frame_kind": "hero_decision_before_prearrange",
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 4,
+        "hidden_incoming_count": 0,
+        "board": {"top": ["Ac", "7c", "7d"], "middle": ["Qs", "Js", "8s", "5s", "2s"], "bottom": ["Kh", "Kc", "Qd", "5h", "2h"]}
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {"top": ["Ks", "Jh", "4h"], "middle": ["Qc", "8c", "5c"], "bottom": ["Ah", "Th", "9h", "7h", "6h"]}
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 1,
+    "round_index": 4,
+    "hero_incoming": ["Jd", "2d", "Ad"],
+    "hero_discards": ["4d", "3d", "Ts"],
+    "hero_pending": [],
+    "hero_can_prepare": true,
+    "hero_can_confirm": true,
+    "action_required": true
+  },
+  "evidence_notes": [
+    "Opponent has completed all 13 cards and four hidden discard backs are visible.",
+    "Hero timer is active on the final normal round; Jd/2d/Ad are all still unassigned."
+  ]
+}
