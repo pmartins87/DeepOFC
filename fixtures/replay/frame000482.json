@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "frame": "frame000482.bmp",
+  "frame_sha256": "c81bac687171908672458eff17d1305d618672656d2592297ab7a5fca454484b",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "frame_kind": "opponent_turn_hero_prearrange",
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 0,
+        "hidden_incoming_count": 3,
+        "board": {"top": [], "middle": ["Js", "8s"], "bottom": ["Kh", "5h", "2h"]}
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {"top": ["Ks"], "middle": ["8c"], "bottom": ["Ah", "Th", "6h"]}
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 0,
+    "round_index": 1,
+    "hero_incoming": ["7h", "4d", "5c"],
+    "hero_discards": [],
+    "hero_pending": [],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  },
+  "evidence_notes": [
+    "Opponent has five committed public cards and three current hidden card backs.",
+    "The screen positions of opponent card backs are not treated as pending destination rows because the later revealed placements do not preserve those positions."
+  ]
+}
