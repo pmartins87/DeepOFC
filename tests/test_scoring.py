@@ -56,9 +56,42 @@ def test_royalty_tables_match_supplied_kkpoker_frames():
     assert royalty(Row.BOTTOM, HandRank(HandCategory.STRAIGHT_FLUSH, (14,))) == 25
 
 
-def test_joker_evaluation_fails_closed_until_r1():
-    with pytest.raises(NotImplementedError, match="R1"):
-        rank_top([Card(joker_id=1), c(12, "s"), c(12, "h")])
+def test_joker_top_uses_best_nominal_substitution():
+    assert rank_top([Card(joker_id=1), c(12, "s"), c(12, "h")]) == HandRank(
+        HandCategory.TRIPS, (12,)
+    )
+
+
+def test_two_jokers_reproduce_observed_j_t_9_8_7_straight_flush_pattern():
+    # Supplied Fantasy gameplay proves both physical Jokers can simultaneously
+    # take distinct nominal cards (T-spade and 8-spade) in the same Bottom row.
+    assert rank_five([C("Js"), C("9s"), C("7s"), C("JK1"), C("JK2")]) == HandRank(
+        HandCategory.STRAIGHT_FLUSH, (11,)
+    )
+
+
+def test_joker_may_duplicate_nominal_card_already_physically_present():
+    # Project assumption frozen 2026-08-15: substitutions are WITH replacement.
+    # The best flush duplicates the physical As nominally, producing A,A,9,7,2.
+    assert rank_five([C("As"), C("9s"), C("7s"), C("2s"), C("JK1")]) == HandRank(
+        HandCategory.FLUSH, (14, 14, 9, 7, 2)
+    )
+
+
+def test_both_jokers_may_choose_the_same_nominal_card():
+    # With replacement, both Jokers independently copy As. This test makes the
+    # assumption executable rather than leaving it as prose only.
+    assert rank_five([C("As"), C("9s"), C("2s"), C("JK1"), C("JK2")]) == HandRank(
+        HandCategory.FLUSH, (14, 14, 14, 9, 2)
+    )
+
+
+def test_five_of_a_kind_edge_still_fails_closed_until_hierarchy_and_royalty_are_frozen():
+    # Allowing duplicates makes five Aces reachable from AAA + two Jokers. The
+    # supplied KKPoker hierarchy/royalty table does not define Five-of-a-Kind,
+    # so the evaluator must not silently pretend this is merely Quads.
+    with pytest.raises(NotImplementedError, match="five-of-a-kind"):
+        rank_five([C("As"), C("Ah"), C("Ad"), C("JK1"), C("JK2")])
 
 
 def test_equal_middle_and_bottom_is_legal_only_under_current_client_equality_rule():
