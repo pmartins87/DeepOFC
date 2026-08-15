@@ -110,6 +110,20 @@ def test_fantasy_active_is_mandatory_before_normal_geometry_is_trusted():
     assert any("ofc_fantasy_active" in error for error in errors)
 
 
+def test_fantasy_routing_does_not_authorize_uncertified_fan_recognition():
+    result = build(_source_tm(), _geometry(), _calibration())
+    audit = parse_tablemap(result)
+    assert "ofc_fantasy_active" in audit.regions
+    assert audit.symbols["ofc_fantasy_recognizer_calibrated"] == "0"
+
+    unsafe = result.replace(
+        "s$ofc_fantasy_recognizer_calibrated 0",
+        "s$ofc_fantasy_recognizer_calibrated 1",
+    )
+    errors = validate_hu_replay_tablemap(unsafe)
+    assert any("ofc_fantasy_recognizer_calibrated" in error for error in errors)
+
+
 def test_every_card_slot_uses_two_persistent_joker_identity_regions():
     result = build(_source_tm(), _geometry(), _calibration())
     audit = parse_tablemap(result)
