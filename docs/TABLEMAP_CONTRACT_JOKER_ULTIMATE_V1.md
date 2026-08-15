@@ -16,10 +16,10 @@ OpenHoldem branch `deepofc` exposes `CTablemap::SupportsOFCJokerUltimate()`, whi
 
 ## Mandatory visual slot contract
 
-Every possible visual card slot has a base name and four children:
+Every possible visual card slot has a base name and five children:
 
 ```text
-<base>occupied
+<base>empty
 <base>back
 <base>joker
 <base>rank
@@ -28,12 +28,12 @@ Every possible visual card slot has a base name and four children:
 
 Semantics:
 
-- `occupied`: mandatory boolean/color region proving that a physical card object is present;
-- `back`: mandatory boolean region distinguishing a hidden card back;
+- `empty`: mandatory boolean/color region matching the known empty green background for that source slot;
+- `back`: mandatory boolean region distinguishing a hidden card back when the slot is not empty;
 - `joker`: mandatory boolean/template region distinguishing a Joker face;
 - `rank` / `suit`: standard OpenHoldem rank/suit transforms for a normal face-up card.
 
-This explicit occupancy gate is critical. If `occupied=true` but the slot cannot be classified as back, Joker or a valid standard rank+suit pair, the scrape is **invalid**. An OCR miss is never silently converted into an empty slot.
+The negative/background gate is deliberate: a standard white face and a yellow card back do not share one reliable positive `occupied` color. If `empty=false` but the slot cannot be classified as back, Joker or a valid standard rank+suit pair, the scrape is **invalid**. An OCR miss is never silently converted into an empty slot.
 
 ### Board slots per canonical chair
 
@@ -49,75 +49,48 @@ ofc_p{p}_discard0 ... ofc_p{p}_discard3
 Example for the first Top source slot:
 
 ```text
-ofc_p0_top0occupied
+ofc_p0_top0empty
 ofc_p0_top0back
 ofc_p0_top0joker
 ofc_p0_top0rank
 ofc_p0_top0suit
 ```
 
-Board-source slots may visually contain:
+Board-source slots may visually contain committed cards, tentative Hero cards, or hidden opponent incoming backs. A back in a board-source slot increments `hidden_incoming_count`; it is never interpreted as a future row destination.
 
-- committed face-up cards;
-- for Hero, tentative current cards dragged over that row;
-- for an opponent currently acting, hidden current card backs overlapping row space.
+Opponent discard slots are count-only until R1 probe D1 proves face identities can be valid live information.
 
-The raw scraper therefore interprets:
+## Hero current cards and discards
 
-- standard/Joker face -> raw visual row card;
-- back in a board-source slot -> increment that opponent's `hidden_incoming_count`, **not** a row destination;
-- back in opponent discard slot -> increment `hidden_discard_count`;
-- no occupied card -> empty visual source slot.
-
-Opponent discard slots are currently **count-only**. If a face-up opponent discard is detected before R1 probe D1 establishes that such identity is valid live information, the scraper fails closed.
-
-## Hero current cards
-
-Normal Pineapple loose-card source slots:
+Normal loose-card source slots:
 
 ```text
 ofc_hero_in0 ... ofc_hero_in4
 ```
 
-Each uses the same `occupied/back/joker/rank/suit` children.
-
-The supplied later-round 450x830 evidence gives geometry for three loose positions. Slots 3 and 4 are therefore optional in the first scraper build until a first-round frame with five still-loose Hero cards is captured. Their absence is safe because normal physical-card accounting will reject a frame that actually needs unseen cards there.
-
-The same current-street physical card may be either:
-
-- detected in a loose `ofc_hero_in*` slot, or
-- detected as a face card over a Hero row because it was pre-arranged.
-
-It must never be accepted in both locations in the same raw observation.
-
-Fantasy requires a separate geometry path because 14–17 incoming cards are displayed differently. No Fantasy geometry is considered supported until representative KKPoker frames are captured.
-
-## Hero discard tracker
+Hero discard source slots:
 
 ```text
 ofc_hero_discard0 ... ofc_hero_discard3
 ```
 
-Hero discarded cards are face-up/known to Hero in supplied evidence and should be returned as physical card identities.
+Each uses the same `empty/back/joker/rank/suit` contract. The same current Hero card must never be accepted simultaneously loose and tentatively over a row.
+
+Fantasy needs a separate geometry path for 14–17 incoming cards and is not yet runtime-supported.
 
 ## Joker detection and identity
 
-The target game contains two Jokers, but we do **not** assume that their face artwork makes physical Joker #1 distinguishable from physical Joker #2.
+The two Joker faces may be visually indistinguishable. The scraper therefore uses a per-slot Joker classifier and assigns frame-local JK1/JK2 occurrence labels in deterministic scan order. Those labels are exchangeable occurrence labels, not proof that the KKPoker client exposes persistent Joker identity.
 
-Therefore each visual slot only needs a boolean/template `joker` classifier. The raw OpenHoldem scraper assigns deterministic frame-local labels JK1/JK2 in scan order when one/two Jokers are visible.
+Current replay evidence contains no visible Joker face, so the generated replay-draft tablemap intentionally carries an uncalibrated Joker placeholder. If a Joker appears before calibration, standard rank/suit parsing must fail and invalidate the scrape.
 
-Important consequence: JK1/JK2 labels are **interchangeable canonical occurrence labels**, not evidence that the client exposes a persistent physical identity. Canonical state comparison must eventually be invariant to swapping JK1 and JK2 when both are otherwise indistinguishable.
-
-The unresolved R1 wildcard semantics concern what a Joker may **represent**, not the detection of the physical Joker object itself.
-
-## Dynamic boolean/status regions
+## Dynamic status regions
 
 For each chair:
 
 ```text
 ofc_p{p}_turn
 ofc_p{p}_dealer
-ofc_p{p}_fantasy        // only after stable evidence exists
 ```
 
 Global:
@@ -126,69 +99,75 @@ Global:
 ofc_confirm_visible
 ```
 
-Exactly one `ofc_p{p}_turn` and one dealer region must be true in a stable normal-play observation.
-
-A true `ofc_confirm_visible` is **not** equivalent to canonical `hero_can_confirm`: supplied replay evidence shows the gold Confirm control while an earlier opponent timer is still active. Safe canonical confirmation requires both:
+Exactly one actor and one dealer must be identified in a stable normal state. Visible Confirm is not sufficient to authorize a strategy action; supplied frames show it while an earlier opponent timer is active. Canonical safety remains:
 
 ```text
-confirm_visible == true
-acting_chair == hero_chair
+hero_can_confirm = confirm_visible && acting_chair == hero_chair
 ```
 
-until empirical probe U1 proves a stronger supported pre-action behavior.
+until probe U1 proves otherwise.
 
-## Round derivation for normal play
-
-The raw observation derives/cross-checks the normal round from Hero-visible physical-card accounting:
+## Normal-round derivation
 
 ```text
 hero_total_dealt =
-    face-up Hero cards currently over row source slots
-  + loose current Hero cards
+    Hero face cards currently over row source slots
+  + loose Hero current cards
   + known Hero discard tracker cards
 ```
 
-Valid normal-play totals are exactly:
+Valid totals:
 
-- 5  -> round 0
-- 8  -> round 1
+- 5 -> round 0
+- 8 -> round 1
 - 11 -> round 2
 - 14 -> round 3
 - 17 -> round 4
 
-This remains invariant when a current card is dragged from the loose area to a row because it is counted exactly once. It is only a normal-Pineapple invariant; Fantasy uses a separate path.
+This remains invariant during tentative drag placement because each physical card is counted exactly once.
 
-## HU 450x830 evidence geometry
+## HU 450x830 evidence and reproducible generator
 
-The current full-card visual rectangle inventory is frozen in:
+Geometry:
 
 `tablemaps/joker_ultimate_hu_450x830_geometry_v1.json`
 
-The supplied source `.tm` targets a legacy 500x700 layout but contains useful existing rank/suit transform assets. The first runtime `.tm` should reuse those transforms while relocating per-slot regions to the 450x830 evidence geometry.
+Replay color/slot calibration:
 
-It is not yet a certified runtime `.tm` because:
+`tablemaps/joker_ultimate_hu_450x830_calibration_v1.json`
 
-- `occupied/back/joker` child regions still need pixel/template calibration on the actual 450x830 client;
-- first-round five-loose-card geometry is incomplete;
-- Joker face evidence/template is not yet captured;
-- Fantasy and 3-player geometry are not yet available.
+Generator:
+
+`tools/build_joker_hu_tablemap.py`
+
+Verifier:
+
+`deepofc/tablemap_verify.py`
+
+The generator takes the supplied legacy `.tm` as the font/transform donor and produces a deterministic 450x830 **replay-draft** with explicit `ofc_*` regions. The verifier requires the correct target size, OFC symbols and every mandatory HU replay region.
+
+The draft is not a certified live tablemap because:
+
+- the P0 dealer pixel is predicted, not yet observed in supplied evidence;
+- first-round five-loose-card geometry is incomplete (the supplied first-round frame already has all five cards pre-arranged);
+- Joker face calibration is absent;
+- Fantasy and 3-player geometry are absent;
+- a Windows/OpenHoldem replay build has not yet validated the regions.
 
 ## Fail-closed requirements
 
-A read-only OFC scrape is invalid if any of the following occurs:
+A read-only OFC scrape is invalid if, among other things:
 
 - `ofc_variant` missing/wrong;
 - player count not 2 or 3;
-- any mandatory occupied/back/joker/rank/suit slot contract missing;
-- an occupied slot cannot be classified unambiguously;
+- mandatory `empty/back/joker/rank/suit` slot child missing;
+- `empty=false` but no unambiguous back/Joker/standard face exists;
 - duplicate known standard physical card;
 - more than two visible Jokers;
-- row face count exceeds 3/5/5 capacity after canonical reconstruction;
-- normal visible-card total is not one of 5/8/11/14/17;
-- multiple/no acting-chair region in a stable normal-play state;
-- multiple/no dealer region;
-- previously committed card disappears/moves rows in stateful reconstruction;
-- same Hero current card appears simultaneously loose and in a row;
-- unsupported face-up opponent discard appears before D1 is resolved.
+- invalid normal total outside 5/8/11/14/17;
+- multiple/no actor or dealer;
+- committed card disappears/moves rows in reconstruction;
+- same Hero current card appears loose and in a row;
+- face-up opponent discard appears before D1 is resolved.
 
-No failure may fall back to a plausible Hold'em card or betting state.
+No failure may fall back to plausible Hold'em state.
