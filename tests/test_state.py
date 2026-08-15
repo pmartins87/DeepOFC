@@ -18,6 +18,14 @@ def fantasy_cards(count: int) -> tuple[Card, ...]:
     return pool[:count]
 
 
+def fantasy_pending(incoming: tuple[Card, ...]) -> tuple[PendingPlacement, ...]:
+    return tuple(
+        [PendingPlacement(card, Row.TOP) for card in incoming[:3]]
+        + [PendingPlacement(card, Row.MIDDLE) for card in incoming[3:8]]
+        + [PendingPlacement(card, Row.BOTTOM) for card in incoming[8:13]]
+    )
+
+
 def test_standard_and_joker_cards_are_distinct_physical_cards():
     cards = {C("As"), C("Ah"), C("JK1"), C("JK2")}
     assert len(cards) == 4
@@ -147,11 +155,7 @@ def test_fantasy_rejects_normal_round_index():
 
 def test_fantasy_confirm_shape_is_exactly_13_placed_plus_1_to_4_unused():
     incoming = fantasy_cards(14)
-    pending = tuple(
-        [PendingPlacement(card, Row.TOP) for card in incoming[:3]]
-        + [PendingPlacement(card, Row.MIDDLE) for card in incoming[3:8]]
-        + [PendingPlacement(card, Row.BOTTOM) for card in incoming[8:13]]
-    )
+    pending = fantasy_pending(incoming)
     state = OFCState(
         players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
         hero_chair=1,
@@ -166,6 +170,47 @@ def test_fantasy_confirm_shape_is_exactly_13_placed_plus_1_to_4_unused():
     )
     assert state.confirm_shape_is_legal()
     assert state.unassigned_incoming() == (incoming[-1],)
+
+
+def test_fantasy_confirm_shape_rejects_only_12_tentative_placements():
+    incoming = fantasy_cards(14)
+    state = OFCState(
+        players=(PlayerState(chair=0), PlayerState(chair=1, fantasy=True)),
+        hero_chair=1,
+        dealer_chair=1,
+        acting_chair=1,
+        round_index=-1,
+        hero_incoming=incoming,
+        hero_pending=fantasy_pending(incoming)[:-1],
+        hero_can_prepare=True,
+        hero_can_confirm=True,
+        action_required=True,
+    )
+    assert not state.confirm_shape_is_legal()
+
+
+def test_fantasy_confirm_shape_rejects_mixed_committed_and_pending_board():
+    incoming = fantasy_cards(14)
+    committed = C("2h")
+    # Use 12 tentative cards so the combined visual total is 13; this used to
+    # pass the weaker shape check even though it mixes post-Confirm board state
+    # with pre-Confirm Fantasy placement semantics.
+    state = OFCState(
+        players=(
+            PlayerState(chair=0),
+            PlayerState(chair=1, fantasy=True, board=PlayerBoard(top=(committed,))),
+        ),
+        hero_chair=1,
+        dealer_chair=1,
+        acting_chair=1,
+        round_index=-1,
+        hero_incoming=incoming,
+        hero_pending=fantasy_pending(incoming)[:-1],
+        hero_can_prepare=True,
+        hero_can_confirm=True,
+        action_required=True,
+    )
+    assert not state.confirm_shape_is_legal()
 
 
 def test_fantasy_hidden_incoming_count_allows_14_to_17_only_for_fantasy_player():
