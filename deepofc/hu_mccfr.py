@@ -32,8 +32,9 @@ class ExternalSamplingMCCFR:
 
     Strategy averaging is exact for this reduced game. Because each player acts
     at most once, player-own reach before every information set is 1. A lazy
-    time-integration scheme records the time-average current strategy without
-    iterating over every untouched information set on every sampled traversal.
+    time-integration scheme records the time-average strategy actually USED by
+    each completed iteration without iterating over every untouched information
+    set on every sampled traversal.
     """
 
     def __init__(self, game: HUFinalRoundSubgame, *, seed: int = 1) -> None:
@@ -48,8 +49,8 @@ class ExternalSamplingMCCFR:
             info: {action: 0.0 for action in actions}
             for info, actions in game.info_actions.items()
         }
-        # Iteration at which the currently implied regret-matching strategy
-        # became active. Initial uniform strategy is eligible from iteration 1.
+        # First iteration in which the currently implied regret-matching strategy
+        # is USED. The initial uniform strategy is active from iteration 1.
         self.active_since = {info: 1 for info in game.info_actions}
 
     def _distribution(self, info: HUInfoSet) -> dict[HUPlacementAction, float]:
@@ -141,8 +142,10 @@ class ExternalSamplingMCCFR:
         for action, value in action_values.items():
             bucket[action] += value - node_value
 
-    def _flush_old_strategy_before_change(self, info: HUInfoSet, t: int) -> None:
-        count = t - self.active_since[info]
+    def _flush_strategy_used_through_iteration(self, info: HUInfoSet, t: int) -> None:
+        # The current strategy was used in every iteration active_since..t,
+        # inclusive. Flush that exact pre-update interval before regrets change.
+        count = t - self.active_since[info] + 1
         if count <= 0:
             return
         strategy = self._distribution(info)
@@ -158,10 +161,12 @@ class ExternalSamplingMCCFR:
         self._sampled_traversal(1, delta)
 
         for info, action_delta in delta.items():
-            self._flush_old_strategy_before_change(info, t)
+            # Iteration t has already used the old strategy. Credit it before
+            # applying the regret update; the new strategy starts at t+1.
+            self._flush_strategy_used_through_iteration(info, t)
             for action, increment in action_delta.items():
                 self.regrets[info][action] += increment
-            self.active_since[info] = t
+            self.active_since[info] = t + 1
         self.iteration = t
 
     def run(self, iterations: int) -> None:
@@ -179,6 +184,8 @@ class ExternalSamplingMCCFR:
         profile: dict[HUInfoSet, dict[HUPlacementAction, float]] = {}
         for info, actions in self.game.info_actions.items():
             totals = dict(self.strategy_sum[info])
+            # Any strategy not yet flushed has been used from active_since
+            # through the latest completed iteration, inclusive.
             count = self.iteration - self.active_since[info] + 1
             if count > 0:
                 current = self._distribution(info)
