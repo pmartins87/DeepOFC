@@ -71,9 +71,14 @@ def _calibration() -> dict:
             "p1": {"point": [40, 40], "rgb": "cfcfcf", "radius": 20},
         },
         "confirm_visible": {"point": [50, 50], "rgb": "9f8945", "radius": 28},
+        "fantasy_active": {"point": [60, 60], "rgb": "874c00", "radius": 20},
         "hero_discard_rects": row4(400),
         "opponent_discard_rects": row4(450),
-        "joker_detector": {"calibrated": False, "placeholder_rgb": "ff00ff"},
+        "joker_detector": {
+            "calibrated": False,
+            "placeholder1_rgb": "ff00ff",
+            "placeholder2_rgb": "00ffff",
+        },
     }
 
 
@@ -86,12 +91,23 @@ def test_builder_output_passes_hu_replay_contract_verifier():
     assert validate_hu_replay_tablemap(result) == []
     assert "s$ofc_variant" in result
     assert "joker_ultimate" in result
+    assert "r$ofc_fantasy_active" in result
     assert "r$ofc_p0_top0empty" in result
     assert "r$ofc_p1_bottom4rank" in result
     assert "r$ofc_hero_in2suit" in result
     assert "r$ofc_hero_in0drag" in result
     assert "r$ofc_hero_in1drag" in result
     assert "r$ofc_hero_in2drag" in result
+
+
+def test_fantasy_active_is_mandatory_before_normal_geometry_is_trusted():
+    result = build(_source_tm(), _geometry(), _calibration())
+    audit = parse_tablemap(result)
+    assert "ofc_fantasy_active" in audit.regions
+
+    missing = result.replace("r$ofc_fantasy_active", "r$deleted_fantasy_active")
+    errors = validate_hu_replay_tablemap(missing)
+    assert any("ofc_fantasy_active" in error for error in errors)
 
 
 def test_every_card_slot_uses_two_persistent_joker_identity_regions():
@@ -107,6 +123,16 @@ def test_every_card_slot_uses_two_persistent_joker_identity_regions():
         assert base + "joker1" in audit.regions
         assert base + "joker2" in audit.regions
         assert base + "joker" not in audit.regions
+
+
+def test_persistent_jokers_get_distinct_fail_closed_placeholders():
+    result = build(_source_tm(), _geometry(), _calibration())
+    # The two detector names must not accidentally share one old scan-order
+    # placeholder in generated replay drafts.
+    joker1_line = next(line for line in result.splitlines() if line.startswith("r$ofc_p0_top0joker1"))
+    joker2_line = next(line for line in result.splitlines() if line.startswith("r$ofc_p0_top0joker2"))
+    assert "ffff00ff" in joker1_line
+    assert "ff00ffff" in joker2_line
 
 
 def test_verifier_rejects_legacy_single_joker_contract_even_if_other_regions_exist():
@@ -144,6 +170,17 @@ def test_replay_draft_is_explicitly_non_actionable_even_if_future_drop_regions_e
     audit = parse_tablemap(result_with_drop_rects)
     assert audit.symbols["ofc_drag_targets_calibrated"] == "0"
     assert {"ofc_drop_top", "ofc_drop_middle", "ofc_drop_bottom"} <= set(audit.regions)
+
+
+def test_builder_rejects_calibration_without_fantasy_routing_detector():
+    calibration = _calibration()
+    del calibration["fantasy_active"]
+    try:
+        build(_source_tm(), _geometry(), calibration)
+    except ValueError as exc:
+        assert "fantasy_active" in str(exc)
+    else:
+        raise AssertionError("builder accepted calibration without Fantasy routing detector")
 
 
 def test_verifier_rejects_unmodified_holdem_style_tablemap():
