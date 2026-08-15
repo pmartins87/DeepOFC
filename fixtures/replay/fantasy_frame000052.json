@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "frame": "session_1/frame000052.bmp",
+  "frame_sha256": "7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935",
+  "frame_kind": "user_supplied_real_pixel_evidence",
+  "table_label": "Joker Ultimate",
+  "evidence_notes": [
+    "Hero is in 15-card Fantasy and all 15 physical cards are still loose in the curved fan.",
+    "Both persistent physical Jokers are visible simultaneously: JK1 orange/red and JK2 gray/black.",
+    "Opponent for_sho is the acting player and has five current hidden card backs; no opponent board cards are committed yet in this frame.",
+    "Dealer button is on for_sho. Hero may prepare the Fantasy arrangement but cannot safely Confirm while for_sho is acting.",
+    "This frame and real frame000053 form a same-Fantasy-hand transition with an invariant 15-card Hero incoming set."
+  ],
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "for_sho",
+        "fantasy": false,
+        "hidden_incoming_count": 5,
+        "hidden_discard_count": 0,
+        "board": {
+          "top": [],
+          "middle": [],
+          "bottom": []
+        }
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "fantasy": true,
+        "hidden_incoming_count": 0,
+        "hidden_discard_count": 0,
+        "board": {
+          "top": [],
+          "middle": [],
+          "bottom": []
+        }
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 0,
+    "acting_chair": 0,
+    "round_index": -1,
+    "hero_incoming": [
+      "JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"
+    ],
+    "hero_discards": [],
+    "hero_pending": [],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  }
+}
