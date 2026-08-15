@@ -1,8 +1,8 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "status": "replay_calibration_not_live_certified",
   "source_frames": [468, 482, 512, 528, 543, 560, 568],
-  "fantasy_joker_source_frames": [52, 53, 54],
+  "fantasy_joker_source_frames": [52, 53, 54, 55, 60],
   "color_format": "RRGGBB",
   "empty_background": {
     "opponent_top": {"rgb": "22704c", "radius": 24},
@@ -31,6 +31,15 @@
     "p1": {"point": [393, 482], "rgb": "cfcfcf", "radius": 20, "confidence": "observed_true_all_supplied_gameplay_frames"}
   },
   "confirm_visible": {"point": [350, 710], "rgb": "9f8945", "radius": 28},
+  "fantasy_active": {
+    "point": [225, 760],
+    "rgb": "874c00",
+    "radius": 20,
+    "confidence": "replay_calibrated_not_live_certified",
+    "true_frames": [52, 53, 55, 60],
+    "false_frames": [29, 54],
+    "evidence": "orange Fantasy arrangement arc is stable before/while the Fantasy placement UI is active and disappears after Confirm or at a normal-hand end"
+  },
   "hero_discard_rects": [
     [27, 575, 53, 614],
     [55, 575, 81, 614],
@@ -61,6 +70,8 @@
     "The P0 dealer point is only a geometry prediction; all original normal-play supplied frames have Hero/P1 as dealer.",
     "Opponent discard cards are a 4-slot horizontal strip; Hero discards are a 2x2 small-card grid in the supplied HU layout.",
     "Fantasy frames 52/53/54 supersede the prior no-visible-Joker assumption: the two physical Jokers are visually distinguishable and retain identity after confirmation through color-coded markers.",
-    "This calibration file still does not claim a certified live Joker detector; it records the now-known visual identity contract for the next tablemap calibration pass."
+    "Fantasy-active pixel (225,760) is #874c00 in frames 52/53/55/60 and background-green in frames 29/54; this is sufficient for replay fail-closed routing but not yet a live-runtime certification.",
+    "Fantasy arrangement uses shifted/compressed Hero row geometry relative to normal confirmed play; normal Hero row rectangles must never be reused merely because the same table is attached.",
+    "This calibration file still does not claim a certified live Joker or Fantasy fan detector; it records evidence-backed routing facts for the next tablemap/runtime pass."
   ]
 }
