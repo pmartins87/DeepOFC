@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-"""Export the seven canonical replay fixtures into a tiny line protocol.
+"""Export canonical replay/contract fixtures into a tiny line protocol.
 
 The consumer is the native C++ COFCReconstructor self-test in the OpenHoldem
-`deepofc` branch.  This keeps the cross-language equality gate independent of a
+`deepofc` branch. This keeps the cross-language equality gate independent of a
 JSON library on the legacy C++ side while preserving the Python DeepOFC model
 as the source of truth.
+
+The seven original entries are screenshot-backed normal-play fixtures. The
+final Fantasy entry is explicitly synthetic: it freezes already source-backed
+state semantics before the separate real-pixel Fantasy tablemap gate exists.
 """
 
 import argparse
@@ -26,6 +30,7 @@ SEQUENCE = [
     "frame000543.json",
     "frame000560.json",
     "frame000568.json",
+    "fantasy_contract_17_prepare.json",
 ]
 
 RANK_INDEX = {r: i for i, r in enumerate("23456789TJQKA")}
@@ -108,14 +113,16 @@ def expected_snapshot(golden) -> str:
 
 
 def export(out: Path) -> None:
-    lines: list[str] = ["DEEPOFC_OPENHOLDEM_REPLAY_REFERENCE|1"]
+    lines: list[str] = ["DEEPOFC_OPENHOLDEM_REPLAY_REFERENCE|2"]
     for name in SEQUENCE:
         data = json.loads((FIXTURE_DIR / name).read_text(encoding="utf-8"))
         golden = state_from_dict(data["state"])
         hero_visual, loose = raw_from_golden(golden)
 
-        # The supplied screenshots visibly show the gold Confirm control during
-        # both opponent and Hero turns. Legal confirmation is derived from actor.
+        # The original supplied screenshots visibly show the gold Confirm
+        # control during both opponent and Hero turns. Legal confirmation is
+        # derived from actor. The synthetic Fantasy contract uses the same raw
+        # safety convention: visible Confirm is not permission to commit early.
         lines.append(f"FRAME|{name}")
         lines.append(
             "META|{}|{}|{}|{}|{}|{}|{}".format(
