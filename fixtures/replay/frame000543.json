@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "frame": "frame000543.bmp",
+  "frame_sha256": "1c1e1f790299e639894d98a267dd71b577ae631a8c11bf14fe4c96bc0e1aa13a",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "source_archive_sha256": "7de5a16eee195e3f0aa318e57e6a43c8d75deb5e3d322df6a3a94419658c16c4",
+  "frame_kind": "hero_decision",
+  "table_label": "Joker Ultimate GPS/IP",
+  "stake_label": "$20 JOKER Blinds: 10¢",
+  "evidence_notes": [
+    "Hero timer is active; opponent has completed the current street first.",
+    "Hero has pre-arranged Jh to top and Qc to middle; Ts remains unassigned and is the discard candidate.",
+    "Cards inside a row are later auto-sorted by KKPoker, so row membership is canonical and visual slot identity is not."
+  ],
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 3,
+        "board": {
+          "top": ["Ac", "7c", "7d"],
+          "middle": ["Qs", "Js", "8s", "5s", "2s"],
+          "bottom": ["Kh", "5h", "2h"]
+        }
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {
+          "top": ["Ks", "4h"],
+          "middle": ["8c", "5c"],
+          "bottom": ["Ah", "Th", "9h", "7h", "6h"]
+        }
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 1,
+    "round_index": 3,
+    "hero_incoming": ["Qc", "Ts", "Jh"],
+    "hero_discards": ["4d", "3d"],
+    "hero_pending": [
+      {"card": "Jh", "row": "top"},
+      {"card": "Qc", "row": "middle"}
+    ],
+    "hero_can_prepare": true,
+    "hero_can_confirm": true,
+    "action_required": true
+  }
+}
