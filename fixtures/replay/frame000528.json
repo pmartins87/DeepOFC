@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "frame": "frame000528.bmp",
+  "frame_sha256": "775c890b67c43b3f2d49bb26627b2336b93c7c07849ad9521ea16714bdf3def1",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "frame_kind": "opponent_turn_hero_prearrange",
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 2,
+        "hidden_incoming_count": 3,
+        "board": {"top": ["Ac", "7d"], "middle": ["Qs", "Js", "8s", "2s"], "bottom": ["Kh", "5h", "2h"]}
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {"top": ["Ks", "4h"], "middle": ["8c", "5c"], "bottom": ["Ah", "Th", "9h", "7h", "6h"]}
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 0,
+    "round_index": 3,
+    "hero_incoming": ["Qc", "Ts", "Jh"],
+    "hero_discards": ["4d", "3d"],
+    "hero_pending": [],
+    "hero_can_prepare": true,
+    "hero_can_confirm": false,
+    "action_required": false
+  },
+  "evidence_notes": [
+    "Two opponent previous discards are visible as backs below the board and three current hidden incoming backs are visible in the row area.",
+    "Hero has 9 committed cards, two known prior discards and the three current incoming cards Qc/Ts/Jh, not yet tentatively placed in this frame."
+  ]
+}
