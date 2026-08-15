@@ -177,6 +177,12 @@ def settle_raw_points(
     if not all(board.is_complete() for board in boards):
         raise ValueError("raw settlement requires complete boards")
 
+    all_cards = tuple(card for board in boards for card in board.cards())
+    if len(all_cards) != len(set(all_cards)):
+        raise ValueError("duplicate physical card across player boards")
+    if any(card not in PHYSICAL_DECK_54 for card in all_cards):
+        raise ValueError("board set contains card outside the 54-card physical deck")
+
     points = [0 for _ in boards]
     for i in range(len(boards)):
         for j in range(i + 1, len(boards)):
