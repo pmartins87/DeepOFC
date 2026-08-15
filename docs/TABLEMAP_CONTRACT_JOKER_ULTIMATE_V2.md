@@ -152,7 +152,7 @@ Fantasy may hide/rearrange timer/turn controls; that geometry must be calibrated
 
 Source-card recognition regions and destination/drop regions are separate concepts.
 
-For each canonical row, R10 must have a calibrated **drop target** that remains safe regardless of KKPoker's post-drop within-row resorting:
+For each canonical row, R10 must eventually have a calibrated **drop target** that remains safe regardless of KKPoker's post-drop within-row resorting:
 
 ```text
 ofc_drop_top
@@ -162,17 +162,33 @@ ofc_drop_bottom
 
 A drop target should be chosen in a stable interior area accepted by the client, not on an existing card corner where overlap could change behavior.
 
+### Hard calibration authorization gate
+
+The existence of those three regions is **not** permission to move the mouse. Every tablemap also carries:
+
+```text
+s$ofc_drag_targets_calibrated   0
+```
+
+Semantics:
+
+- `0` — replay/draft/guessed geometry. R10 must refuse to build or execute a physical placement step even if `ofc_drop_*` rectangles exist.
+- `1` — all supported row targets have been deliberately calibrated against the real KKPoker client and have passed the frozen sandbox/runtime acceptance tests.
+
+Generated replay drafts always write `0`. Changing this value to `1` is a deliberate certification event, not an automatic consequence of adding regions. `COFCActionPlanner` fails closed unless the value is exactly `1`.
+
 Fantasy unused-card discard behavior requires its own calibrated target/gesture contract after observing the UI. If cards are discarded implicitly by leaving them out before Confirm, R10 must verify that behavior rather than inventing a drag-to-trash gesture.
 
 The action loop is always transactional:
 
 1. locate exact physical source card;
-2. mouse-down;
-3. drag through safe path;
-4. mouse-up in intended row target;
-5. rescrape;
-6. verify the physical card is now tentatively/committed in the intended canonical row;
-7. continue only on exact match.
+2. verify the active tablemap has explicitly certified drag targets;
+3. mouse-down;
+4. drag through safe path;
+5. mouse-up in intended row target;
+6. rescrape;
+7. verify the physical card is now tentatively/committed in the intended canonical row;
+8. continue only on exact match.
 
 Confirm is clicked only after the complete intended placement/discard set has been verified.
 
@@ -199,7 +215,7 @@ When `fantasy_state=true`, this invariant must not be used to infer a normal rou
 
 ## Fail-closed requirements
 
-A Joker Ultimate scrape is invalid if, among other things:
+A Joker Ultimate scrape/action plan is invalid if, among other things:
 
 - variant gate missing/wrong;
 - player count unsupported;
@@ -213,9 +229,10 @@ A Joker Ultimate scrape is invalid if, among other things:
 - Fantasy fan contains an unrecognized/ambiguous card;
 - committed card disappears or moves canonical rows;
 - actor/dealer state is contradictory where required;
+- a physical placement is requested while `s$ofc_drag_targets_calibrated != 1`;
 - post-drag rescrape does not exactly match the requested canonical transition.
 
-No failure may fall back to plausible Hold'em state or to a guessed OFC card.
+No failure may fall back to plausible Hold'em state, a guessed OFC card, or an uncertified drag target.
 
 ## Acceptance gates
 
@@ -234,4 +251,4 @@ BMP pixels
 
 ### R10 physical UI actions
 
-A sandbox/replay harness must prove normal and Fantasy source-card selection, drag/drop placement, discard semantics and Confirm with exact post-action canonical verification before the hard R9 read-only guard is removed.
+A sandbox/replay harness must prove normal and Fantasy source-card selection, drag/drop placement, discard semantics and Confirm with exact post-action canonical verification before the hard R9 read-only guard is removed. Only after the row-target calibration tests pass may the certified runtime tablemap set `s$ofc_drag_targets_calibrated = 1`.
