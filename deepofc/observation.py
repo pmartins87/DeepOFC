@@ -37,6 +37,11 @@ class RawOFCObservation:
     This layer intentionally does not say which Hero row cards are committed.
     The stateful reconstructor compares it with previous confirmed state and the
     discard tracker to classify committed vs tentative cards.
+
+    KKPoker replay evidence shows the gold Confirm button while the earlier
+    opponent's timer is still active. Therefore `confirm_visible` is a raw UI
+    fact and is deliberately different from canonical `hero_can_confirm`, which
+    means it is strategically/legal-order safe for Hero to commit now.
     """
 
     players: Tuple[RawPlayerObservation, ...]
@@ -47,7 +52,7 @@ class RawOFCObservation:
     hero_loose_cards: Tuple[Card, ...] = ()
     hero_discard_tracker: Tuple[Card, ...] = ()
     hero_can_prepare: bool = False
-    hero_can_confirm: bool = False
+    confirm_visible: bool = False
     mode: str = "joker_ultimate"
 
     def __post_init__(self) -> None:
