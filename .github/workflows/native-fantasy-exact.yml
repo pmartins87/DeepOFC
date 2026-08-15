@@ -1,0 +1,21 @@
+name: Native Fantasy exact gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/fantasy_exact.cpp'
+      - 'native/fantasy_exact_cases.txt'
+      - '.github/workflows/native-fantasy-exact.yml'
+  workflow_dispatch:
+
+jobs:
+  native-exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile optimized native kernel
+        run: g++ -O3 -DNDEBUG -std=c++14 -Wall -Wextra -pedantic native/fantasy_exact.cpp -o native/fantasy_exact
+      - name: Run certified 14 / real 15 / stress 17 cases
+        run: native/fantasy_exact native/fantasy_exact_cases.txt
