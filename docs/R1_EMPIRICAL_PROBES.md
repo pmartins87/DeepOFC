@@ -40,6 +40,19 @@ Goal: determine card count on the next re-Fantasy when the stay condition is sat
 
 Capture the next deal and count cards. A single clean example is sufficient to freeze this path.
 
+## Probe S1 — Both players foul in the same pairwise comparison
+
+The public KKPoker rules say that when **a** player fouls, opposing players automatically scoop, but the public pages found in the official-site audit do not state the settlement when both players in the same pair foul.
+
+Goal: freeze whether a double-foul pair scores:
+
+- 0 points / no royalties for both;
+- mutual scoop cancellation;
+- an order-dependent result;
+- or another KKPoker-specific rule.
+
+Capture a real hand where both completed boards are visibly marked fouled and record the exact raw points/balance deltas before applying any inferred rake. Until this is proven, `pairwise_points_standard()` deliberately fails closed on double foul.
+
 ## Probe C1 — Three-player win-cap settlement
 
 Goal: freeze the exact ordered transfer/clamping algorithm.
