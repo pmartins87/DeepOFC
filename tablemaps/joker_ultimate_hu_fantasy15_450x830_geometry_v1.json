@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "measured_evidence_geometry_not_runtime_certification",
+  "variant": "joker_ultimate",
+  "client_size": {"width": 450, "height": 830},
+  "fantasy_card_count": 15,
+  "source_frames": [
+    {
+      "path": "session_1/frame000032.bmp",
+      "sha256": "723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130",
+      "cards_left_to_right": [
+        "Ah", "Ac", "Kh", "Js", "Jd", "Tc", "9s", "9c", "7s", "6s", "6h", "5h", "3s", "3c", "2s"
+      ]
+    },
+    {
+      "path": "session_1/frame000052.bmp",
+      "sha256": "7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935",
+      "cards_left_to_right": [
+        "JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"
+      ],
+      "joker_identity_mapping": {
+        "JK1": "orange/red pineapple Joker",
+        "JK2": "gray/black pineapple Joker"
+      }
+    },
+    {
+      "path": "session_1/frame000060.bmp",
+      "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99",
+      "cards_left_to_right": [
+        "Ac", "Ad", "Qd", "Tc", "8c", "7h", "7c", "6d", "5c", "4h", "4d", "3s", "3c", "3d", "2s"
+      ]
+    }
+  ],
+  "measurement_notes": [
+    "The 15-card fan geometry is visually stable across the three supplied 15-card Fantasy deals above.",
+    "Cards overlap heavily and are rotated. The rectangles below cover the exposed rank/suit/Joker-identity strip of each fan position rather than the hidden full card body.",
+    "These rectangles are suitable as source evidence for recognition experiments and candidate drag-source regions, but they are NOT certified click targets.",
+    "The runtime must bind the recognized physical card to the current rectangle on every fresh scrape. It must never retain strategic fan-slot identity after a drag because the fan may reflow.",
+    "Only 15-card Fantasy geometry is directly captured here. 14/16/17 layouts remain uncalibrated."
+  ],
+  "fan_slots_left_to_right": [
+    {"index": 0,  "identity_patch": [15,681,41,727]},
+    {"index": 1,  "identity_patch": [41,673,67,719]},
+    {"index": 2,  "identity_patch": [66,665,92,711]},
+    {"index": 3,  "identity_patch": [92,659,118,705]},
+    {"index": 4,  "identity_patch": [118,654,144,700]},
+    {"index": 5,  "identity_patch": [145,651,171,697]},
+    {"index": 6,  "identity_patch": [171,648,197,694]},
+    {"index": 7,  "identity_patch": [197,647,223,693]},
+    {"index": 8,  "identity_patch": [224,647,250,693]},
+    {"index": 9,  "identity_patch": [250,649,276,695]},
+    {"index": 10, "identity_patch": [276,651,302,697]},
+    {"index": 11, "identity_patch": [303,654,329,700]},
+    {"index": 12, "identity_patch": [330,658,356,704]},
+    {"index": 13, "identity_patch": [357,664,383,710]},
+    {"index": 14, "identity_patch": [383,672,409,718]}
+  ],
+  "related_commit_state_frames": [
+    {
+      "path": "session_1/frame000053.bmp",
+      "sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5",
+      "meaning": "both physical Jokers tentatively placed; two unused cards remain loose before Confirm"
+    },
+    {
+      "path": "session_1/frame000054.bmp",
+      "sha256": "a3bd163820c94b409f481727957a4296c4702a10895fc134d349df01bb70b17e",
+      "meaning": "after Confirm, unused cards are in discard tracker and Jokers are shown as gold substituted cards with persistent color-coded Joker icons"
+    }
+  ]
+}
