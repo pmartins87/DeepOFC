@@ -1,0 +1,22 @@
+name: Fantasy14 exact equality gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/fantasy_solver.py'
+      - 'tools/verify_fantasy14_subset_vs_bruteforce.py'
+      - '.github/workflows/fantasy14-exact-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run independent 1,009,008-action equality gate
+        run: python tools/verify_fantasy14_subset_vs_bruteforce.py
