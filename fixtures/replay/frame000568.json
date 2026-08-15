@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "frame": "frame000568.bmp",
+  "frame_sha256": "4fccc328f42788e519d70470541d0976dd22754997452b694a883eda73951321",
+  "source_archive": "joker_ofc_frames_and_rules.zip",
+  "source_archive_sha256": "7de5a16eee195e3f0aa318e57e6a43c8d75deb5e3d322df6a3a94419658c16c4",
+  "frame_kind": "hero_decision",
+  "table_label": "Joker Ultimate GPS/IP",
+  "stake_label": "$20 JOKER Blinds: 10¢",
+  "evidence_notes": [
+    "Final normal street; Hero timer is active.",
+    "Opponent board is complete and visibly marked fouled/cracked.",
+    "Hero has pre-arranged Ad and Jd to middle; 2d remains unassigned and is the discard candidate."
+  ],
+  "state": {
+    "mode": "joker_ultimate",
+    "players": [
+      {
+        "chair": 0,
+        "name": "Oxy87",
+        "hidden_discard_count": 4,
+        "board": {
+          "top": ["Ac", "7c", "7d"],
+          "middle": ["Qs", "Js", "8s", "5s", "2s"],
+          "bottom": ["Kh", "Kc", "Qd", "5h", "2h"]
+        }
+      },
+      {
+        "chair": 1,
+        "name": "kk733526",
+        "board": {
+          "top": ["Ks", "Jh", "4h"],
+          "middle": ["Qc", "8c", "5c"],
+          "bottom": ["Ah", "Th", "9h", "7h", "6h"]
+        }
+      }
+    ],
+    "hero_chair": 1,
+    "dealer_chair": 1,
+    "acting_chair": 1,
+    "round_index": 4,
+    "hero_incoming": ["Jd", "2d", "Ad"],
+    "hero_discards": ["4d", "3d", "Ts"],
+    "hero_pending": [
+      {"card": "Ad", "row": "middle"},
+      {"card": "Jd", "row": "middle"}
+    ],
+    "hero_can_prepare": true,
+    "hero_can_confirm": true,
+    "action_required": true
+  }
+}
