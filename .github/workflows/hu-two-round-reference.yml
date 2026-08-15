@@ -1,0 +1,22 @@
+name: HU two-round perfect-recall reference
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'tests/test_hu_two_round.py'
+      - 'tools/benchmark_hu_two_round_reference.py'
+      - '.github/workflows/hu-two-round-reference.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exhaustively validate two-round perfect-recall reference
+        run: python tools/benchmark_hu_two_round_reference.py
