@@ -11,25 +11,38 @@ if str(ROOT) not in sys.path:
 from deepofc.hu_two_round import HUTwoRoundSubgame
 
 
+FROZEN_INFOSETS = 79_804
+FROZEN_MERGED_ROUND4 = 7_056
+FROZEN_TERMINALS = 373_248
+
+
 def main() -> None:
     # The structural reference depends on a rank-preserving suit-only
     # player-swap automorphism. The frozen fixture also guarantees every legal
     # terminal is non-foul, so no unresolved double-foul semantics are invoked.
+    # Pure memoization is allowed only if every frozen structural/value result
+    # remains exactly unchanged.
     build_started = time.perf_counter()
     game = HUTwoRoundSubgame()
     build_seconds = time.perf_counter() - build_started
+    if len(game.info_actions) != FROZEN_INFOSETS:
+        raise SystemExit(
+            f"memoization changed infosets: {len(game.info_actions)} vs {FROZEN_INFOSETS}"
+        )
 
     count_started = time.perf_counter()
     terminal_count = game.terminal_count()
     count_seconds = time.perf_counter() - count_started
-    if terminal_count != 373_248:
+    if terminal_count != FROZEN_TERMINALS:
         raise SystemExit(f"unexpected terminal count: {terminal_count}")
 
     merged_started = time.perf_counter()
     merged_round4 = game.count_merged_round4_infosets()
     merged_seconds = time.perf_counter() - merged_started
-    if merged_round4 <= 0:
-        raise SystemExit("round-4 infosets unexpectedly reveal every physical history")
+    if merged_round4 != FROZEN_MERGED_ROUND4:
+        raise SystemExit(
+            f"memoization changed hidden-history merging: {merged_round4} vs {FROZEN_MERGED_ROUND4}"
+        )
 
     symmetry_started = time.perf_counter()
     symmetry_checks = game.assert_terminal_swap_symmetry()
@@ -65,6 +78,9 @@ def main() -> None:
         f"symmetry_seconds={symmetry_seconds:.6f} "
         f"uniform_value_seconds={value_seconds:.6f}"
     )
+    print(f"terminal_cache={game.terminal_u0.cache_info()}")
+    print(f"round3_board_cache={game._boards_after_round3.cache_info()}")
+    print(f"round4_info_cache={game.round4_info.cache_info()}")
     print("HU TWO-ROUND PERFECT-RECALL REFERENCE: PASS")
 
 
