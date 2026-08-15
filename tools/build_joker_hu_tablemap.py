@@ -127,6 +127,10 @@ def build(source_text: str, geometry: dict, calibration: dict) -> str:
         # drop-region rectangles happen to be present. Only an empirically
         # validated runtime tablemap may deliberately flip this to 1.
         "ofc_drag_targets_calibrated": "0",
+        # Independent second gate: even after geometry exists, the transactional
+        # executor itself stays disabled until a controlled-live certification
+        # deliberately opts in. R9/R10 development drafts always remain 0.
+        "ofc_executor_enabled": "0",
     }
     for name, value in symbols.items():
         _replace_or_add_symbol(lines, name, value)
