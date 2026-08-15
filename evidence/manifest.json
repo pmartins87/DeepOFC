@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "target_variant": "KKPoker Joker Ultimate OFC",
+  "source_archive": {
+    "name": "joker_ofc_frames_and_rules.zip",
+    "sha256": "7de5a16eee195e3f0aa318e57e6a43c8d75deb5e3d322df6a3a94419658c16c4"
+  },
+  "bootstrap_tablemap": {
+    "name": "KKPoker_OFC.tm",
+    "sha256": "de8566692d30e4c88092b9521c94a4ed053158669672067bd485ca340b1a69e0"
+  },
+  "openholdem_baseline": {
+    "repository": "pmartins87/myoh_private",
+    "branch": "deepofc",
+    "bootstrap_commit": "3aa8a28944e3759fecc9323fb9f7361d54d4c9af"
+  },
+  "frames": [
+    {"name": "frame000418.bmp", "sha256": "b2f12048beaee00cd262ce6ab7ea39be10e3910d8a109163891f9d38dde93917", "kind": "rules"},
+    {"name": "frame000423.bmp", "sha256": "734e2b6cc43d8de0d2c89986d9ce358b7903c066e72c5ef9fa8c2cdc18fbbfb5", "kind": "rules"},
+    {"name": "frame000444.bmp", "sha256": "07554c6d585db20a263b5e98f9e5d3cf5e555e06baf2d5375e2ec156bcb178f7", "kind": "rules"},
+    {"name": "frame000451.bmp", "sha256": "3eb00fe608bf6078560f894bc2a8a2074a6277930e02715a65592771dd32b34c", "kind": "rules"},
+    {"name": "frame000453.bmp", "sha256": "06a32ee49e3d128808eda2f70c9bec4831fd537d5a6492982e6aca17d56aa6f9", "kind": "rules"},
+    {"name": "frame000455.bmp", "sha256": "4658aecadf39135038abf9246840067368acae6b1f78df026b08dc6e9f266783", "kind": "rules"},
+    {"name": "frame000468.bmp", "sha256": "dfedb9488edda3ab1a3e7d1dd64d261a84292760715c1d76f95775dbe624de5f", "kind": "gameplay"},
+    {"name": "frame000482.bmp", "sha256": "c81bac687171908672458eff17d1305d618672656d2592297ab7a5fca454484b", "kind": "gameplay"},
+    {"name": "frame000512.bmp", "sha256": "1148df990a63e90876582d4edabcd3407b9a8280544f6011f96bcb6e8aa7c210", "kind": "gameplay"},
+    {"name": "frame000528.bmp", "sha256": "775c890b67c43b3f2d49bb26627b2336b93c7c07849ad9521ea16714bdf3def1", "kind": "gameplay"},
+    {"name": "frame000543.bmp", "sha256": "1c1e1f790299e639894d98a267dd71b577ae631a8c11bf14fe4c96bc0e1aa13a", "kind": "gameplay"},
+    {"name": "frame000560.bmp", "sha256": "21392f368191fe97845ce3254919f01ee7dc730527148474d2030a9669897d84", "kind": "gameplay"},
+    {"name": "frame000568.bmp", "sha256": "4fccc328f42788e519d70470541d0976dd22754997452b694a883eda73951321", "kind": "gameplay"}
+  ],
+  "golden_fixtures": [
+    "fixtures/replay/frame000543.json",
+    "fixtures/replay/frame000568.json"
+  ]
+}
