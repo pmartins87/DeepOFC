@@ -13,7 +13,8 @@ from deepofc.hu_two_round import HUTwoRoundSubgame
 
 def main() -> None:
     # The structural reference depends on a rank-preserving suit-only
-    # player-swap automorphism; never reintroduce rank relabeling here.
+    # player-swap automorphism. The frozen fixture also guarantees every legal
+    # terminal is non-foul, so no unresolved double-foul semantics are invoked.
     build_started = time.perf_counter()
     game = HUTwoRoundSubgame()
     build_seconds = time.perf_counter() - build_started
