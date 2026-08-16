@@ -1,0 +1,32 @@
+name: Patch three-round heavy workflows to dispatch-only
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-three-round-heavy-workflows-dispatch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch heavy workflow triggers
+        run: python tools/patch_three_round_heavy_workflows_dispatch.py
+      - name: Persist workflow trigger policy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/hu-three-round-sequential-reference.yml \
+                  .github/workflows/hu-three-round-br-reference.yml \
+                  .github/workflows/hu-three-round-br-parallel.yml \
+                  .github/workflows/hu-three-round-training-work.yml \
+                  .github/workflows/hu-three-round-quality-work.yml
+          git commit -m "CI: make heavy three-round gates explicit dispatch"
+          git push origin HEAD:main
