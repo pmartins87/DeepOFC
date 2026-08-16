@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Sequence
 
 from .actions import NormalPlacementAction, enumerate_normal_actions
@@ -64,13 +64,15 @@ class HUPlayerObservation:
 class HUSequentialNormalState:
     """Authoritative five-round HU Pineapple/Joker normal-play state.
 
-    This state owns all private chance information. It is deliberately separate
-    from `OFCState`, which is a single-player observation/decision projection.
+    Public construction and `apply()` perform the full physical/progress audit.
+    Exact solver traversals may use `apply_fast()` only when starting from a
+    previously validated state. `apply_fast()` still runs the canonical
+    `apply_normal_action` fail-closed semantic checks; it skips only the repeated
+    whole-state partition/progress audit on the *derived* immutable state.
 
-    The deterministic deck serialization deals a complete private batch to the
-    round's first actor and then to the second actor. Because the deck is a
-    uniformly shuffled physical 54-card deck, this serialization changes no
-    chance distribution; it merely makes seeded replay unambiguous.
+    The fast/audited paths are regression-cross-checked in `test_sequential.py`.
+    The private `_trusted_derived` marker is excluded from equality/hash so the
+    same semantic state compares identically regardless of which path created it.
     """
 
     deck: DeterministicDeck
@@ -83,8 +85,20 @@ class HUSequentialNormalState:
     first_player: int
     dealer_chair: int
     terminal: bool = False
+    _trusted_derived: bool = field(
+        default=False,
+        repr=False,
+        compare=False,
+        hash=False,
+    )
 
     def __post_init__(self) -> None:
+        if self._trusted_derived:
+            return
+        self.assert_fully_valid()
+
+    def assert_fully_valid(self) -> None:
+        """Run the complete authoritative state audit on demand."""
         if self.first_player not in (0, 1):
             raise ValueError("first_player must be 0 or 1")
         if self.dealer_chair not in (0, 1):
@@ -143,7 +157,6 @@ class HUSequentialNormalState:
     @property
     def acting_chair(self) -> int:
         if self.terminal:
-            # Keep the last actor as a stable diagnostic chair. No action is legal.
             return 1 - self.first_player
         return self.first_player if self.actor_in_round == 0 else 1 - self.first_player
 
@@ -204,9 +217,6 @@ class HUSequentialNormalState:
             elif self.round_index == 0:
                 expected_board = 5 if acted_this_round else 0
             else:
-                # Before acting in later round r, the player has committed
-                # round 0 plus r-1 later rounds: 5 + 2*(r-1). Acting in the
-                # current round adds exactly two more committed cards.
                 expected_board = 5 + 2 * (self.round_index - 1)
                 if acted_this_round:
                     expected_board += 2
@@ -221,8 +231,6 @@ class HUSequentialNormalState:
             elif self.round_index == 0:
                 expected_discards = 0
             else:
-                # One discard for each completed later round, plus the current
-                # discard only after this player has acted in the current round.
                 expected_discards = self.round_index - 1
                 if acted_this_round:
                     expected_discards += 1
@@ -274,8 +282,6 @@ class HUSequentialNormalState:
             public_action_history=public_history,
         )
 
-        # Defensive non-leak invariant: no current opponent incoming or discard
-        # identity may enter the canonical observation's known physical cards.
         forbidden = set(self.incoming[opponent]) | set(self.discards[opponent])
         leaked = forbidden & set(canonical.known_cards())
         if leaked:
@@ -287,16 +293,17 @@ class HUSequentialNormalState:
             return ()
         return enumerate_normal_actions(self.observation(self.acting_chair).state)
 
-    def apply(self, action: NormalPlacementAction) -> "HUSequentialNormalState":
+    def _advance(
+        self,
+        action: NormalPlacementAction,
+        *,
+        audit_derived_state: bool,
+    ) -> "HUSequentialNormalState":
         if self.terminal:
             raise ValueError("cannot act after terminal state")
         chair = self.acting_chair
 
-        # Do not enumerate the entire action space merely to validate one
-        # concrete action. `apply_normal_action` already fails closed on round
-        # shape, incoming-card coverage, discard identity, duplicate use and row
-        # capacity. Removing the redundant enumeration preserves semantics while
-        # making recursive exact/search traversals materially cheaper.
+        # This remains the semantic gate for every fast or audited transition.
         new_board, discarded = apply_normal_action(
             self.boards[chair],
             action,
@@ -310,6 +317,7 @@ class HUSequentialNormalState:
         discards = list(self.discards)
         discards[chair] = (*discards[chair], *discarded)
         history = (*self.history, SequentialActionRecord(self.round_index, chair, action))
+        trusted = not audit_derived_state
 
         if self.actor_in_round == 0:
             return HUSequentialNormalState(
@@ -323,6 +331,7 @@ class HUSequentialNormalState:
                 first_player=self.first_player,
                 dealer_chair=self.dealer_chair,
                 terminal=False,
+                _trusted_derived=trusted,
             )
 
         if self.round_index == 4:
@@ -337,6 +346,7 @@ class HUSequentialNormalState:
                 first_player=self.first_player,
                 dealer_chair=self.dealer_chair,
                 terminal=True,
+                _trusted_derived=trusted,
             )
 
         next_round = self.round_index + 1
@@ -356,7 +366,20 @@ class HUSequentialNormalState:
             first_player=self.first_player,
             dealer_chair=self.dealer_chair,
             terminal=False,
+            _trusted_derived=trusted,
         )
+
+    def apply(self, action: NormalPlacementAction) -> "HUSequentialNormalState":
+        """Apply one action and fully audit the derived authoritative state."""
+        return self._advance(action, audit_derived_state=True)
+
+    def apply_fast(self, action: NormalPlacementAction) -> "HUSequentialNormalState":
+        """Apply one action with semantic validation but skip repeated state audit.
+
+        Use only for recursive solver/reference traversal from a state already
+        known to be valid. Call `assert_fully_valid()` at audit boundaries.
+        """
+        return self._advance(action, audit_derived_state=False)
 
     def apply_key(self, action_key: tuple) -> "HUSequentialNormalState":
         for action in self.legal_actions():
