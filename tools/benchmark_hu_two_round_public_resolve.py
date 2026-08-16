@@ -44,17 +44,25 @@ def main() -> None:
             f"public continuation decomposition changed blueprint EV: {reconstructed_ev} vs {full_ev}"
         )
 
-    # Public-key privacy audit on every reachable hidden history.
+    # Public-key privacy audit on every reachable hidden history. In addition to
+    # checking that no private card is literally stored in the public key, count
+    # whether the SAME public state is compatible with multiple distinct round-3
+    # discard pairs. The latter distinguishes syntactic privacy from strategic
+    # ambiguity under the reduced chance support.
     privacy_checks = 0
     max_hidden_histories = 0
+    ambiguous_discard_states = 0
+    max_discard_pairs_per_public_state = 0
     for state, sub in subgames.items():
         max_hidden_histories = max(max_hidden_histories, len(sub.histories))
         state_codes = {card for card, _row in state.first_round3_public}
         state_codes.update(card for card, _row in state.second_round3_public)
+        discard_pairs: set[tuple[str, str]] = set()
         for history in sub.histories:
             first_discard = history.first_round3_action.discard
             second_discard = history.second_round3_action.discard
             assert first_discard is not None and second_discard is not None
+            discard_pairs.add((first_discard.code, second_discard.code))
             if first_discard.code in {card for card, _ in state.first_round3_public}:
                 raise SystemExit("first discard leaked into public placement key")
             if second_discard.code in {card for card, _ in state.second_round3_public}:
@@ -63,6 +71,11 @@ def main() -> None:
                 if card.code in state_codes:
                     raise SystemExit("future round4 private card leaked into round3 public key")
             privacy_checks += 1
+        max_discard_pairs_per_public_state = max(
+            max_discard_pairs_per_public_state, len(discard_pairs)
+        )
+        if len(discard_pairs) > 1:
+            ambiguous_discard_states += 1
 
     target = max(
         subgames.values(),
@@ -95,6 +108,8 @@ def main() -> None:
         f"public_decomposition states={len(subgames)} mass={public_mass:.12f} "
         f"reconstructed_ev={reconstructed_ev:.12f} error={decomposition_error:.18e} "
         f"privacy_checks={privacy_checks} max_hidden_histories={max_hidden_histories} "
+        f"ambiguous_discard_states={ambiguous_discard_states} "
+        f"max_discard_pairs={max_discard_pairs_per_public_state} "
         f"build_seconds={build_seconds:.6f}"
     )
     print(
