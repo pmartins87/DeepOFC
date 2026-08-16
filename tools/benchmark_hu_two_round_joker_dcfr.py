@@ -21,9 +21,10 @@ def main() -> None:
     uniform_exp = 0.5 * uniform_conv
 
     solver = TwoRoundFullTreeCFR(game, variant="dcfr")
-    checkpoints = (1, 2, 4, 8, 16, 32)
+    checkpoints = (1, 2, 4, 8, 16, 32, 64)
     previous = 0
     cumulative = 0.0
+    results = []
     for checkpoint in checkpoints:
         started = time.perf_counter()
         solver.run(checkpoint - previous)
@@ -34,6 +35,7 @@ def main() -> None:
         eval_seconds = time.perf_counter() - started
         if not math.isfinite(snap.exploitability):
             raise SystemExit("Joker DCFR produced non-finite exploitability")
+        results.append(snap.exploitability)
         print(
             f"iteration={checkpoint} expected_u0={snap.expected_u0:.12f} "
             f"br0={snap.br0:.12f} br1={snap.br1:.12f} "
@@ -48,6 +50,10 @@ def main() -> None:
     print(
         f"uniform br0={uniform_br0.value:.12f} br1={uniform_br1.value:.12f} "
         f"exploitability={uniform_exp:.12f}"
+    )
+    print(
+        f"summary checkpoints={checkpoints} best_exploitability={min(results):.12f} "
+        f"final_exploitability={results[-1]:.12f}"
     )
     print(f"terminal_cache={game.terminal_u0.cache_info()}")
     print("HU TWO-ROUND PHYSICAL-JOKER DCFR: PASS")
