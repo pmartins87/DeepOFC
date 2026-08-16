@@ -42,6 +42,12 @@ def exact_best_response(
 
     This is the direct three-level generalization of the independently audited
     two-round best-response construction.
+
+    Tree expansion uses the game's canonical derived-state transition. For the
+    sequential benchmarks this is ``apply_fast``: the parent state is already
+    validated and the concrete action is validated semantically before the child
+    is constructed. The independent pure-response replay below intentionally
+    keeps the fully audited ``state.apply`` path as a cross-check.
     """
 
     if player not in (0, 1):
@@ -99,8 +105,6 @@ def exact_best_response(
                     "perfect-recall decision-depth mismatch: "
                     f"round={info.state.round_index} prior_own={len(own_sequence)}"
                 )
-            # Create the bucket even before terminal propagation so zero-weight
-            # opponent branches remain covered and receive deterministic choices.
             bucket_for(depth, info)
             if depth > 0:
                 predecessor = own_sequence[-1]
@@ -111,19 +115,16 @@ def exact_best_response(
                     )
             for action in legal:
                 recurse(
-                    state.apply(action),
+                    game.transition(state, action),
                     opponent_reach,
                     (*own_sequence, (info, action)),
                 )
             return
 
         distribution = game.distribution(profile, info)
-        # Traverse zero-probability opponent actions as well. They contribute
-        # zero counterfactual mass but are required to prove BR infoset coverage
-        # on off-profile branches.
         for action in legal:
             recurse(
-                state.apply(action),
+                game.transition(state, action),
                 opponent_reach * distribution[action],
                 own_sequence,
             )
@@ -171,12 +172,9 @@ def exact_value_of_pure_response(
 ) -> tuple[float, int]:
     """Independently replay one pure BR without traversing zero-probability actions.
 
-    This is intentionally separate from the backward-induction accumulation in
-    `exact_best_response`. At the responding player's infosets it executes only
-    the chosen pure action. At opponent infosets it integrates the supplied
-    behavioral policy exactly. Thus the cross-check exercises the canonical
-    state transitions and terminal scorer again while avoiding the previous
-    waste of enumerating one-hot actions with probability zero.
+    This path deliberately uses the fully audited ``state.apply`` transition,
+    unlike the BR tree expansion. It therefore cross-checks both the selected
+    pure policy and equivalence of the canonical fast derived-state path.
     """
 
     terminal_histories = 0
