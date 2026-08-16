@@ -1,0 +1,37 @@
+name: HU three-round work-normalized exact-BR quality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/sequential.py'
+      - 'deepofc/hu_three_round_sequential.py'
+      - 'deepofc/hu_three_round_br.py'
+      - 'deepofc/hu_three_round_cfr.py'
+      - 'deepofc/hu_three_round_mccfr.py'
+      - 'tools/benchmark_hu_three_round_quality_work.py'
+      - '.github/workflows/hu-three-round-quality-work.yml'
+  workflow_dispatch:
+
+jobs:
+  dcfr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: One full-tree DCFR pass plus exact three-level best response
+        run: python -u tools/benchmark_hu_three_round_quality_work.py --mode dcfr
+
+  external:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Equal-terminal external sampling plus exact three-level best response
+        run: python -u tools/benchmark_hu_three_round_quality_work.py --mode external
