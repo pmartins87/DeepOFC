@@ -33,9 +33,9 @@ def test_three_round_first_legal_path_reaches_nonfoul_terminal_with_six_more_act
     assert state.actions_taken - start_actions == 6
     assert tuple(board.filled_count() for board in state.boards) == (13, 13)
     assert tuple(len(cards) for cards in state.discards) == (4, 4)
-    assert not is_foul(state.boards[0])
-    assert not is_foul(state.boards[1])
-    settlement = settle_raw_points(state.boards)
+    assert not is_foul(state.boards[0], equality_allowed=True)
+    assert not is_foul(state.boards[1], equality_allowed=True)
+    settlement = settle_raw_points(state.boards, equality_allowed=True)
     assert settlement.zero_sum
 
 
