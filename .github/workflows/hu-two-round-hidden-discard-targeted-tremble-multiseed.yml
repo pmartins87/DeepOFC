@@ -1,0 +1,30 @@
+name: HU two-round hidden-discard BR-targeted trembled re-solve multi-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_resolve.py'
+      - 'deepofc/hu_two_round_hidden_discard.py'
+      - 'tools/benchmark_hu_two_round_hidden_discard_targeted_tremble_resolve.py'
+      - '.github/workflows/hu-two-round-hidden-discard-targeted-tremble-multiseed.yml'
+  workflow_dispatch:
+
+jobs:
+  multiseed:
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1954132610, 372483540, 20260815, 12345, 917331]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Resolve exact-BR steering public states under trembled beliefs
+        run: python -u tools/benchmark_hu_two_round_hidden_discard_targeted_tremble_resolve.py --seed ${{ matrix.seed }}
