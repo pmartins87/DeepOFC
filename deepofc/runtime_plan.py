@@ -26,7 +26,7 @@ import json
 from typing import Union
 
 from .actions import FantasyPlacementAction, NormalPlacementAction, enumerate_normal_actions
-from .state import Card, OFCState, PendingPlacement, ROW_CAPACITY, Row
+from .state import Card, OFCState, ROW_CAPACITY, Row
 
 
 RUNTIME_TURN_PLAN_SCHEMA_VERSION = 1
@@ -185,16 +185,22 @@ def build_runtime_turn_plan(state: OFCState, action: StrategyAction) -> RuntimeT
     single-drag transaction executor.  Source rectangles are intentionally not
     present and must be rescraped for each drag.
 
+    Planning requires Hero to be the current ordered actor and to be allowed to
+    prepare placements.  It deliberately does *not* require Confirm to be
+    visible before the first drag: some clients expose Confirm only after the
+    required placement shape is complete.  Confirm itself is a later, separately
+    verified transaction.
+
     The current R10 layer cannot yet pick a tentatively placed card back up and
     reroute it.  Therefore any current pending placement that disagrees with the
     solver action causes an immediate refusal rather than silently accepting the
     UI's provisional choice.
     """
 
-    if not state.action_required:
-        raise ValueError("runtime turn plan requires an actionable Hero decision state")
-    if state.acting_chair != state.hero_chair or not state.hero_can_confirm:
-        raise ValueError("runtime turn plan requires Hero to be the confirmed acting chair")
+    if state.acting_chair != state.hero_chair:
+        raise ValueError("runtime turn plan requires Hero to be the ordered acting chair")
+    if not state.hero_can_prepare:
+        raise ValueError("runtime turn plan requires Hero placement preparation to be allowed")
 
     if isinstance(action, NormalPlacementAction):
         _validate_normal_action(state, action)
