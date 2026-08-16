@@ -1,0 +1,29 @@
+name: HU two-round hidden-discard external-sampling long-run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_hidden_discard.py'
+      - 'tools/benchmark_hu_two_round_hidden_discard_mccfr_longrun.py'
+      - '.github/workflows/hu-two-round-hidden-discard-mccfr-longrun.yml'
+  workflow_dispatch:
+
+jobs:
+  longrun:
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1954132610, 372483540, 20260815, 12345, 917331]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train and exact-BR evaluate 5k/10k/20k checkpoints
+        run: python tools/benchmark_hu_two_round_hidden_discard_mccfr_longrun.py --seed ${{ matrix.seed }}
