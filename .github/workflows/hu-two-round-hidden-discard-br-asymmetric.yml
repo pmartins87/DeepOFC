@@ -1,0 +1,24 @@
+name: HU two-round hidden-discard asymmetric BR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_hidden_discard.py'
+      - 'tools/benchmark_hu_two_round_hidden_discard_br_asymmetric.py'
+      - '.github/workflows/hu-two-round-hidden-discard-br-asymmetric.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cross-check hidden-discard asymmetric best response by full-tree replay
+        run: python tools/benchmark_hu_two_round_hidden_discard_br_asymmetric.py
