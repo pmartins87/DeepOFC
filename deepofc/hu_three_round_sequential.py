@@ -224,13 +224,14 @@ class HUThreeRoundSequentialSubgame:
             raise ValueError("strategy needs positive probability mass")
         return {action: value / total for action, value in weights.items()}
 
-    @lru_cache(maxsize=None)
     def terminal_u0(self, state: HUSequentialNormalState) -> int:
         if not state.terminal:
             raise ValueError("terminal utility requires terminal state")
-        if is_foul(state.boards[0]) or is_foul(state.boards[1]):
+        if is_foul(state.boards[0], equality_allowed=True) or is_foul(
+            state.boards[1], equality_allowed=True
+        ):
             raise AssertionError("three-round fixture was designed to exclude all foul terminals")
-        return settle_raw_points(state.boards).points_by_chair[0]
+        return settle_raw_points(state.boards, equality_allowed=True).points_by_chair[0]
 
     def expected_u0(self, profile: StrategyProfile) -> float:
         def recurse(state: HUSequentialNormalState) -> float:
@@ -272,14 +273,6 @@ class HUThreeRoundSequentialSubgame:
             recurse(self.initial_state(outcome))
         return infos
 
-    @staticmethod
-    def _mirror_card(card: Card) -> Card:
-        if card.is_joker:
-            assert card.joker_id in (1, 2)
-            return Card(joker_id=3 - card.joker_id)
-        suit = {"c": "h", "h": "c", "d": "s", "s": "d"}[card.suit]
-        return Card(rank=card.rank, suit=suit)
-
     def assert_terminal_swap_symmetry(self) -> int:
         checks = 0
         for outcome in self.outcomes:
@@ -306,9 +299,12 @@ class HUThreeRoundSequentialSubgame:
                     raise AssertionError("mirrored three-round state terminated early")
                 if right.acting_chair != 1 - left.acting_chair:
                     raise AssertionError("three-round actor swap symmetry failed")
+
+                right_keys = {
+                    candidate.key(): candidate for candidate in right.legal_actions()
+                }
                 for action in left.legal_actions():
                     mirrored_action = joker_mirror_action(action)
-                    right_keys = {candidate.key(): candidate for candidate in right.legal_actions()}
                     candidate = right_keys.get(mirrored_action.key())
                     if candidate is None:
                         raise AssertionError("mirrored three-round action is not legal")
