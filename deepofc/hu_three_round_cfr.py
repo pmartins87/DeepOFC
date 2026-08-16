@@ -64,6 +64,17 @@ class HUThreeRoundFullTreeDCFR:
             return {action: p for action in positive}
         return {action: value / total for action, value in positive.items()}
 
+    def current_profile(self):
+        """Current regret-matching policy after the latest committed update.
+
+        This is exposed separately from `average_profile()` because a one-pass
+        work-normalized comparison would otherwise compare the external
+        sampler's updated current policy with DCFR's still-uniform one-iteration
+        average by construction.
+        """
+
+        return {info: self._distribution(info) for info in tuple(self.regrets)}
+
     def average_profile(self):
         profile = {}
         for info, totals in self.strategy_sum.items():
