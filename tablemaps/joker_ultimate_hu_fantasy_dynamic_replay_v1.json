@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "status": "supplied_replay_dynamic_detector_evidence_not_runtime_authority",
+  "runtime_authorized": false,
+  "client_size": {"width": 450, "height": 830},
+  "scan_roi": [20, 630, 430, 735],
+  "frames": [
+    {
+      "path": "session_1/frame000032.bmp",
+      "sha256": "723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130",
+      "mode": "initial15",
+      "expected": ["Ah", "Ac", "Kh", "Js", "Jd", "Tc", "9s", "9c", "7s", "6s", "6h", "5h", "3s", "3c", "2s"]
+    },
+    {
+      "path": "session_1/frame000035.bmp",
+      "sha256": "43277bcd160efd84fa9e6bbb88f93f5e16b300f3c7c510d41dc3ef841f767de5",
+      "mode": "transition",
+      "expected_rejection": true,
+      "rejection_kind": "transition_geometry"
+    },
+    {
+      "path": "session_1/frame000036.bmp",
+      "sha256": "9a33a07c992e5b85f741c96ae4e14e6e26cb142aedb1dfa4a4400df2728d1737",
+      "mode": "reflow",
+      "expected": ["Ah", "Ac", "Kh", "Jd", "Tc", "9c", "6h", "5h", "3c", "2s"]
+    },
+    {
+      "path": "session_1/frame000037.bmp",
+      "sha256": "78d3ac5a5b1959ccb167b866845889dded9ad18f5a38005e351f994f6ba31a28",
+      "mode": "reflow",
+      "expected_rejection": true,
+      "rejection_kind": "physical_card_lineage",
+      "expected": ["Kh", "Jd", "Tc", "9c", "6h", "5h", "3c", "2s"]
+    },
+    {
+      "path": "session_1/frame000039.bmp",
+      "sha256": "e4c1b801790b63b0c0c85ac7eb2b0f6ff60fd60d11a4f4e7a1ba11303d2e588b",
+      "mode": "reflow",
+      "expected": ["Ah", "Ac", "Kh", "Jd", "Tc", "9c", "6h", "5h", "3s", "3c"]
+    },
+    {
+      "path": "session_1/frame000040.bmp",
+      "sha256": "d6260662b1ecaad5e2847d58296e57e1f9bbd6c8b9dc8016a3fdba733cf95a8b",
+      "mode": "reflow",
+      "expected": ["Kh", "Jd", "Tc", "9c", "6h", "5h"]
+    },
+    {
+      "path": "session_1/frame000041.bmp",
+      "sha256": "0ae248df52b8903ca1260fae52d168ce724e62f4def0ac1c20c0b5dfb2512669",
+      "mode": "reflow",
+      "expected_rejection": true,
+      "rejection_kind": "rank_margin",
+      "expected": ["9c", "5h"]
+    },
+    {
+      "path": "session_1/frame000052.bmp",
+      "sha256": "7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935",
+      "mode": "initial15",
+      "expected": ["JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"]
+    },
+    {
+      "path": "session_1/frame000053.bmp",
+      "sha256": "bb6232c90019618bb5e172627d03614f97fd6b84a3addea7dcac5c37535f50f5",
+      "mode": "upright",
+      "expected": ["3s", "2c"]
+    },
+    {
+      "path": "session_1/frame000060.bmp",
+      "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99",
+      "mode": "initial15",
+      "expected": ["Ac", "Ad", "Qd", "Tc", "8c", "7h", "7c", "6d", "5c", "4h", "4d", "3s", "3c", "3d", "2s"]
+    },
+    {
+      "path": "session_1/frame000061.bmp",
+      "sha256": "91a82c6f5ffa79b625e8b4c9e9874d610bfbd3c9a2c64499f75339ca52f916a6",
+      "mode": "upright",
+      "expected": ["4h", "2s"]
+    },
+    {
+      "path": "session_1/frame000062.bmp",
+      "sha256": "689c7c00291e99f2ac47e8e61013608df3845e0301e0d26211c8a5de2ce40a0c",
+      "mode": "upright",
+      "expected": ["4h", "2s"]
+    }
+  ],
+  "limitations": [
+    "Only supplied 450x830 replay pixels are covered.",
+    "Initial 14, 16 and 17-card fan geometries have not yet been captured.",
+    "The detector must remain fail-closed and the OpenHoldem runtime gate remains disabled."
+  ]
+}
