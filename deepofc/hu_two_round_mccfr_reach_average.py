@@ -1,45 +1,33 @@
 from __future__ import annotations
 
-from collections import defaultdict
-
 from .actions import NormalPlacementAction
 from .hu_two_round import HUTwoRoundSubgame, TwoRoundInfoSet
 from .hu_two_round_mccfr import TwoRoundExternalSamplingMCCFR
 
 
 class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
-    """External-sampling trainer with exact standard CFR average integration.
+    """External-sampling trainer with exact standard CFR averaging.
 
-    For a round-3 infoset, the player's own reach before acting is 1.
-    For a round-4 infoset, perfect recall makes the own reach exactly the
-    probability of the player's remembered round-3 action at its unique
+    The first implementation flushed every round-4 child whenever its round-3
+    predecessor changed. That was mathematically exact but computationally
+    hostile to sampling. This version keeps the same estimator while recording
+    only behavioral-strategy change events. At export time it integrates the
+    piecewise-constant product
+
+        pi_i^t(I) * sigma_i^t(I, a)
+
+    by merging the predecessor and local event timelines.
+
+    For round 3, own reach is one. For round 4, perfect recall makes own reach
+    exactly the probability of the remembered round-3 action at the unique
     predecessor infoset.
-
-    The standard average numerator is therefore integrated as
-
-        sum_t pi_i^t(I) * sigma_i^t(I, a)
-
-    and its denominator as sum_t pi_i^t(I).
-
-    Both the predecessor strategy and the local strategy are piecewise constant
-    between regret updates. The lazy integrator flushes a round-4 infoset when
-    either component changes. This is exact for this two-decision benchmark and
-    avoids scanning all ~80k infosets every sampled iteration.
     """
 
     def __init__(self, game: HUTwoRoundSubgame, *, seed: int = 1) -> None:
         super().__init__(game, seed=seed)
-        self.reach_average_sum = {
-            info: {action: 0.0 for action in actions}
-            for info, actions in game.info_actions.items()
-        }
-        self.reach_average_mass = {info: 0.0 for info in game.info_actions}
-        self.reach_average_active_since = {info: 1 for info in game.info_actions}
-
         self.round4_parent: dict[
             TwoRoundInfoSet, tuple[TwoRoundInfoSet, NormalPlacementAction]
         ] = {}
-        children: dict[TwoRoundInfoSet, list[TwoRoundInfoSet]] = defaultdict(list)
         for info in game.info_actions:
             if info.round_index != 4:
                 continue
@@ -55,12 +43,14 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
                 raise AssertionError(
                     "round-4 perfect recall did not map to one predecessor action"
                 )
-            relation = (parent, candidates[0])
-            self.round4_parent[info] = relation
-            children[parent].append(info)
-        self.children_by_parent = {
-            parent: tuple(values) for parent, values in children.items()
-        }
+            self.round4_parent[info] = (parent, candidates[0])
+
+        # Implicit initial event at iteration 1 is uniform for every infoset.
+        # Store only later changes: info -> [(first_iteration_used, distribution)].
+        self.strategy_events: dict[
+            TwoRoundInfoSet,
+            list[tuple[int, dict[NormalPlacementAction, float]]],
+        ] = {}
 
     @staticmethod
     def _parent_info(info: TwoRoundInfoSet) -> TwoRoundInfoSet:
@@ -88,23 +78,19 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
         parent, parent_action = self.round4_parent[info]
         return self._distribution(parent)[parent_action]
 
-    def _flush_reach_average_through(
-        self,
-        info: TwoRoundInfoSet,
-        iteration: int,
-    ) -> None:
-        count = iteration - self.reach_average_active_since[info] + 1
-        if count <= 0:
-            return
-        reach = self.own_reach(info)
-        strategy = self._distribution(info)
-        weighted_count = count * reach
-        if weighted_count != 0.0:
-            totals = self.reach_average_sum[info]
-            for action, probability in strategy.items():
-                totals[action] += weighted_count * probability
-            self.reach_average_mass[info] += weighted_count
-        self.reach_average_active_since[info] = iteration + 1
+    def _uniform_distribution(
+        self, info: TwoRoundInfoSet
+    ) -> dict[NormalPlacementAction, float]:
+        actions = self.game.actions(info)
+        probability = 1.0 / len(actions)
+        return {action: probability for action in actions}
+
+    @staticmethod
+    def _different(
+        left: dict[NormalPlacementAction, float],
+        right: dict[NormalPlacementAction, float],
+    ) -> bool:
+        return any(left[action] != right[action] for action in left)
 
     def step(self) -> None:
         t = self.iteration + 1
@@ -112,26 +98,96 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
         self._sampled_traversal(0, delta)
         self._sampled_traversal(1, delta)
 
-        changed = set(delta)
-        to_flush = set(changed)
-        for info in changed:
-            if info.round_index == 3:
-                to_flush.update(self.children_by_parent.get(info, ()))
-
-        # Every strategy/reach pair below was the one actually used in iteration
-        # t. Flush it before any regret changes; all new behavior begins at t+1.
-        for info in to_flush:
-            self._flush_reach_average_through(info, t)
-
-        # Preserve the legacy local-time-average diagnostic from the base class.
-        for info in changed:
+        # Iteration t used these pre-update strategies. Preserve the legacy
+        # local-time average exactly as in the base class.
+        before = {info: self._distribution(info) for info in delta}
+        for info in delta:
             self._flush_local_strategy_used_through(info, t)
 
         for info, action_delta in delta.items():
             for action, increment in action_delta.items():
                 self.regrets[info][action] += increment
             self.local_active_since[info] = t + 1
+
+        # Any changed behavioral strategy becomes active only at t+1. No child
+        # infosets are touched here; reach-weighted products are integrated later.
+        for info in delta:
+            after = self._distribution(info)
+            if self._different(before[info], after):
+                self.strategy_events.setdefault(info, []).append((t + 1, dict(after)))
         self.iteration = t
+
+    def _events_through(
+        self, info: TwoRoundInfoSet
+    ) -> list[tuple[int, dict[NormalPlacementAction, float]]]:
+        events = [(1, self._uniform_distribution(info))]
+        if self.iteration <= 0:
+            return events
+        for start, distribution in self.strategy_events.get(info, ()):  # sparse
+            if start <= self.iteration:
+                events.append((start, distribution))
+        return events
+
+    @staticmethod
+    def _distribution_at(
+        events: list[tuple[int, dict[NormalPlacementAction, float]]],
+        iteration: int,
+    ) -> dict[NormalPlacementAction, float]:
+        current = events[0][1]
+        for start, distribution in events[1:]:
+            if start > iteration:
+                break
+            current = distribution
+        return current
+
+    def _integrate_round3(
+        self, info: TwoRoundInfoSet
+    ) -> tuple[dict[NormalPlacementAction, float], float]:
+        actions = self.game.actions(info)
+        totals = {action: 0.0 for action in actions}
+        if self.iteration <= 0:
+            return totals, 0.0
+        events = self._events_through(info)
+        starts = [start for start, _ in events] + [self.iteration + 1]
+        mass = 0.0
+        for index in range(len(starts) - 1):
+            start, end = starts[index], starts[index + 1]
+            count = end - start
+            distribution = events[index][1]
+            mass += count
+            for action, probability in distribution.items():
+                totals[action] += count * probability
+        return totals, mass
+
+    def _integrate_round4(
+        self, info: TwoRoundInfoSet
+    ) -> tuple[dict[NormalPlacementAction, float], float]:
+        actions = self.game.actions(info)
+        totals = {action: 0.0 for action in actions}
+        if self.iteration <= 0:
+            return totals, 0.0
+
+        parent, parent_action = self.round4_parent[info]
+        local_events = self._events_through(info)
+        parent_events = self._events_through(parent)
+        breakpoints = {1, self.iteration + 1}
+        breakpoints.update(start for start, _ in local_events)
+        breakpoints.update(start for start, _ in parent_events)
+        ordered = sorted(point for point in breakpoints if point <= self.iteration + 1)
+
+        mass = 0.0
+        for start, end in zip(ordered, ordered[1:]):
+            count = end - start
+            if count <= 0:
+                continue
+            local = self._distribution_at(local_events, start)
+            parent_distribution = self._distribution_at(parent_events, start)
+            reach = parent_distribution[parent_action]
+            weighted_count = count * reach
+            mass += weighted_count
+            for action, probability in local.items():
+                totals[action] += weighted_count * probability
+        return totals, mass
 
     def cfr_average_profile(self):
         if self.iteration == 0:
@@ -139,22 +195,12 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
 
         profile = {}
         for info, actions in self.game.info_actions.items():
-            totals = dict(self.reach_average_sum[info])
-            mass = self.reach_average_mass[info]
-            count = self.iteration - self.reach_average_active_since[info] + 1
-            if count > 0:
-                reach = self.own_reach(info)
-                weighted_count = count * reach
-                strategy = self._distribution(info)
-                for action, probability in strategy.items():
-                    totals[action] += weighted_count * probability
-                mass += weighted_count
+            if info.round_index == 3:
+                totals, mass = self._integrate_round3(info)
+            else:
+                totals, mass = self._integrate_round4(info)
 
             if mass <= 0.0:
-                # Standard CFR leaves an unreachable average infoset without
-                # behavioral mass. Use uniform only as a deterministic fallback
-                # representation; it contributes no reach to the accumulated
-                # average value that created the zero denominator.
                 probability = 1.0 / len(actions)
                 profile[info] = {action: probability for action in actions}
             else:
