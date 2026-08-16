@@ -1,14 +1,6 @@
 name: HU three-round exact BR parallel
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'deepofc/sequential.py'
-      - 'deepofc/hu_three_round_sequential.py'
-      - 'deepofc/hu_three_round_br.py'
-      - 'tools/benchmark_hu_three_round_br_player.py'
-      - '.github/workflows/hu-three-round-br-parallel.yml'
   workflow_dispatch:
 
 jobs:
