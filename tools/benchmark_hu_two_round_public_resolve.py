@@ -44,11 +44,6 @@ def main() -> None:
             f"public continuation decomposition changed blueprint EV: {reconstructed_ev} vs {full_ev}"
         )
 
-    # Public-key privacy audit on every reachable hidden history. In addition to
-    # checking that no private card is literally stored in the public key, count
-    # whether the SAME public state is compatible with multiple distinct round-3
-    # discard pairs. The latter distinguishes syntactic privacy from strategic
-    # ambiguity under the reduced chance support.
     privacy_checks = 0
     max_hidden_histories = 0
     ambiguous_discard_states = 0
@@ -77,12 +72,19 @@ def main() -> None:
         if len(discard_pairs) > 1:
             ambiguous_discard_states += 1
 
-    target = max(
-        subgames.values(),
-        key=lambda sub: (sub.public_reach_probability, len(sub.histories)),
-    )
+    # The previous gate selected highest reach even when that continuation was
+    # already exact-equilibrium (exploitability zero), producing a false failure
+    # when finite-iteration DCFR introduced only ~1e-7 numerical residue. Select
+    # a relevant state that actually contains strategic error instead.
+    candidates = []
+    for sub in subgames.values():
+        exploitability = sub.exploitability(blueprint)
+        if exploitability > 1e-12:
+            candidates.append((sub.public_reach_probability * exploitability, exploitability, sub))
+    if not candidates:
+        raise SystemExit("legacy public benchmark has no exploitable reachable continuation")
+    _score, before_exp, target = max(candidates, key=lambda item: (item[0], item[1]))
     before_ev = target.expected_u0(blueprint)
-    before_exp = target.exploitability(blueprint)
 
     resolver = Round4PublicDCFR(target)
     started = time.perf_counter()
@@ -94,7 +96,7 @@ def main() -> None:
 
     if not all(math.isfinite(x) for x in (before_ev, before_exp, after_ev, after_exp)):
         raise SystemExit("public resolver produced non-finite diagnostics")
-    if after_exp >= before_exp:
+    if after_exp + 1e-12 >= before_exp:
         raise SystemExit(
             "public DCFR failed to reduce exact continuation exploitability: "
             f"before={before_exp} after={after_exp}"
