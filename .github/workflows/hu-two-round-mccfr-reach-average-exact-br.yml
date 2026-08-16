@@ -1,0 +1,25 @@
+name: HU two-round external-sampling reach-average exact BR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_mccfr_reach_average.py'
+      - 'tools/benchmark_hu_two_round_mccfr_reach_average_exact_br.py'
+      - '.github/workflows/hu-two-round-mccfr-reach-average-exact-br.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train external sampling and exact-BR evaluate current/CFR-average profiles
+        run: python tools/benchmark_hu_two_round_mccfr_reach_average_exact_br.py
