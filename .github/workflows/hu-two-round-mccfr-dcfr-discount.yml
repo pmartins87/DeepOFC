@@ -1,0 +1,24 @@
+name: HU two-round lazy sampled-DCFR discount
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_mccfr_dcfr.py'
+      - 'tools/benchmark_hu_two_round_mccfr_dcfr_discount.py'
+      - '.github/workflows/hu-two-round-mccfr-dcfr-discount.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compare collapsed lazy DCFR factors against sequential discounting
+        run: python tools/benchmark_hu_two_round_mccfr_dcfr_discount.py
