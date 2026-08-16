@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from deepofc.actions import NormalPlacementAction
 from deepofc.sequential import (
     HUSequentialNormalState,
     deterministic_first_legal_hand,
@@ -49,6 +50,23 @@ def test_observation_hides_opponent_current_incoming_and_discards():
     own = state.observation(0)
     assert discard0 in own.state.hero_discards
     assert own.own_action_history[-1][1] == discard0.code
+
+
+def test_direct_apply_remains_fail_closed_without_enumerating_all_actions():
+    state = HUSequentialNormalState.new(seed=777, first_player=0)
+    state = state.apply(state.legal_actions()[0])
+    state = state.apply(state.legal_actions()[0])
+    assert state.round_index == 1
+
+    valid = state.legal_actions()[0]
+    incoming = set(state.incoming[state.acting_chair])
+    outsider = next(card for card in state.deck.cards[state.deck.cursor:] if card not in incoming)
+    invalid = NormalPlacementAction(
+        placements=valid.placements,
+        discard=outsider,
+    )
+    with pytest.raises(ValueError, match="cover each incoming physical card exactly once"):
+        state.apply(invalid)
 
 
 def test_full_seeded_hu_hand_replays_exactly_from_action_keys():
