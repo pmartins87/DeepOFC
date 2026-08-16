@@ -252,8 +252,6 @@ class HUSequentialNormalState:
                 hidden_incoming_count=(0 if hero_chair == 1 else len(self.incoming[1])),
             ),
         )
-        # At terminal there is no meaningful acting decision. OFCState still
-        # requires an acting chair, so preserve the last actor diagnostically.
         canonical = OFCState(
             players=players,
             hero_chair=hero_chair,
@@ -293,12 +291,12 @@ class HUSequentialNormalState:
         if self.terminal:
             raise ValueError("cannot act after terminal state")
         chair = self.acting_chair
-        legal = self.legal_actions()
-        canonical = {candidate.key(): candidate for candidate in legal}
-        if action.key() not in canonical:
-            raise ValueError("action is not legal in the current sequential state")
-        action = canonical[action.key()]
 
+        # Do not enumerate the entire action space merely to validate one
+        # concrete action. `apply_normal_action` already fails closed on round
+        # shape, incoming-card coverage, discard identity, duplicate use and row
+        # capacity. Removing the redundant enumeration preserves semantics while
+        # making recursive exact/search traversals materially cheaper.
         new_board, discarded = apply_normal_action(
             self.boards[chair],
             action,
