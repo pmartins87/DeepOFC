@@ -1,0 +1,27 @@
+name: HU three-round V2 exact BR parallel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_three_round_br.py'
+      - 'deepofc/hu_three_round_sequential_v2.py'
+      - 'tools/benchmark_hu_three_round_v2_br_player.py'
+      - '.github/workflows/hu-three-round-v2-br-parallel.yml'
+  workflow_dispatch:
+
+jobs:
+  br:
+    strategy:
+      fail-fast: false
+      matrix:
+        player: [0, 1]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact V2 player best response and audited pure replay
+        run: python -u tools/benchmark_hu_three_round_v2_br_player.py --player ${{ matrix.player }}
