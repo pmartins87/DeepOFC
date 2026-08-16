@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from .actions import NormalPlacementAction
 from .hu_three_round_sequential import (
     HUThreeRoundSequentialSubgame,
-    StrategyProfile,
 )
 from .sequential import HUPlayerObservation, HUSequentialNormalState
 
@@ -19,14 +18,7 @@ class ThreeRoundTrainingStats:
 
 
 class HUThreeRoundExternalSamplingMCCFR:
-    """Recursive external-sampling MCCFR on the canonical sequential engine.
-
-    Chance and opponent actions are sampled. At the traverser's information
-    sets every legal action is expanded. Both player traversals in one global
-    iteration read the same pre-update regret tables; deltas are committed only
-    after both traversals, matching the simultaneous-update convention used by
-    the already certified two-round solver.
-    """
+    """Recursive external-sampling MCCFR on the canonical sequential engine."""
 
     def __init__(
         self,
@@ -66,9 +58,6 @@ class HUThreeRoundExternalSamplingMCCFR:
     def current_profile(self) -> dict[
         HUPlayerObservation, dict[NormalPlacementAction, float]
     ]:
-        # Sparse by design. Missing infosets retain uniform behavior through the
-        # game's `distribution()` fallback when exact evaluation/BR traverses
-        # branches never sampled during training.
         return {info: self._distribution(info) for info in tuple(self.regrets)}
 
     def _sample_action(
@@ -103,12 +92,16 @@ class HUThreeRoundExternalSamplingMCCFR:
 
         if actor != traverser:
             action = self._sample_action(strategy)
-            return self._traverse(state.apply(action), traverser, delta)
+            return self._traverse(
+                self.game.transition(state, action), traverser, delta
+            )
 
         action_values: dict[NormalPlacementAction, float] = {}
         node_value = 0.0
         for action, probability in strategy.items():
-            value = self._traverse(state.apply(action), traverser, delta)
+            value = self._traverse(
+                self.game.transition(state, action), traverser, delta
+            )
             action_values[action] = value
             node_value += probability * value
 
