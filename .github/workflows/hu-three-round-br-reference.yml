@@ -1,0 +1,24 @@
+name: HU three-round exact best-response reference
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/sequential.py'
+      - 'deepofc/hu_three_round_sequential.py'
+      - 'deepofc/hu_three_round_br.py'
+      - 'tools/benchmark_hu_three_round_br_reference.py'
+      - '.github/workflows/hu-three-round-br-reference.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact BR0/BR1 and independent pure-response full-tree replay
+        run: python -u tools/benchmark_hu_three_round_br_reference.py
