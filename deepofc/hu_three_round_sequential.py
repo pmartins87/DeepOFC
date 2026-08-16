@@ -21,9 +21,6 @@ def P(code: str, row: Row) -> PendingPlacement:
     return PendingPlacement(card=C(code), row=row)
 
 
-# Fixed first two rounds. These are not an abstraction of hidden information:
-# they are a certified public/private checkpoint built by the canonical R4
-# sequential engine before the R6 chance support begins at round_index=2.
 PRIOR_HANDS = (
     (
         (C("2c"), C("4c"), C("5d"), C("6h"), C("7s")),
@@ -64,10 +61,6 @@ PRIOR_ACTIONS = (
     ),
 )
 
-# Every future P0 ordinary card is a spade; P1 receives the suit-mirrored
-# diamonds. With Middle frozen as an 8-high straight and Bottom starting with a
-# suited 3, every legal terminal is non-foul: Top can be at most trips, while
-# Bottom necessarily becomes a flush-or-better after four future placements.
 P0_FUTURE_SCHEDULES = (
     (
         (C("2s"), C("4s"), C("JK1")),
@@ -179,9 +172,6 @@ class HUThreeRoundSequentialSubgame:
             terminal=False,
         )
 
-        # Replay the fixed first two rounds through the same engine used by live
-        # benchmark transitions. This certifies the checkpoint rather than
-        # constructing partial boards independently of R4 semantics.
         while state.round_index < 2:
             chair = state.acting_chair
             action = PRIOR_ACTIONS[chair][state.round_index]
@@ -202,6 +192,14 @@ class HUThreeRoundSequentialSubgame:
         if state.terminal:
             raise ValueError("terminal state has no information set")
         return state.observation(state.acting_chair)
+
+    def transition(
+        self,
+        state: HUSequentialNormalState,
+        action: NormalPlacementAction,
+    ) -> HUSequentialNormalState:
+        """Canonical solver transition using the R4 audited fast path."""
+        return state.apply_fast(action)
 
     def distribution(
         self,
@@ -239,8 +237,9 @@ class HUThreeRoundSequentialSubgame:
                 return float(self.terminal_u0(state))
             info = self.info(state)
             return sum(
-                probability * recurse(state.apply(action))
+                probability * recurse(self.transition(state, action))
                 for action, probability in self.distribution(profile, info).items()
+                if probability > 0.0
             )
 
         return self.chance_probability * sum(
@@ -251,7 +250,11 @@ class HUThreeRoundSequentialSubgame:
         def recurse(state: HUSequentialNormalState) -> int:
             if state.terminal:
                 return 1
-            return sum(recurse(state.apply(action)) for action in state.legal_actions())
+            info = self.info(state)
+            return sum(
+                recurse(self.transition(state, action))
+                for action in self.actions(info)
+            )
 
         return sum(recurse(self.initial_state(outcome)) for outcome in self.outcomes)
 
@@ -267,7 +270,7 @@ class HUThreeRoundSequentialSubgame:
             if existing != legal:
                 raise AssertionError("same sequential infoset produced different legal action sets")
             for action in legal:
-                recurse(state.apply(action))
+                recurse(self.transition(state, action))
 
         for outcome in self.outcomes:
             recurse(self.initial_state(outcome))
@@ -287,6 +290,10 @@ class HUThreeRoundSequentialSubgame:
                 if left.terminal:
                     if not right.terminal:
                         raise AssertionError("mirrored three-round state is not terminal")
+                    # Fast-derived states are fully audited at the exhaustive
+                    # terminal boundary before the scorer is trusted.
+                    left.assert_fully_valid()
+                    right.assert_fully_valid()
                     u0 = self.terminal_u0(left)
                     mirror_u0 = self.terminal_u0(right)
                     if u0 != -mirror_u0:
@@ -300,15 +307,20 @@ class HUThreeRoundSequentialSubgame:
                 if right.acting_chair != 1 - left.acting_chair:
                     raise AssertionError("three-round actor swap symmetry failed")
 
+                left_info = self.info(left)
+                right_info = self.info(right)
                 right_keys = {
-                    candidate.key(): candidate for candidate in right.legal_actions()
+                    candidate.key(): candidate for candidate in self.actions(right_info)
                 }
-                for action in left.legal_actions():
+                for action in self.actions(left_info):
                     mirrored_action = joker_mirror_action(action)
                     candidate = right_keys.get(mirrored_action.key())
                     if candidate is None:
                         raise AssertionError("mirrored three-round action is not legal")
-                    recurse(left.apply(action), right.apply(candidate))
+                    recurse(
+                        self.transition(left, action),
+                        self.transition(right, candidate),
+                    )
 
             recurse(left_root, right_root)
         return checks
