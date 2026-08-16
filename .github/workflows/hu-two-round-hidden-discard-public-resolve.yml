@@ -1,0 +1,26 @@
+name: HU two-round hidden-discard public re-solve safety
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_resolve.py'
+      - 'deepofc/hu_two_round_hidden_discard.py'
+      - 'tools/benchmark_hu_two_round_hidden_discard_public_resolve.py'
+      - '.github/workflows/hu-two-round-hidden-discard-public-resolve.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Re-solve one relevant public state and exact-BR test stitched full policy
+        run: python tools/benchmark_hu_two_round_hidden_discard_public_resolve.py
