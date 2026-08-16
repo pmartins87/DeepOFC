@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'native/fantasy15_pixel_holdout.cpp'
+      - 'native/fantasy15_pixel_model_v1.h'
       - '.github/workflows/fantasy15-native-pixel-harness.yml'
   workflow_dispatch:
 
@@ -15,6 +16,33 @@ jobs:
       - uses: actions/checkout@v4
       - name: Compile strict C++17 replay harness
         run: g++ -std=c++17 -O2 -Wall -Wextra -Werror native/fantasy15_pixel_holdout.cpp -o fantasy15_pixel_holdout
+      - name: Verify frozen rank-model checksums
+        run: |
+          cat > /tmp/check_model.cpp <<'CPP'
+          #include <cstdint>
+          #include <iostream>
+          #include "native/fantasy15_pixel_model_v1.h"
+          int main() {
+            const long expected_sum[13] = {5834,6827,6329,6496,6290,5830,6981,6464,6341,5928,6716,6898,6604};
+            const long expected_weighted[13] = {848875,1048906,1058735,1037829,1026041,915146,1120686,1044284,1055344,914813,1089315,1162766,1112071};
+            for (int r = 0; r < deepofc_f15_model::kRankCount; ++r) {
+              long s = 0, w = 0;
+              for (int i = 0; i < deepofc_f15_model::kFeatureCount; ++i) {
+                const int x = deepofc_f15_model::kRankCentroidsQ[r][i];
+                s += x;
+                w += long(i + 1) * x;
+              }
+              if (s != expected_sum[r] || w != expected_weighted[r]) {
+                std::cerr << "model checksum mismatch row=" << r << " sum=" << s << " weighted=" << w << "\n";
+                return 1;
+              }
+            }
+            std::cout << "PASS: frozen Fantasy15 rank model checksums exact\n";
+            return 0;
+          }
+          CPP
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror -I. /tmp/check_model.cpp -o /tmp/check_model
+          /tmp/check_model
       - name: Confirm harness stays read-only
         run: |
           if grep -Eiq 'SendInput|mouse_event|SetCursorPos|PostMessage|click|drag' native/fantasy15_pixel_holdout.cpp; then
