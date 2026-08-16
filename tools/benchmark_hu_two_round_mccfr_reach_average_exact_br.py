@@ -56,38 +56,41 @@ def main() -> None:
     train_seconds = time.perf_counter() - started
     print(f"training iterations=5000 seconds={train_seconds:.6f}")
 
-    started = time.perf_counter()
-    current = evaluate(game, solver.current_profile())
-    current_seconds = time.perf_counter() - started
-    print_eval("current", current, current_seconds)
+    evaluations = {}
+    profiles = (
+        ("current", solver.current_profile()),
+        ("reach_weighted_cfr_average", solver.cfr_average_profile()),
+        ("linear_reach_weighted_cfr_average", solver.linear_cfr_average_profile()),
+    )
+    for label, profile in profiles:
+        started = time.perf_counter()
+        result = evaluate(game, profile)
+        seconds = time.perf_counter() - started
+        evaluations[label] = result
+        print_eval(label, result, seconds)
 
-    started = time.perf_counter()
-    average = evaluate(game, solver.cfr_average_profile())
-    average_seconds = time.perf_counter() - started
-    print_eval("reach_weighted_cfr_average", average, average_seconds)
-
-    # The subclass must preserve the exact same current-policy training path as
-    # the already frozen base external-sampling solver for this deterministic seed.
+    current = evaluations["current"]
     frozen_current = 0.012517507003
     if abs(current.exploitability - frozen_current) > 1e-10:
         raise SystemExit(
             "reach-average instrumentation changed current training path: "
             f"{current.exploitability} vs {frozen_current}"
         )
+    for label in ("reach_weighted_cfr_average", "linear_reach_weighted_cfr_average"):
+        if evaluations[label].exploitability >= 2.099206349206:
+            raise SystemExit(
+                f"{label} failed to improve over uniform baseline: "
+                f"{evaluations[label].exploitability}"
+            )
 
-    if average.exploitability >= 2.099206349206:
-        raise SystemExit(
-            "reach-weighted CFR average failed to improve over uniform baseline: "
-            f"{average.exploitability}"
-        )
-
-    winner = "reach_weighted_cfr_average" if average.exploitability < current.exploitability else "current"
+    winner = min(evaluations, key=lambda label: evaluations[label].exploitability)
     print(
-        f"winner={winner} current_exploitability={current.exploitability:.12f} "
-        f"reach_average_exploitability={average.exploitability:.12f}"
+        f"winner={winner} current={evaluations['current'].exploitability:.12f} "
+        f"standard={evaluations['reach_weighted_cfr_average'].exploitability:.12f} "
+        f"linear={evaluations['linear_reach_weighted_cfr_average'].exploitability:.12f}"
     )
     print(f"terminal_cache={game.terminal_u0.cache_info()}")
-    print("HU TWO-ROUND EXTERNAL-SAMPLING REACH-AVERAGE EXACT-BR: PASS")
+    print("HU TWO-ROUND EXTERNAL-SAMPLING CURRENT/STANDARD/LINEAR EXACT-BR: PASS")
 
 
 if __name__ == "__main__":
