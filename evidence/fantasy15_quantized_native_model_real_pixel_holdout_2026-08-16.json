@@ -1,0 +1,65 @@
+{
+  "gate": "fantasy15_quantized_native_model_real_pixel_holdout_2026-08-16",
+  "status": "PASS",
+  "source_archive": {
+    "name": "ofc fantasy.zip",
+    "sha256": "1b91e038bb42acee2520187907d9ef9d6f34fc303d065ac2bc5dd1e92d52027e"
+  },
+  "client_size": [450, 830],
+  "training_frames": [
+    {
+      "path": "session_1/frame000032.bmp",
+      "sha256": "723c94862c6020f838d48938a96403b3f4605e77a36b064c5120135c88884130"
+    },
+    {
+      "path": "session_1/frame000060.bmp",
+      "sha256": "05689f26ba0e2d3a3cfa3c25e215f3cae38f1292d8ddede7df2e286d37b9eb99"
+    }
+  ],
+  "holdout_frame": {
+    "path": "session_1/frame000052.bmp",
+    "sha256": "7ea7ff00bf0c8c0d47b3ce8313e1732c9b2958513f23787eee31b70d3f3a4935"
+  },
+  "holdout_policy": "frame000052 contributes zero rank samples to model; all 13 rank centroids derive only from frames 32+60",
+  "feature": "same deterministic 32x32 binary HOG / 4x4 cells / 2x2 blocks as native C++ harness",
+  "quantization": "uint8 = floor(feature_centroid*255+0.5); runtime dequantizes /255.0",
+  "model_checksums": {
+    "rank_order": "23456789TJQKA",
+    "sum": [5834, 6827, 6329, 6496, 6290, 5830, 6981, 6464, 6341, 5928, 6716, 6898, 6604],
+    "weighted": [848875, 1048906, 1058735, 1037829, 1026041, 915146, 1120686, 1044284, 1055344, 914813, 1089315, 1162766, 1112071]
+  },
+  "thresholds": {
+    "standard_max_distance": 2.25,
+    "standard_min_margin": 0.15,
+    "joker_min_distance": 3.2
+  },
+  "result": {
+    "standard_cards_exact": "13/13",
+    "persistent_jokers_exact": "2/2",
+    "full_fan_exact": "15/15"
+  },
+  "expected": ["JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"],
+  "predicted": ["JK1", "JK2", "Ac", "Kd", "Qc", "Qd", "Js", "9s", "9h", "7s", "6h", "4s", "4c", "3s", "2c"],
+  "details": [
+    {"slot":0,"expected":"JK1","predicted":"JK1","rank_distance_quantized_model":3.515489847,"rank_margin_quantized_model":0.523578133,"ink_counts":{"h":208,"c":199,"d":0,"s":7}},
+    {"slot":1,"expected":"JK2","predicted":"JK2","rank_distance_quantized_model":4.886700528,"rank_margin_quantized_model":0.372869375,"ink_counts":{"h":74,"c":0,"d":0,"s":121}},
+    {"slot":2,"expected":"Ac","predicted":"Ac","rank_distance_quantized_model":1.057354109,"rank_margin_quantized_model":1.373181647,"ink_counts":{"h":0,"c":305,"d":0,"s":53}},
+    {"slot":3,"expected":"Kd","predicted":"Kd","rank_distance_quantized_model":0.951769749,"rank_margin_quantized_model":1.513604302,"ink_counts":{"h":0,"c":6,"d":283,"s":1}},
+    {"slot":4,"expected":"Qc","predicted":"Qc","rank_distance_quantized_model":1.069458347,"rank_margin_quantized_model":0.817595593,"ink_counts":{"h":0,"c":332,"d":17,"s":1}},
+    {"slot":5,"expected":"Qd","predicted":"Qd","rank_distance_quantized_model":1.219791686,"rank_margin_quantized_model":0.872873379,"ink_counts":{"h":0,"c":8,"d":289,"s":0}},
+    {"slot":6,"expected":"Js","predicted":"Js","rank_distance_quantized_model":0.932067272,"rank_margin_quantized_model":1.225071735,"ink_counts":{"h":0,"c":2,"d":15,"s":215}},
+    {"slot":7,"expected":"9s","predicted":"9s","rank_distance_quantized_model":0.781842789,"rank_margin_quantized_model":2.427536581,"ink_counts":{"h":0,"c":0,"d":0,"s":256}},
+    {"slot":8,"expected":"9h","predicted":"9h","rank_distance_quantized_model":1.352679879,"rank_margin_quantized_model":0.6120074,"ink_counts":{"h":368,"c":0,"d":0,"s":8}},
+    {"slot":9,"expected":"7s","predicted":"7s","rank_distance_quantized_model":1.906816328,"rank_margin_quantized_model":1.746854055,"ink_counts":{"h":2,"c":0,"d":0,"s":217}},
+    {"slot":10,"expected":"6h","predicted":"6h","rank_distance_quantized_model":0.385027494,"rank_margin_quantized_model":1.80069314,"ink_counts":{"h":367,"c":0,"d":0,"s":0}},
+    {"slot":11,"expected":"4s","predicted":"4s","rank_distance_quantized_model":1.021249502,"rank_margin_quantized_model":2.688343037,"ink_counts":{"h":0,"c":0,"d":0,"s":246}},
+    {"slot":12,"expected":"4c","predicted":"4c","rank_distance_quantized_model":1.741808097,"rank_margin_quantized_model":1.833680627,"ink_counts":{"h":0,"c":303,"d":0,"s":3}},
+    {"slot":13,"expected":"3s","predicted":"3s","rank_distance_quantized_model":0.66190184,"rank_margin_quantized_model":2.776891589,"ink_counts":{"h":0,"c":22,"d":0,"s":231}},
+    {"slot":14,"expected":"2c","predicted":"2c","rank_distance_quantized_model":1.338822201,"rank_margin_quantized_model":2.188783843,"ink_counts":{"h":0,"c":361,"d":0,"s":1}}
+  ],
+  "authority": {
+    "runtime_enabled": false,
+    "autoplayer_enabled": false,
+    "meaning": "This certifies the frozen 15-card HU hero-chair-1 pixel model on the independent real-pixel holdout only. It does not certify live capture, arrangement-row recognition, 14/16/17 geometry, 3-player geometry, or any click/drag path."
+  }
+}
