@@ -1,0 +1,24 @@
+name: HU three-round V2 work-normalized exact-BR quality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hu-three-round-v2-quality-work.yml'
+  workflow_dispatch:
+
+jobs:
+  quality:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [dcfr, external]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Equal-terminal V2 training followed by exact three-level best response
+        run: python -u tools/benchmark_hu_three_round_v2_quality_work.py --mode ${{ matrix.mode }}
