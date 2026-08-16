@@ -32,8 +32,6 @@ def test_observation_hides_opponent_current_incoming_and_discards():
     assert obs0.state.player(1).hidden_incoming_count == 5
     assert obs0.state.player(1).hidden_discard_count == 0
 
-    # Finish round 0, then let player 0 act in round 1 so player 1 observes the
-    # public placements but not player 0's discarded card.
     state = state.apply(state.legal_actions()[0])
     state = state.apply(state.legal_actions()[0])
     assert state.round_index == 1 and state.acting_chair == 0
@@ -45,8 +43,6 @@ def test_observation_hides_opponent_current_incoming_and_discards():
     assert all(not hasattr(record, "discard") for record in obs1.public_action_history)
     assert discard0.code not in repr(obs1.public_action_history)
 
-    # Player 0 must retain the same private discard in its own perfect-recall
-    # observation even though player 1 cannot see it.
     own = state.observation(0)
     assert discard0 in own.state.hero_discards
     assert own.own_action_history[-1][1] == discard0.code
@@ -67,6 +63,8 @@ def test_direct_apply_remains_fail_closed_without_enumerating_all_actions():
     )
     with pytest.raises(ValueError, match="cover each incoming physical card exactly once"):
         state.apply(invalid)
+    with pytest.raises(ValueError, match="cover each incoming physical card exactly once"):
+        state.apply_fast(invalid)
 
 
 def test_full_seeded_hu_hand_replays_exactly_from_action_keys():
@@ -90,8 +88,6 @@ def test_full_seeded_hu_hand_replays_exactly_from_action_keys():
     )
     assert replayed == finished
 
-    # At terminal each player knows both public boards plus only its own four
-    # discard identities; the opponent's four discards remain absent.
     for chair in (0, 1):
         obs = replayed.observation(chair)
         opponent = 1 - chair
@@ -119,6 +115,22 @@ def test_round_progress_is_exact_for_both_actor_orders():
             state = state.apply(state.legal_actions()[0])
         assert state.terminal
         assert [record.chair for record in state.history] == expected_actor_sequence
+
+
+@pytest.mark.parametrize("seed", range(20))
+@pytest.mark.parametrize("first_player", (0, 1))
+def test_fast_path_matches_fully_audited_path_at_every_transition(seed, first_player):
+    audited = HUSequentialNormalState.new(seed=seed + 1000, first_player=first_player)
+    fast = audited
+    while not audited.terminal:
+        action = audited.legal_actions()[0]
+        audited = audited.apply(action)
+        fast = fast.apply_fast(action)
+        # `_trusted_derived` is excluded from equality/hash; semantic states must
+        # be identical and the skipped full audit must still pass on demand.
+        assert fast == audited
+        fast.assert_fully_valid()
+    assert fast.terminal
 
 
 @pytest.mark.parametrize("seed", range(40))
