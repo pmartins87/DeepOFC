@@ -19,10 +19,15 @@ class HUThreeRoundFullTreeDCFR:
     """Recursive simultaneous full-tree DCFR on the canonical sequential game.
 
     Counterfactual regret at a player-i infoset is weighted by chance and the
-    *opponent* sequence reach only. Average strategy is weighted by chance and
+    opponent sequence reach only. Average strategy is weighted by chance and
     player i's own sequence reach. Regrets are discounted before the new
     iteration's exact regret delta is committed, matching the already certified
     two-round DCFR ordering.
+
+    Derived states are expanded through ``game.transition``. Sequential games
+    implement that transition with their validated fast path, avoiding repeated
+    full-state invariant scans at every node while preserving the same legal
+    action and terminal semantics.
     """
 
     def __init__(
@@ -65,14 +70,6 @@ class HUThreeRoundFullTreeDCFR:
         return {action: value / total for action, value in positive.items()}
 
     def current_profile(self):
-        """Current regret-matching policy after the latest committed update.
-
-        This is exposed separately from `average_profile()` because a one-pass
-        work-normalized comparison would otherwise compare the external
-        sampler's updated current policy with DCFR's still-uniform one-iteration
-        average by construction.
-        """
-
         return {info: self._distribution(info) for info in tuple(self.regrets)}
 
     def average_profile(self):
@@ -122,9 +119,10 @@ class HUThreeRoundFullTreeDCFR:
         action_values = {}
         node_u0 = 0.0
         for action, probability in strategy.items():
+            child_state = self.game.transition(state, action)
             if actor == 0:
                 child = self._traverse(
-                    state.apply(action),
+                    child_state,
                     chance_reach=chance_reach,
                     reach0=reach0 * probability,
                     reach1=reach1,
@@ -133,7 +131,7 @@ class HUThreeRoundFullTreeDCFR:
                 )
             else:
                 child = self._traverse(
-                    state.apply(action),
+                    child_state,
                     chance_reach=chance_reach,
                     reach0=reach0,
                     reach1=reach1 * probability,
