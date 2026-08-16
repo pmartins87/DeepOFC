@@ -10,12 +10,13 @@ if str(ROOT) not in sys.path:
 
 from deepofc.hu_three_round_br import (
     exact_best_response,
-    profile_with_pure_response,
+    exact_value_of_pure_response,
 )
 from deepofc.hu_three_round_sequential import HUThreeRoundSequentialSubgame
 
 
 EXPECTED_TERMINALS = 1_312_200
+EXPECTED_PURE_REPLAY_TERMINALS = 8 * 405
 
 
 def main() -> None:
@@ -31,8 +32,12 @@ def main() -> None:
         )
 
     started = time.perf_counter()
-    cross0 = game.expected_u0(profile_with_pure_response(game, uniform, br0))
+    cross0, cross0_terminals = exact_value_of_pure_response(game, uniform, br0)
     cross0_seconds = time.perf_counter() - started
+    if cross0_terminals != EXPECTED_PURE_REPLAY_TERMINALS:
+        raise SystemExit(
+            f"BR0 pure replay work mismatch: {cross0_terminals} vs {EXPECTED_PURE_REPLAY_TERMINALS}"
+        )
     if abs(br0.value - cross0) > 1e-10:
         raise SystemExit(f"three-round BR0 pure replay mismatch: {br0.value} vs {cross0}")
 
@@ -45,8 +50,12 @@ def main() -> None:
         )
 
     started = time.perf_counter()
-    cross1 = -game.expected_u0(profile_with_pure_response(game, uniform, br1))
+    cross1, cross1_terminals = exact_value_of_pure_response(game, uniform, br1)
     cross1_seconds = time.perf_counter() - started
+    if cross1_terminals != EXPECTED_PURE_REPLAY_TERMINALS:
+        raise SystemExit(
+            f"BR1 pure replay work mismatch: {cross1_terminals} vs {EXPECTED_PURE_REPLAY_TERMINALS}"
+        )
     if abs(br1.value - cross1) > 1e-10:
         raise SystemExit(f"three-round BR1 pure replay mismatch: {br1.value} vs {cross1}")
 
@@ -62,7 +71,8 @@ def main() -> None:
         f"br0_infosets={len(br0.choices)} br1_infosets={len(br1.choices)}"
     )
     print(
-        f"independent_crosscheck br0_full_tree={cross0:.12f} br1_full_tree={cross1:.12f}"
+        f"independent_crosscheck br0_pure={cross0:.12f} br1_pure={cross1:.12f} "
+        f"pure_replay_terminals_each={EXPECTED_PURE_REPLAY_TERMINALS}"
     )
     print(
         f"timing br0_seconds={br0_seconds:.6f} cross0_seconds={cross0_seconds:.6f} "
