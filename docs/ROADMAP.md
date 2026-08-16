@@ -188,12 +188,12 @@ Implemented and tested:
 
 Still required before R4 PASS:
 
-- [ ] full sequential 2-player hidden-state engine through all five normal rounds;
+- [x] full sequential 2-player hidden-state engine through all five normal rounds;
 - [ ] full sequential 3-player hidden-state engine;
-- [ ] explicit observation projection so private incoming/discards never leak to other players;
+- [x] explicit HU observation projection so private incoming/discards never leak to the other player, with exact own-action perfect recall and public placement-only history;
 - [ ] Fantasy/re-Fantasy transitions for every still-unfrozen card-count path;
-- [ ] complete-hand deterministic replay from seed and logged actions;
-- [ ] large fuzz/property campaigns over physical uniqueness, row capacities, actor order and terminal zero-sum invariants;
+- [x] complete normal-HU deterministic replay from seed and logged canonical action keys;
+- [ ] large fuzz/property campaigns over physical uniqueness, row capacities, actor order and terminal zero-sum invariants; current HU structural gate already covers 80 complete seeded hands across both actor orders, but this is not yet the final large campaign;
 - [ ] integrate capped cash settlement only after R1 freezes its exact client semantics.
 
 **Gate:** complete games replay deterministically from seed/actions, information visibility is correct, and large fuzz/property campaigns preserve every state/scoring invariant.
@@ -265,13 +265,28 @@ First exact HU architecture benchmark now implemented/proven:
 
 Current interpretation: full-tree DCFR is the strongest measured algorithm on this **small tractable tree**, while external sampling remains relevant because it visits only a sampled fraction of the game tree. This is not yet a production architecture decision.
 
+Current deeper-HU evidence (2026-08-16):
+
+- [x] 373,248-terminal two-decision benchmark certified with exact structural value 0 and deep exact best response;
+- [x] stronger overlapping-support fixture certified with **882** public states compatible with multiple hidden-discard pairs and up to **4** distinct discard pairs behind one public state;
+- [x] 5-seed external-sampling current-profile calibration at 20k iterations reaches mean exploitability about **0.0007590**, maximum about **0.0019046**, with two seeds at exact zero and all five seeds best at the 20k checkpoint;
+- [x] standard and linear own-reach-weighted CFR averages independently cross-checked; at the measured finite budget the current profile remains materially stronger;
+- [x] lazy sampled-DCFR mechanism independently checked but strategically rejected versus ordinary external sampling;
+- [x] physical-Joker two-decision benchmark certified with persistent JK1/JK2, **41,472** terminals and **162** public states ambiguous between Joker and non-Joker discards;
+- [x] physical-Joker budget curves show no universal solver winner: DCFR is excellent at moderate budget on small trees, while external sampling scales and reached exact zero at 20k;
+- [x] canonical full five-round **HU normal-play sequential engine** added in R4 with authoritative hidden state, player observation projection, perfect recall and deterministic replay;
+- [ ] resolve zero-blueprint-reach/off-tree public beliefs with a safety mechanism validated by exact full-game best response; the 1% trembled-belief experiment remains pending;
+- [ ] move the next R6 tribunal earlier in the hand, using the canonical sequential HU engine and at least **three decisions per player** rather than another hand-built last-two-street fixture.
+
+Canonical evidence document: `docs/HU_TWO_ROUND_R6_BENCHMARK_2026-08-16.md`.
+
 Next benchmark program:
 
-- [ ] construct a deeper HU subgame with **at least two decisions by the same player**, preserving perfect recall and private-discard information;
-- [ ] replace the one-action-specialized exact best response with a deeper-game independently validated BR/reference evaluator;
-- [ ] benchmark outcome-sampling MCCFR only against that validated reference rather than by training loss;
-- [ ] benchmark continual re-solving from the live public state;
-- [ ] test where full-tree DCFR becomes computationally dominated by sampled/re-solving approaches as the chance/action tree grows;
+- [x] construct deeper HU subgames with **at least two decisions by the same player**, preserving perfect recall and strategically ambiguous private-discard information;
+- [x] replace the one-action-specialized exact best response with a deeper-game independently validated BR/reference evaluator, including asymmetric pure-response replay cross-checks;
+- [x] benchmark outcome-sampling MCCFR only against that validated reference rather than by training loss; exact-unbiased estimator passed but outcome sampling was empirically rejected in this regime;
+- [x] benchmark public-state continual re-solving and stitch solved continuations back into the complete strategy before exact full-game best-response evaluation;
+- [x] measure the DCFR/external-sampling crossover on 373,248-terminal hidden-discard and 41,472-terminal physical-Joker games, separating training and exact-evaluation cost;
 - [ ] benchmark hybrid search + learned value/policy only after exact/search references exist;
 - [ ] measure exploitability/best response, convergence rate, memory, CPU cost and runtime latency rather than choosing by self-play value alone;
 - [ ] treat 3-player separately with multiplayer self-play/equilibrium-approximation validation.
