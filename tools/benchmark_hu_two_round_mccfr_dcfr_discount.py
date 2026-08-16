@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import math
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,6 +8,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from deepofc.hu_two_round import HUTwoRoundSubgame
+from deepofc.hu_two_round_mccfr import TwoRoundExternalSamplingMCCFR
 from deepofc.hu_two_round_mccfr_dcfr import TwoRoundExternalSamplingLazyDCFR
 
 
@@ -22,6 +22,29 @@ def sequential(value: float, start: int, end: int, exponent: float) -> float:
 
 def main() -> None:
     game = HUTwoRoundSubgame()
+
+    # Gate 1: same seed + first iteration must traverse and update identically.
+    # At t=1 DCFR discounts only pre-existing zero regrets, so any difference
+    # here would mean the sampled traversal/RNG semantics changed accidentally.
+    base = TwoRoundExternalSamplingMCCFR(game, seed=20260815)
+    sampled_dcfr = TwoRoundExternalSamplingLazyDCFR(game, seed=20260815)
+    base.step()
+    sampled_dcfr.step()
+    first_step_error = 0.0
+    for info, actions in game.info_actions.items():
+        for action in actions:
+            first_step_error = max(
+                first_step_error,
+                abs(base.regrets[info][action] - sampled_dcfr.regrets[info][action]),
+            )
+    if first_step_error > 0.0:
+        raise SystemExit(
+            f"sampled-DCFR changed first-iteration traversal/update: {first_step_error}"
+        )
+
+    # Gate 2: collapsed skipped-iteration discount equals explicit sequential
+    # multiplication and leaves regret-matching behavior invariant in the absence
+    # of a new regret update.
     solver = TwoRoundExternalSamplingLazyDCFR(game, seed=7)
     info = next(iter(game.info_actions))
     actions = game.actions(info)
@@ -58,18 +81,20 @@ def main() -> None:
             f"{strategy_error}"
         )
 
-    # Re-applying the same target must be exactly idempotent.
     frozen = dict(solver.regrets[info])
     solver._discount_to(info, 37)
     if any(solver.regrets[info][a] != frozen[a] for a in actions):
         raise SystemExit("same-target lazy discount was not idempotent")
 
     print(
+        f"sampled_dcfr_first_iteration max_abs_regret_error={first_step_error:.18e}"
+    )
+    print(
         f"lazy_dcfr_discount actions={len(actions)} interval=3..37 "
         f"max_abs_regret_error={worst:.18e} "
         f"max_abs_strategy_error={strategy_error:.18e}"
     )
-    print("HU TWO-ROUND LAZY DCFR DISCOUNT: PASS")
+    print("HU TWO-ROUND LAZY DCFR DISCOUNT+TRAVERSAL: PASS")
 
 
 if __name__ == "__main__":
