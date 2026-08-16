@@ -1,0 +1,24 @@
+name: Fantasy15 native pixel harness compile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/fantasy15_pixel_holdout.cpp'
+      - '.github/workflows/fantasy15-native-pixel-harness.yml'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile strict C++17 replay harness
+        run: g++ -std=c++17 -O2 -Wall -Wextra -Werror native/fantasy15_pixel_holdout.cpp -o fantasy15_pixel_holdout
+      - name: Confirm harness stays read-only
+        run: |
+          if grep -Eiq 'SendInput|mouse_event|SetCursorPos|PostMessage|click|drag' native/fantasy15_pixel_holdout.cpp; then
+            echo 'Unexpected action primitive in read-only replay harness'
+            exit 1
+          fi
+          echo 'PASS: native Fantasy15 pixel harness is compile-clean and read-only'
