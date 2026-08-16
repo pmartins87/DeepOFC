@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import sys
 import time
@@ -42,14 +43,7 @@ def tremble_profile(game, current, epsilon: float):
 
 
 def br_steering_public_states(game, current, response):
-    """Public round-4 states reached by one exact BR versus the current opponent.
-
-    The responding player's own round-3 action is deterministic from the BR.
-    The opponent's positive-probability round-3 actions are enumerated exactly,
-    preserving chance/opponent reach. This specifically surfaces states an
-    adversary can steer us into even if our self-play/current blueprint assigns
-    them zero probability.
-    """
+    """Public round-4 states reached by one exact BR versus the current opponent."""
 
     player = response.player
     states: dict[Round4PublicState, float] = {}
@@ -84,9 +78,9 @@ def br_steering_public_states(game, current, response):
     return states
 
 
-def main() -> None:
+def run(seed: int) -> tuple[float, float]:
     game = HUTwoRoundHiddenDiscardSubgame()
-    solver = TwoRoundExternalSamplingMCCFR(game, seed=20260815)
+    solver = TwoRoundExternalSamplingMCCFR(game, seed=seed)
     started = time.perf_counter()
     solver.run(5_000)
     train_seconds = time.perf_counter() - started
@@ -107,7 +101,9 @@ def main() -> None:
     off_tree_targets = target_states - current_support
     on_tree_targets = target_states & current_support
     if not off_tree_targets:
-        raise SystemExit("exact best responses did not expose any zero-blueprint-reach public state")
+        raise SystemExit(
+            f"seed={seed}: exact best responses exposed no zero-blueprint-reach public state"
+        )
 
     belief = tremble_profile(game, current, EPSILON)
     started = time.perf_counter()
@@ -115,7 +111,9 @@ def main() -> None:
     build_seconds = time.perf_counter() - started
     missing = target_states - set(belief_public)
     if missing:
-        raise SystemExit(f"trembled belief still lacks {len(missing)} BR steering states")
+        raise SystemExit(
+            f"seed={seed}: trembled belief still lacks {len(missing)} BR steering states"
+        )
 
     stitched = {info: dict(dist) for info, dist in current.items()}
     owners = {}
@@ -125,19 +123,13 @@ def main() -> None:
     local_weighted_before = 0.0
     local_weighted_after = 0.0
 
-    # Use BR steering reach only as an audit weight, never as a replacement for
-    # the trembled posterior inside each subgame.
     combined_reach = {
         state: steering0.get(state, 0.0) + steering1.get(state, 0.0)
         for state in target_states
     }
 
     started = time.perf_counter()
-    for state in sorted(
-        target_states,
-        key=lambda s: combined_reach[s],
-        reverse=True,
-    ):
+    for state in sorted(target_states, key=lambda s: combined_reach[s], reverse=True):
         sub = belief_public[state]
         for info in sub.info_actions:
             previous = owners.setdefault(info, state)
@@ -168,34 +160,42 @@ def main() -> None:
     delta = after[3] - before[3]
 
     print(
-        f"blueprint iterations=5000 train_seconds={train_seconds:.6f} "
+        f"seed={seed} blueprint iterations=5000 train_seconds={train_seconds:.6f} "
         f"expected_u0={before[0]:.12f} br0={before[1]:.12f} br1={before[2]:.12f} "
         f"exploitability={before[3]:.12f} exact_eval_seconds={before_seconds:.6f}"
     )
     print(
-        f"br_steering states_br0={len(steering0)} states_br1={len(steering1)} "
+        f"seed={seed} br_steering states_br0={len(steering0)} states_br1={len(steering1)} "
         f"union={len(target_states)} on_tree={len(on_tree_targets)} off_tree={len(off_tree_targets)}"
     )
     print(
-        f"belief epsilon={EPSILON:.6f} belief_public_states={len(belief_public)} "
+        f"seed={seed} belief epsilon={EPSILON:.6f} belief_public_states={len(belief_public)} "
         f"build_seconds={build_seconds:.6f} improved_targets={improved} rejected_targets={rejected} "
         f"stitched_infosets={target_infosets} resolve_seconds={resolve_seconds:.6f}"
     )
     print(
-        f"weighted_target_local_before={local_weighted_before:.12f} "
+        f"seed={seed} weighted_target_local_before={local_weighted_before:.12f} "
         f"weighted_target_local_after={local_weighted_after:.12f}"
     )
     print(
-        f"stitched expected_u0={after[0]:.12f} br0={after[1]:.12f} br1={after[2]:.12f} "
+        f"seed={seed} stitched expected_u0={after[0]:.12f} br0={after[1]:.12f} br1={after[2]:.12f} "
         f"exploitability={after[3]:.12f} global_delta={delta:+.12f} "
         f"exact_eval_seconds={after_seconds:.6f}"
     )
     if delta >= -1e-12:
         raise SystemExit(
-            "BR-targeted trembled-belief re-solving did not improve exact global exploitability: "
+            f"seed={seed}: BR-targeted trembled re-solving did not improve exact global exploitability: "
             f"delta={delta}"
         )
-    print("HU TWO-ROUND HIDDEN-DISCARD BR-TARGETED TREMBLED RE-SOLVE: PASS")
+    print(f"seed={seed} HU TWO-ROUND BR-TARGETED TREMBLED RE-SOLVE: PASS")
+    return before[3], after[3]
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=20260815)
+    args = ap.parse_args()
+    run(args.seed)
 
 
 if __name__ == "__main__":
