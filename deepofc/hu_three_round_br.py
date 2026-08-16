@@ -164,18 +164,57 @@ def exact_best_response(
     )
 
 
+def exact_value_of_pure_response(
+    game: HUThreeRoundSequentialSubgame,
+    opponent_profile: StrategyProfile,
+    response: ThreeRoundBestResponse,
+) -> tuple[float, int]:
+    """Independently replay one pure BR without traversing zero-probability actions.
+
+    This is intentionally separate from the backward-induction accumulation in
+    `exact_best_response`. At the responding player's infosets it executes only
+    the chosen pure action. At opponent infosets it integrates the supplied
+    behavioral policy exactly. Thus the cross-check exercises the canonical
+    state transitions and terminal scorer again while avoiding the previous
+    waste of enumerating one-hot actions with probability zero.
+    """
+
+    terminal_histories = 0
+
+    def recurse(state: HUSequentialNormalState) -> float:
+        nonlocal terminal_histories
+        if state.terminal:
+            terminal_histories += 1
+            u0 = float(game.terminal_u0(state))
+            return u0 if response.player == 0 else -u0
+
+        info = game.info(state)
+        if state.acting_chair == response.player:
+            chosen = response.choices.get(info)
+            if chosen is None:
+                raise AssertionError("pure response lacks a reached responding-player infoset")
+            return recurse(state.apply(chosen))
+
+        distribution = game.distribution(opponent_profile, info)
+        total = 0.0
+        for action, probability in distribution.items():
+            if probability <= 0.0:
+                continue
+            total += probability * recurse(state.apply(action))
+        return total
+
+    value = game.chance_probability * sum(
+        recurse(game.initial_state(outcome)) for outcome in game.outcomes
+    )
+    return value, terminal_histories
+
+
 def profile_with_pure_response(
     game: HUThreeRoundSequentialSubgame,
     opponent_profile: StrategyProfile,
     response: ThreeRoundBestResponse,
 ) -> dict[HUPlayerObservation, dict[NormalPlacementAction, float]]:
-    """Sparse full-profile overlay for independent expected-value replay.
-
-    Opponent entries explicitly supplied in `opponent_profile` are preserved;
-    missing opponent infosets continue to use the game's uniform fallback.
-    Every responding-player infoset discovered by the exact BR is overwritten by
-    the corresponding deterministic one-hot action.
-    """
+    """Sparse full-profile overlay retained for generic diagnostics."""
 
     merged = {
         info: {action: float(probability) for action, probability in dist.items()}
