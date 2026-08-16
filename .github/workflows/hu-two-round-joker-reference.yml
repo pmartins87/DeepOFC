@@ -1,0 +1,27 @@
+name: HU two-round physical-Joker exact reference
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/state.py'
+      - 'deepofc/scoring.py'
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_resolve.py'
+      - 'deepofc/hu_two_round_joker.py'
+      - 'tools/benchmark_hu_two_round_joker_reference.py'
+      - '.github/workflows/hu-two-round-joker-reference.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exhaustively certify physical-Joker two-round benchmark
+        run: python tools/benchmark_hu_two_round_joker_reference.py
