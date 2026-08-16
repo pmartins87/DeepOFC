@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from deepofc.hu_three_round_mccfr import HUThreeRoundExternalSamplingMCCFR
 from deepofc.hu_three_round_sequential import HUThreeRoundSequentialSubgame
 from deepofc.hu_two_round_joker import joker_mirror_action
 from deepofc.scoring import is_foul
@@ -50,3 +51,13 @@ def test_three_round_root_actions_mirror_to_swapped_chance_outcome():
     for action in left.legal_actions():
         mirrored_action = joker_mirror_action(action)
         assert mirrored_action.key() in right_by_key
+
+
+def test_three_round_external_sampling_expands_exactly_405_own_sequences_per_traverser():
+    game = HUThreeRoundSequentialSubgame()
+    solver = HUThreeRoundExternalSamplingMCCFR(game, seed=20260816)
+    solver.step()
+    stats = solver.stats()
+    assert stats.iterations == 1
+    assert stats.terminal_evaluations == 810
+    assert stats.regret_infosets > 0
