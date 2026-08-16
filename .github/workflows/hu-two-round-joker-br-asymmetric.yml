@@ -1,0 +1,24 @@
+name: HU two-round physical-Joker asymmetric BR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_joker.py'
+      - 'tools/benchmark_hu_two_round_joker_br_asymmetric.py'
+      - '.github/workflows/hu-two-round-joker-br-asymmetric.yml'
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cross-check asymmetric Joker best response by full-tree replay
+        run: python tools/benchmark_hu_two_round_joker_br_asymmetric.py
