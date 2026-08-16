@@ -1,0 +1,28 @@
+name: Patch R4 R6 roadmap 2026-08-16
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-roadmap-r4-r6-20260816.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply roadmap patch
+        run: python tools/patch_roadmap_r4_r6_20260816.py
+      - name: Persist roadmap state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ROADMAP.md
+          git commit -m "Docs: advance R4 and R6 evidence state"
+          git push origin HEAD:main
