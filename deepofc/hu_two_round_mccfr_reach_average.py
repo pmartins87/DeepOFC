@@ -6,21 +6,13 @@ from .hu_two_round_mccfr import TwoRoundExternalSamplingMCCFR
 
 
 class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
-    """External-sampling trainer with exact standard CFR averaging.
+    """External-sampling trainer with exact CFR-style averaging.
 
-    The first implementation flushed every round-4 child whenever its round-3
-    predecessor changed. That was mathematically exact but computationally
-    hostile to sampling. This version keeps the same estimator while recording
-    only behavioral-strategy change events. At export time it integrates the
-    piecewise-constant product
-
-        pi_i^t(I) * sigma_i^t(I, a)
-
-    by merging the predecessor and local event timelines.
-
-    For round 3, own reach is one. For round 4, perfect recall makes own reach
-    exactly the probability of the remembered round-3 action at the unique
-    predecessor infoset.
+    Behavioral-strategy changes are recorded sparsely. Average profiles are
+    exported by integrating piecewise-constant local strategies and predecessor
+    own-reach probabilities over those event timelines. This supports both the
+    standard unweighted CFR average and a linear-in-iteration average without
+    touching child infosets during sampled training.
     """
 
     def __init__(self, game: HUTwoRoundSubgame, *, seed: int = 1) -> None:
@@ -98,8 +90,6 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
         self._sampled_traversal(0, delta)
         self._sampled_traversal(1, delta)
 
-        # Iteration t used these pre-update strategies. Preserve the legacy
-        # local-time average exactly as in the base class.
         before = {info: self._distribution(info) for info in delta}
         for info in delta:
             self._flush_local_strategy_used_through(info, t)
@@ -140,8 +130,19 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
             current = distribution
         return current
 
+    @staticmethod
+    def _interval_weight(start: int, end: int, *, linear: bool) -> float:
+        """Sum iteration weights over integer t in [start, end)."""
+        count = end - start
+        if count <= 0:
+            return 0.0
+        if not linear:
+            return float(count)
+        # start + ... + (end-1), evaluated exactly in integer arithmetic first.
+        return float(count * (start + end - 1) // 2)
+
     def _integrate_round3(
-        self, info: TwoRoundInfoSet
+        self, info: TwoRoundInfoSet, *, linear: bool = False
     ) -> tuple[dict[NormalPlacementAction, float], float]:
         actions = self.game.actions(info)
         totals = {action: 0.0 for action in actions}
@@ -152,15 +153,15 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
         mass = 0.0
         for index in range(len(starts) - 1):
             start, end = starts[index], starts[index + 1]
-            count = end - start
+            weight = self._interval_weight(start, end, linear=linear)
             distribution = events[index][1]
-            mass += count
+            mass += weight
             for action, probability in distribution.items():
-                totals[action] += count * probability
+                totals[action] += weight * probability
         return totals, mass
 
     def _integrate_round4(
-        self, info: TwoRoundInfoSet
+        self, info: TwoRoundInfoSet, *, linear: bool = False
     ) -> tuple[dict[NormalPlacementAction, float], float]:
         actions = self.game.actions(info)
         totals = {action: 0.0 for action in actions}
@@ -177,28 +178,28 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
 
         mass = 0.0
         for start, end in zip(ordered, ordered[1:]):
-            count = end - start
-            if count <= 0:
+            temporal_weight = self._interval_weight(start, end, linear=linear)
+            if temporal_weight <= 0.0:
                 continue
             local = self._distribution_at(local_events, start)
             parent_distribution = self._distribution_at(parent_events, start)
             reach = parent_distribution[parent_action]
-            weighted_count = count * reach
-            mass += weighted_count
+            weighted = temporal_weight * reach
+            mass += weighted
             for action, probability in local.items():
-                totals[action] += weighted_count * probability
+                totals[action] += weighted * probability
         return totals, mass
 
-    def cfr_average_profile(self):
+    def _average_profile(self, *, linear: bool):
         if self.iteration == 0:
             return self.game.uniform_profile()
 
         profile = {}
         for info, actions in self.game.info_actions.items():
             if info.round_index == 3:
-                totals, mass = self._integrate_round3(info)
+                totals, mass = self._integrate_round3(info, linear=linear)
             else:
-                totals, mass = self._integrate_round4(info)
+                totals, mass = self._integrate_round4(info, linear=linear)
 
             if mass <= 0.0:
                 probability = 1.0 / len(actions)
@@ -208,3 +209,10 @@ class TwoRoundExternalSamplingReachAverage(TwoRoundExternalSamplingMCCFR):
                     action: totals[action] / mass for action in actions
                 }
         return profile
+
+    def cfr_average_profile(self):
+        return self._average_profile(linear=False)
+
+    def linear_cfr_average_profile(self):
+        """Reach-weighted CFR average with iteration t used as temporal weight."""
+        return self._average_profile(linear=True)
