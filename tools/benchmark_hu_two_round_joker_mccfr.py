@@ -21,9 +21,10 @@ def main() -> None:
     uniform_exp = 0.5 * uniform_conv
 
     solver = TwoRoundExternalSamplingMCCFR(game, seed=20260815)
-    checkpoints = (500, 1_000, 2_500, 5_000)
+    checkpoints = (500, 1_000, 2_500, 5_000, 10_000, 20_000)
     previous = 0
     cumulative = 0.0
+    results = []
     for checkpoint in checkpoints:
         started = time.perf_counter()
         solver.run(checkpoint - previous)
@@ -34,6 +35,7 @@ def main() -> None:
         eval_seconds = time.perf_counter() - started
         if not math.isfinite(snap.exploitability):
             raise SystemExit("Joker external sampling produced non-finite exploitability")
+        results.append(snap.exploitability)
         print(
             f"iteration={checkpoint} expected_u0={snap.expected_u0:.12f} "
             f"br0={snap.br0:.12f} br1={snap.br1:.12f} "
@@ -45,9 +47,14 @@ def main() -> None:
         raise SystemExit(
             f"Joker external sampling failed to improve uniform: {snap.exploitability} >= {uniform_exp}"
         )
+    behavior = "FINAL_IS_BEST" if results[-1] <= min(results) + 1e-12 else "NON_MONOTONE_LAST_ITERATE"
     print(
         f"uniform br0={uniform_br0.value:.12f} br1={uniform_br1.value:.12f} "
         f"exploitability={uniform_exp:.12f}"
+    )
+    print(
+        f"summary checkpoints={checkpoints} best_exploitability={min(results):.12f} "
+        f"final_exploitability={results[-1]:.12f} behavior={behavior}"
     )
     print(f"terminal_cache={game.terminal_u0.cache_info()}")
     print("HU TWO-ROUND PHYSICAL-JOKER EXTERNAL-SAMPLING: PASS")
