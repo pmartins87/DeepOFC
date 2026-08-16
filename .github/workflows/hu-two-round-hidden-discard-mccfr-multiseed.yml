@@ -1,0 +1,25 @@
+name: HU two-round hidden-discard external-sampling multi-seed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deepofc/hu_two_round.py'
+      - 'deepofc/hu_two_round_br.py'
+      - 'deepofc/hu_two_round_mccfr.py'
+      - 'deepofc/hu_two_round_hidden_discard.py'
+      - 'tools/benchmark_hu_two_round_hidden_discard_mccfr_multiseed.py'
+      - '.github/workflows/hu-two-round-hidden-discard-mccfr-multiseed.yml'
+  workflow_dispatch:
+
+jobs:
+  multiseed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Train five hidden-discard external-sampling seeds and exact-BR evaluate
+        run: python tools/benchmark_hu_two_round_hidden_discard_mccfr_multiseed.py
