@@ -1,15 +1,6 @@
 name: HU three-round work-normalized training cost
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'deepofc/sequential.py'
-      - 'deepofc/hu_three_round_sequential.py'
-      - 'deepofc/hu_three_round_cfr.py'
-      - 'deepofc/hu_three_round_mccfr.py'
-      - 'tools/benchmark_hu_three_round_training_work.py'
-      - '.github/workflows/hu-three-round-training-work.yml'
   workflow_dispatch:
 
 jobs:
