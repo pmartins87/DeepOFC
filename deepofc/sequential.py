@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+from typing import Sequence
 
 from .actions import NormalPlacementAction, enumerate_normal_actions
 from .simulator import DeterministicDeck, apply_normal_action
@@ -199,28 +199,33 @@ class HUSequentialNormalState:
                     f"got {len(self.incoming[chair])}, expected {expected_incoming}"
                 )
 
-            expected_board = 5 + 2 * self.round_index
-            if acted_this_round:
-                expected_board += 0 if self.round_index == 0 else 2
-                if self.round_index == 0:
-                    expected_board = 5
-            else:
-                expected_board = 5 + 2 * max(0, self.round_index - 1) if self.round_index > 0 else 0
             if self.terminal:
                 expected_board = 13
+            elif self.round_index == 0:
+                expected_board = 5 if acted_this_round else 0
+            else:
+                # Before acting in later round r, the player has committed
+                # round 0 plus r-1 later rounds: 5 + 2*(r-1). Acting in the
+                # current round adds exactly two more committed cards.
+                expected_board = 5 + 2 * (self.round_index - 1)
+                if acted_this_round:
+                    expected_board += 2
             if self.boards[chair].filled_count() != expected_board:
                 raise ValueError(
                     f"chair {chair} board count mismatch: got {self.boards[chair].filled_count()}, "
                     f"expected {expected_board}"
                 )
 
-            expected_discards = 0
-            completed_later_rounds = max(0, self.round_index - 1)
-            expected_discards += completed_later_rounds
-            if self.round_index > 0 and acted_this_round:
-                expected_discards += 1
             if self.terminal:
                 expected_discards = 4
+            elif self.round_index == 0:
+                expected_discards = 0
+            else:
+                # One discard for each completed later round, plus the current
+                # discard only after this player has acted in the current round.
+                expected_discards = self.round_index - 1
+                if acted_this_round:
+                    expected_discards += 1
             if len(self.discards[chair]) != expected_discards:
                 raise ValueError(
                     f"chair {chair} discard count mismatch: got {len(self.discards[chair])}, "
@@ -249,12 +254,11 @@ class HUSequentialNormalState:
         )
         # At terminal there is no meaningful acting decision. OFCState still
         # requires an acting chair, so preserve the last actor diagnostically.
-        acting = self.acting_chair
         canonical = OFCState(
             players=players,
             hero_chair=hero_chair,
             dealer_chair=self.dealer_chair,
-            acting_chair=acting,
+            acting_chair=self.acting_chair,
             round_index=self.round_index,
             hero_incoming=self.incoming[hero_chair],
             hero_discards=self.discards[hero_chair],
