@@ -8,6 +8,11 @@ M5H deliberately separates three concerns:
 * an independently identified reference evaluator measures unilateral deviation;
 * this module seals held-out seed metrics into the general M5C evidence schema.
 
+The reference evaluator is no longer identified by a free-form SHA/string pair.
+It must carry an immutable M5H authority manifest.  Screening-only learned
+responses can therefore produce real held-out diagnostics without ever being
+eligible to certify low exploitability.
+
 No strategic acceptance threshold is inferred or applied here.
 """
 
@@ -26,13 +31,19 @@ from hu_continuation import (
 )
 from m5c_route_certification import (
     EVIDENCE_HELDOUT,
+    EVIDENCE_SCREENING,
     EVIDENCE_TEST,
     HeldoutRouteEvidence,
     freeze_route_evidence,
 )
+from m5h_reference_evaluator_manifest import (
+    CAPABILITY_CERTIFICATION_ELIGIBLE,
+    CAPABILITY_SCREENING_ONLY,
+    ReferenceEvaluatorManifest,
+)
 from normal_fantasy_kernel import players_for_meta
 
-REPORT_SCHEMA = "openofc-m5h-normal-heldout-report-v1"
+REPORT_SCHEMA = "openofc-m5h-normal-heldout-report-v2"
 AUTHORITY = "NORMAL_ROUTE_HELDOUT_EVIDENCE_PRODUCER_NOT_CERTIFIER"
 SUPPORTED_KERNELS = (KERNEL_NORMAL_NORMAL, KERNEL_NORMAL_FANTASY)
 EPS = 1e-12
@@ -108,7 +119,12 @@ class NormalRouteHeldoutReport:
     oracle_id: str
     implementation_sha256: str
     continuation_sha256: str
-    reference_evaluator_sha256: str
+    reference_evaluator_id: str
+    reference_evaluator_manifest_sha256: str
+    reference_evaluator_implementation_sha256: str
+    reference_validation_evidence_sha256: str
+    reference_method_class: str
+    reference_capability: str
     reference_authority: str
     heldout_seed_ids: tuple[str, ...]
     training_seed_ids: tuple[str, ...]
@@ -136,8 +152,8 @@ class NormalEvidenceBundle:
 
 def _mean_standard_error(values: Sequence[float]) -> tuple[float, float]:
     if len(values) < 2:
-        # A one-seed synthetic fixture can exercise serialization, but a REAL
-        # held-out object is rejected before reaching this helper.
+        # A one-seed synthetic fixture can exercise serialization, but real
+        # held-out/screening evidence is rejected before reaching this helper.
         if not values:
             raise ValueError("M5H requires held-out profile values")
         return float(values[0]), 0.0
@@ -164,6 +180,27 @@ def _metric_gain(row: HeldoutNormalSeedMetric, player: int) -> float | None:
     raise ValueError("persistent HU player must be 0 or 1")
 
 
+def _validate_reference_authority(
+    reference: ReferenceEvaluatorManifest,
+    kernel_kind: str,
+    evidence_kind: str,
+) -> None:
+    if not reference.supports_kernel(kernel_kind):
+        raise ValueError("M5H reference evaluator is not validated for route kernel")
+    if evidence_kind == EVIDENCE_HELDOUT:
+        if reference.capability != CAPABILITY_CERTIFICATION_ELIGIBLE:
+            raise ValueError(
+                "M5H HELD_OUT certification evidence requires a certification-eligible reference evaluator"
+            )
+    elif evidence_kind == EVIDENCE_SCREENING:
+        if reference.capability != CAPABILITY_SCREENING_ONLY:
+            raise ValueError(
+                "M5H screening evidence requires a screening-only reference evaluator manifest"
+            )
+    elif evidence_kind != EVIDENCE_TEST:
+        raise ValueError("M5H evidence kind is unsupported")
+
+
 def collect_normal_route_evidence(
     oracle: object,
     state: HUContinuationState,
@@ -171,8 +208,7 @@ def collect_normal_route_evidence(
     heldout: Sequence[HeldoutNormalSeedMetric],
     *,
     implementation_sha256: str,
-    reference_evaluator_sha256: str,
-    reference_authority: str,
+    reference_evaluator: ReferenceEvaluatorManifest,
     training_seed_ids: Sequence[str],
     provenance: str,
     evidence_kind: str = EVIDENCE_TEST,
@@ -182,6 +218,10 @@ def collect_normal_route_evidence(
     Thresholds are intentionally absent. A caller must separately pass the
     returned `HeldoutRouteEvidence` to M5C with an independently frozen
     `StrategicThresholdManifest`.
+
+    `HELD_OUT_SCREENING_ONLY` is a real independent evidence class, but M5C
+    refuses to promote it.  Only a manifest whose validated method class is
+    certification eligible may produce the certifying `HELD_OUT` kind.
     """
 
     kind = hand_kernel_kind(state)
@@ -193,15 +233,13 @@ def collect_normal_route_evidence(
     implementation_sha = _require_sha256(
         implementation_sha256, "implementation_sha256"
     )
-    evaluator_sha = _require_sha256(
-        reference_evaluator_sha256, "reference_evaluator_sha256"
-    )
-    authority = str(reference_authority).strip()
+    if not isinstance(reference_evaluator, ReferenceEvaluatorManifest):
+        raise TypeError("M5H reference_evaluator must be a ReferenceEvaluatorManifest")
+    _validate_reference_authority(reference_evaluator, kind, evidence_kind)
+
     provenance_text = str(provenance).strip()
-    if not authority or not provenance_text:
-        raise ValueError("M5H requires reference authority and provenance")
-    if evidence_kind not in (EVIDENCE_HELDOUT, EVIDENCE_TEST):
-        raise ValueError("M5H evidence_kind must be HELD_OUT or SYNTHETIC_TEST_ONLY")
+    if not provenance_text:
+        raise ValueError("M5H requires provenance")
 
     rows = tuple(heldout)
     if not rows:
@@ -216,11 +254,11 @@ def collect_normal_route_evidence(
     overlap = sorted(set(seed_ids) & set(train_ids))
     if overlap:
         raise ValueError(f"M5H training/held-out seed overlap: {overlap[:3]}")
-    if evidence_kind == EVIDENCE_HELDOUT:
+    if evidence_kind in (EVIDENCE_HELDOUT, EVIDENCE_SCREENING):
         if len(rows) < 2:
-            raise ValueError("REAL M5H held-out evidence requires at least two independent seeds")
+            raise ValueError("REAL M5H evidence requires at least two independent seeds")
         if not train_ids:
-            raise ValueError("REAL M5H held-out evidence requires training seed provenance")
+            raise ValueError("REAL M5H evidence requires training seed provenance")
 
     per_seed_samples = {int(row.samples) for row in rows}
     if len(per_seed_samples) != 1:
@@ -270,6 +308,7 @@ def collect_normal_route_evidence(
     heldout_samples = len(rows) * samples_per_seed
     _checked, continuation_sha = continuation_fingerprint(continuation_values)
 
+    ref = reference_evaluator
     payload: dict[str, object] = {
         "schema": REPORT_SCHEMA,
         "authority": AUTHORITY,
@@ -278,8 +317,13 @@ def collect_normal_route_evidence(
         "oracle_id": oracle_id,
         "implementation_sha256": implementation_sha,
         "continuation_sha256": continuation_sha,
-        "reference_evaluator_sha256": evaluator_sha,
-        "reference_authority": authority,
+        "reference_evaluator_id": ref.evaluator_id,
+        "reference_evaluator_manifest_sha256": ref.sha256,
+        "reference_evaluator_implementation_sha256": ref.implementation_sha256,
+        "reference_validation_evidence_sha256": ref.validation_evidence_sha256,
+        "reference_method_class": ref.method_class,
+        "reference_capability": ref.capability,
+        "reference_authority": ref.reference_authority,
         "heldout_seed_ids": list(seed_ids),
         "training_seed_ids": list(train_ids),
         "samples_per_seed": samples_per_seed,
@@ -310,8 +354,13 @@ def collect_normal_route_evidence(
         oracle_id=oracle_id,
         implementation_sha256=implementation_sha,
         continuation_sha256=continuation_sha,
-        reference_evaluator_sha256=evaluator_sha,
-        reference_authority=authority,
+        reference_evaluator_id=ref.evaluator_id,
+        reference_evaluator_manifest_sha256=ref.sha256,
+        reference_evaluator_implementation_sha256=ref.implementation_sha256,
+        reference_validation_evidence_sha256=ref.validation_evidence_sha256,
+        reference_method_class=ref.method_class,
+        reference_capability=ref.capability,
+        reference_authority=ref.reference_authority,
         heldout_seed_ids=seed_ids,
         training_seed_ids=train_ids,
         samples_per_seed=samples_per_seed,
@@ -339,7 +388,8 @@ def collect_normal_route_evidence(
         evidence_kind=evidence_kind,
         provenance=(
             f"{provenance_text} | {AUTHORITY} report={report_sha} "
-            f"reference={authority} evaluator_sha256={evaluator_sha}"
+            f"reference_manifest={ref.sha256} evaluator={ref.evaluator_id} "
+            f"capability={ref.capability}"
         ),
     )
     return NormalEvidenceBundle(report=report, route_evidence=evidence)
