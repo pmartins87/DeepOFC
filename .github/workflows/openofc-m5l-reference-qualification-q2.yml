@@ -1,0 +1,101 @@
+name: OpenOFC M5L reference qualification Q2
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - deepofc/hu_two_round.py
+      - deepofc/hu_two_round_br.py
+      - deepofc/hu_two_round_hidden_discard.py
+      - deepofc/hu_two_round_joker.py
+      - tools/openofc_solver/M5L_REFERENCE_EVALUATOR_QUALIFICATION_CONTRACT.md
+      - tools/openofc_solver/m5l_two_round_response.py
+      - tools/openofc_solver/run_m5l_two_round_q2.py
+      - tools/openofc_solver/test_m5l_two_round_response.py
+      - docs/M5L_Q2_HELDOUT_BENCHMARK_PLAN_2026-08-27.md
+      - docs/M5L_REFERENCE_QUALIFICATION_Q1_2026-08-27.md
+      - evidence/strategic/m5l_three_round_q1_2026-08-27.json
+      - .github/workflows/openofc-m5l-reference-qualification-q2.yml
+  workflow_dispatch:
+
+jobs:
+  q2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Verify Q1 activation precondition and frozen Q2 plan
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          q1 = json.loads(Path('evidence/strategic/m5l_three_round_q1_2026-08-27.json').read_text(encoding='utf-8'))
+          assert q1['schema'] == 'openofc-m5l-three-round-q1-v1'
+          assert q1['authority'] == 'MULTI_PROFILE_CALIBRATION_NOT_CERTIFICATION'
+          assert q1['sha256'] == '60339a21eae6e67f90a2a3703ccf9bc34af1b0cec84ce4d8b39c14c9571a5f95'
+          assert q1['summary']['rows'] == 16
+          assert q1['summary']['certification_eligible'] is False
+          assert q1['summary']['reference_manifest_emitted'] is False
+
+          plan = Path('docs/M5L_Q2_HELDOUT_BENCHMARK_PLAN_2026-08-27.md').read_text(encoding='utf-8')
+          for required in ('hidden-discard', 'joker', '16,384', '2026083101', '2026083137'):
+              assert required in plan
+          print('OPENOFC_M5L_Q2_PRECONDITION=PASS')
+          PY
+      - name: Recheck two-round response mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5l_two_round_response.py
+      - name: Run M5L Q2 held-out benchmark-family calibration
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5l_two_round_q2.py
+      - name: Validate Q2 remains held-out calibration only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('artifacts/m5l_two_round_q2.json').read_text(encoding='utf-8'))
+          assert data['schema'] == 'openofc-m5l-two-round-q2-heldout-v1'
+          assert data['authority'] == 'HELDOUT_BENCHMARK_FAMILY_CALIBRATION_NOT_CERTIFICATION'
+          assert data['qualification_stage'] == 'Q2_HELDOUT_BENCHMARK_FAMILIES'
+          assert data['activation_precondition'] == 'Q1_COMPLETE_AND_RECORDED'
+          assert data['response_budget'] == 16384
+          assert data['response_seeds'] == [2026083101, 2026083137]
+          assert {row['family_id'] for row in data['rows']} == {'hidden-discard', 'joker'}
+          assert {row['profile_rule'] for row in data['rows']} == {'uniform', 'hash-biased-mixed'}
+          assert {row['player'] for row in data['rows']} == {0, 1}
+          assert data['summary']['rows'] == 16
+          assert data['summary']['families'] == ['hidden-discard', 'joker']
+          assert data['summary']['profiles'] == ['uniform', 'hash-biased-mixed']
+          assert data['summary']['certification_eligible'] is False
+          assert data['summary']['reference_manifest_emitted'] is False
+          assert all(row['response_budget'] == 16384 for row in data['rows'])
+          assert all(row['underestimation_residual'] >= 0.0 for row in data['rows'])
+          assert all(
+              abs(row['exact_best_response_value'] - row['exact_replay_value']) <= 1e-10
+              for row in data['rows']
+          )
+          print('OPENOFC_M5L_Q2_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5l-reference-qualification-q2
+          path: artifacts/m5l_two_round_q2.json
+          if-no-files-found: error
+          retention-days: 14
