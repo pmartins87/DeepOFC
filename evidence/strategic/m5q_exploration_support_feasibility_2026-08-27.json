@@ -1,0 +1,42 @@
+{
+  "schema": "openofc-m5q-exploration-support-feasibility-evidence-v1",
+  "authority": "EXPLORATION_SUPPORTED_EXTERNAL_SAMPLING_FEASIBILITY_EVIDENCE_NOT_CERTIFICATION",
+  "date": "2026-08-27",
+  "workflow_run_id": 33117273274,
+  "workflow_job_id": 98675023719,
+  "workflow_conclusion": "success",
+  "head_sha": "9396b996f58c2727eb11f7140b5c631b3556e439",
+  "artifact_id": 9665123542,
+  "artifact_payload_sha256": "317b0fc0a242fb3bfea751c2c611a2c0106a7d13cb8a1497ae23f9f6f31e6bce",
+  "artifact_zip_sha256": "61744ff803b8ca07a0875ec8bf71e0b161cb6c379a960f7f25d6dace3392f276",
+  "target_exploitability": 0.15,
+  "epsilon_ladder": [0.01, 0.05, 0.1, 0.2, 1.0],
+  "mechanics_tests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "epsilon_1_best_guaranteed_support": {
+    "joker": {
+      "exact_utility_range": 4.0,
+      "global_sampling_probability_floor": 0.0005787037037037037,
+      "zero_variance_required_iterations_for_target": 918799060363021
+    },
+    "hidden_discard": {
+      "exact_utility_range": 12.0,
+      "global_sampling_probability_floor": 0.000248015873015873,
+      "zero_variance_required_iterations_for_target": 1382605782910640640
+    }
+  },
+  "findings": {
+    "strictly_positive_support_restored_for_all_epsilon_rows": true,
+    "epsilon_1_is_best_guaranteed_support_endpoint": true,
+    "global_delta_appendix_c_route_practical": false,
+    "reason": "Even epsilon=1.0, the best guaranteed support endpoint in the frozen uniform-mixture family, leaves the zero-variance Appendix-C iteration requirement at approximately 9.19e14 for Joker and 1.38e18 for hidden-discard. Smaller epsilon cannot improve the global support floor.",
+    "production_solver_modified": false,
+    "actual_convergence_quality_measured": false,
+    "actual_estimator_variance_measured": false,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0
+  },
+  "decision": "Reject explicit-exploration plus global-minimum-sampling-probability Appendix-C accounting as the primary practical certification architecture. Continue with a support-free/data-dependent concentration route or another structurally different upper-bound mechanism. Exploration remains an independent training-design question and is not rejected for strategic quality by this result."
+}
