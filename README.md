@@ -10,7 +10,7 @@ The end goal is a production player that is mathematically optimal, or as close 
 - runtime visual state must equal the mathematical state;
 - OpenHoldem is modified where its Hold'em abstractions are semantically wrong for OFC;
 - every source patch, validation gate and roadmap state is persisted in GitHub;
-- expensive offline search/training can be delegated to a Ryzen 9 when the chosen solver architecture justifies it;
+- expensive offline search/training can be delegated when the chosen solver architecture justifies it;
 - no live click path is enabled merely because code exists: runtime authority is gated separately from implementation.
 
 ## Start here
@@ -24,7 +24,7 @@ For continuation/versioning, read in this order:
 3. [`docs/HANDOFF.md`](docs/HANDOFF.md)
 4. [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
-This ordering is deliberate. Historical status files remain evidence, but they must not silently override a newer frozen current-state checkpoint.
+Historical status files remain evidence, but they must not silently override a newer frozen current-state checkpoint.
 
 ## Authoritative repositories
 
@@ -32,7 +32,7 @@ This ordering is deliberate. Historical status files remain evidence, but they m
 - OpenHoldem runtime fork: `pmartins87/myoh_private`, branch `deepofc` plus explicitly named runtime experiment branches.
 - OpenHoldem bootstrap commit: `3aa8a28944e3759fecc9323fb9f7361d54d4c9af`.
 
-A temporary consolidation exception is documented in `VERSION_MANIFEST.md`: the latest M4/M5 strategic solver staging currently lives in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, and must be migrated back here through a provenance/equivalence gate before ownership is switched.
+A temporary consolidation exception is documented in `VERSION_MANIFEST.md`: the latest M4/M5 strategic solver staging currently lives in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, frozen at `c21c3c4f1017c83df07eb22230318a8131bf40d1`, and is being migrated back here through provenance/equivalence gates.
 
 ## Authoritative supplied evidence
 
@@ -49,7 +49,7 @@ DeepOFC targets one concrete KKPoker product/state machine:
 
 **KKPoker OFC Joker Ultimate**
 
-Fantasy is not a separate DeepOFC variant. It is a state/layout of Joker Ultimate.
+Fantasy is a state/layout of Joker Ultimate, not a separate DeepOFC variant.
 
 The physical deck is:
 
@@ -57,7 +57,7 @@ The physical deck is:
 
 Current engine scope supports 2–3 players. Normal Pineapple play uses five rounds: `5 / 3 / 3 / 3 / 3`; all five initial cards are placed, and on each later round two of three are placed and one is discarded.
 
-A completed board is `Top[3] + Middle[5] + Bottom[5]`, with the current-client foul ordering:
+A completed board is `Top[3] + Middle[5] + Bottom[5]`, with current-client foul ordering:
 
 `Bottom >= Middle >= Top`.
 
@@ -74,8 +74,6 @@ For evaluation:
 - only ordinary OFC poker-hand categories are valid, so Five-of-a-Kind is not a hand and such nominal assignments are skipped;
 - on a complete board the Jokers are assigned jointly to the **strongest assignment that preserves a valid board whenever one exists**;
 - a board is foul only if no valid Joker assignment can satisfy the row-order rule.
-
-This distinction is important: local row maximum and complete-board Joker value are different concepts.
 
 ## Fantasy
 
@@ -100,19 +98,23 @@ DeepOFC has four main layers:
 
 ## Current status
 
-As of the 2026-08-27 consolidation checkpoint:
+As of the 2026-08-27 consolidation/migration checkpoint:
 
-- the strategic solver has advanced through **M5C staging**;
-- M5C's dedicated CI verifies the fail-closed certification mechanism, but the 50 state-local strategic routes are **not yet certified**;
-- the next strategic gate is independent held-out route evidence, explicit threshold provenance and route-by-route certification before the first REAL 50-state M4Z Bellman trace;
+- the continuation/Bellman strategic **architecture is implemented through M5G** in the frozen staging tree;
+- M5G is a 50-state registry factory/certification firewall, not a claim that the strategy is solved;
+- a REAL dynamic M4Z Bellman surface still requires **50/50 real-certified exact-V routes**: 2 Normal×Normal, 16 Normal×Fantasy and 32 Fantasy×Fantasy;
+- the next strategic blocker is independent held-out route evidence, defensible threshold provenance and state-local certification;
+- G1 repository inventory passed: 152 staging files were inventoried, 119 classified for migration, 33 preserved historical, with 38 related M4/M5 workflows recorded;
+- recent strategic source is being consolidated into DeepOFC without discarding Git/blob/hash provenance;
 - the R0–R13 roadmap remains the production-readiness framework;
 - R9 recognition/reconstruction remains a runtime live-safety blocker;
 - R10 transaction/drag/Confirm infrastructure remains separately gated;
-- R11 shadow, R12 controlled live and R13 production remain downstream gates;
-- recent solver staging is being consolidated back into this repository without discarding its Git provenance.
+- R11 shadow, R12 controlled live and R13 production remain downstream gates.
 
 OpenHoldem `Release|Win32` has already built with isolated OFC integration in earlier gates. Runtime readiness still requires the stronger deterministic proof:
 
 `real KKPoker pixels -> tablemap/recognizer -> raw OFC observation -> canonical C++ state == independent DeepOFC state`.
+
+A runtime field label is canonical only when source commit, policy, tablemap/recognizer, build and artifact provenance are bound together.
 
 Production readiness is reached only at R13 after strategy, runtime, training and operations are reproducible and certified.

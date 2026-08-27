@@ -1,0 +1,67 @@
+name: OpenOFC frozen solver inventory
+
+on:
+  push:
+    branches:
+      - migration/openofc-solver-inventory-c21c3c4
+    paths:
+      - tools/migration/build_openofc_solver_inventory.py
+      - .github/workflows/openofc-solver-inventory.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout DeepOFC branch
+        uses: actions/checkout@v4
+        with:
+          path: deepofc
+          fetch-depth: 0
+
+      - name: Checkout frozen OpenOFC solver source
+        uses: actions/checkout@v4
+        with:
+          repository: pmartins87/myoh_private
+          ref: c21c3c4f1017c83df07eb22230318a8131bf40d1
+          path: myoh
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Generate provenance and dependency inventory
+        run: |
+          python deepofc/tools/migration/build_openofc_solver_inventory.py \
+            --source-root myoh \
+            --source-commit c21c3c4f1017c83df07eb22230318a8131bf40d1 \
+            --json-output deepofc/docs/migration/openofc_solver_inventory_c21c3c4.json \
+            --md-output deepofc/docs/migration/OPENOFC_SOLVER_INVENTORY_C21C3C4.md
+
+      - name: Validate generated inventory
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('deepofc/docs/migration/openofc_solver_inventory_c21c3c4.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
+          assert data['summary']['solver_subtree_file_count'] > 0
+          assert data['observations']['m5g_present'] is True
+          print(json.dumps(data['summary'], indent=2, sort_keys=True))
+          PY
+
+      - name: Persist generated inventory on migration branch
+        working-directory: deepofc
+        run: |
+          git config user.name "DeepOFC inventory automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/migration/openofc_solver_inventory_c21c3c4.json docs/migration/OPENOFC_SOLVER_INVENTORY_C21C3C4.md
+          if git diff --cached --quiet; then
+            echo "Inventory already up to date"
+            exit 0
+          fi
+          git commit -m "DeepOFC: materialize frozen OpenOFC solver inventory [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}

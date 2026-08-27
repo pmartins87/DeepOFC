@@ -2,7 +2,7 @@
 
 Date: 2026-08-27
 Status: active development; not production-ready
-Canonical status schema: `deepofc-current-state-v1`
+Canonical status schema: `deepofc-current-state-v2`
 
 This document is the single entry point for the current project state. Historical milestone documents remain evidence, but when their status wording conflicts with this file, this file wins until the conflict is deliberately reconciled.
 
@@ -10,10 +10,10 @@ This document is the single entry point for the current project state. Historica
 
 DeepOFC has two active engineering tracks that must converge before production:
 
-1. **Strategy / solver** — the current strategic milestone is **M5C**. The M4/M5 continuation/Bellman work is presently staged in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, head `c21c3c4f1017c83df07eb22230318a8131bf40d1`, pending controlled migration back into this authoritative model/solver repository.
+1. **Strategy / solver** — the continuation/Bellman architecture is implemented through **M5G**, while real strategic evidence/certification remains the blocker. The M4/M5 tree is presently staged in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, frozen at `c21c3c4f1017c83df07eb22230318a8131bf40d1`, pending controlled migration back into this authoritative model/solver repository.
 2. **Runtime / OpenHoldem** — recognition, reconstruction, transaction safety, drag/Confirm execution and field recovery remain a separately gated runtime problem. Existing v5.x field labels must not be treated as canonical project versions unless they are bound to source commit, policy, tablemap and build provenance.
 
-The repository-governance drift discovered on 2026-08-27 did **not** imply lost work. It meant the latest solver work was persisted in the OpenHoldem repository instead of this repository. The immediate consolidation task is therefore provenance-preserving migration, not reimplementation.
+The repository-governance drift discovered on 2026-08-27 did **not** imply lost work. It meant the latest solver work was persisted in the OpenHoldem repository instead of this repository. The immediate consolidation task is provenance-preserving migration, not reimplementation.
 
 ## Repository authority
 
@@ -24,34 +24,64 @@ The intended authority split is restored as project policy:
 
 Temporary exception: the M4/M5 strategic solver staging tree currently lives under `pmartins87/myoh_private/tools/openofc_solver`. It remains authoritative **for those staged files only** until the migration gate in `docs/SOLVER_MIGRATION_PLAN.md` is complete.
 
-## Strategic milestone: M5C
+## Strategic architecture frontier: M5G
 
-The strategic lineage has advanced beyond the 2026-08-16 R6 architecture tribunal.
+The exact frozen staging tree proves that the architecture advanced beyond M5C. The staging HEAD message still says `OpenOFC M5C: add staging certification gate`, because additional M5C documentation/workflow commits were added after M5D–M5G implementation commits. Therefore the HEAD subject is **not** the strategic frontier.
 
-Current staging head:
+Frozen source:
 
 - repository: `pmartins87/myoh_private`
 - branch: `openofc-m4v-continuation-transport`
-- head: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
-- head message: `OpenOFC M5C: add staging certification gate`
+- frozen head: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
 - M5B anchor: `008307c972582df978a7ee7db6717bf8cc1fa1db` — train-at-current-V normal kernel probes
-- M5C workflow run: `33044932517` — passed on the staging head
+- M5C dedicated workflow run: `33044932517` — PASS for the certification firewall implementation
+- M5G implementation anchor: `a7befe2a47b456d4f08a240cd7968e6ec38cb150` — full authoritative registry factory
 
-### What the M5C PASS means
+### M5A–M5G interpretation
 
-It means the **fail-closed certification mechanism** is implemented and its dedicated CI gate passes.
+- **M5A** — continuation-aware fixed-policy/model value adapters.
+- **M5B** — policy improvement trained at the current continuation vector; still probe/not-certified until held-out strategic evidence passes.
+- **M5C** — fail-closed route certification firewall. Its CI PASS proves the firewall mechanism, not policy quality.
+- **M5D** — dynamic exact-V certified Bellman orchestration: a route must be certified for the continuation vector actually being evaluated; synthetic evidence remains incapable of real promotion.
+- **M5E** — Fantasy×Fantasy route-certification bridge with the additional support-gap/model-error requirements.
+- **M5F** — Fantasy×Fantasy held-out evidence producer combining the exact-support teacher, support-restricted deviation evidence and held-out model/action-value error. Its generated evidence is not automatically production-ready.
+- **M5G** — full 50-state registry factory and final architectural certification firewall before a REAL dynamic M4Z Bellman trace. It assembles already certified routes; it does not create the missing strategic evidence or choose thresholds.
 
-It does **not** mean the current policies are strategically certified, solved, production-ready or safe to promote into a real Bellman surface.
+### What is still blocked
 
-M5C requires state-local independent evidence. A complete real Bellman surface currently requires 50 distinct ready certificates:
+A complete real Bellman surface still requires **50 distinct real-certified exact-V routes**:
 
-- 2 Normal × Normal routes;
-- 16 Normal × Fantasy routes;
-- 32 Fantasy × Fantasy routes.
+- 2 Normal × Normal;
+- 16 Normal × Fantasy;
+- 32 Fantasy × Fantasy.
 
-Required strategic evidence includes independent held-out seeds and samples, bounded value standard error and unilateral-deviation gain. Fantasy × Fantasy additionally requires the exact-teacher support-gap and held-out model/action-value error criteria defined by the M5C contract.
+Required evidence includes independent held-out seeds/samples, bounded value standard error and unilateral-deviation gain. Fantasy × Fantasy additionally requires the exact-teacher support gap and held-out model/action-value error criteria.
 
-The next strategic gate is therefore **evidence generation and route-by-route certification**, followed only then by the first REAL 50-state M4Z Bellman trace.
+Thus **architecture through M5G is present; strategic promotion is not**. The next strategy work is independent held-out evidence, an independently justified threshold protocol, state-local certification, and only then a REAL M4Z Bellman trace.
+
+## G1 migration inventory — PASS
+
+The first provenance-preserving migration gate is now materialized on branch `migration/openofc-solver-inventory-c21c3c4`.
+
+Artifacts:
+
+- `docs/migration/openofc_solver_inventory_c21c3c4.json`
+- `docs/migration/OPENOFC_SOLVER_INVENTORY_C21C3C4.md`
+- generator: `tools/migration/build_openofc_solver_inventory.py`
+- workflow: `.github/workflows/openofc-solver-inventory.yml`
+- workflow run: `33059295351` — PASS
+- materialized inventory commit: `92d43f141c1a55f65c801749503619105479c70c`
+
+Inventory result:
+
+- 152 files in the frozen solver staging subtree;
+- 69 files in the current-root transitive dependency closure;
+- 119 files marked `migrate` after adding current contracts and tests of migrated dependencies;
+- 33 files preserved as `historical` rather than silently copied;
+- 38 related M4/M5 workflows recorded;
+- file-list/provenance payload SHA-256: `89a546aef6f367226cbaf9c6a54d886488519d88b0f1c7d07415db13df382e84`.
+
+G1 is an ownership/provenance PASS. It does not alter strategic authority yet.
 
 ## Solver quality state
 
@@ -59,7 +89,7 @@ The earlier R6 architecture tribunal remains valid background evidence: under th
 
 That result selected an architecture direction; it did not solve the full Joker Ultimate game.
 
-The current M4/M5 work has moved the project from algorithm selection toward a continuation-aware Bellman framework with explicit strategic promotion firewalls. This is substantial progress, but production exploitability for the complete target game remains uncertified.
+The M4/M5 lineage has moved the project from algorithm selection toward continuation-aware Bellman machinery with exact-V certification boundaries. Production exploitability for the complete target game remains uncertified.
 
 ## Runtime state
 
@@ -74,19 +104,19 @@ That checkpoint established the intended semantics:
 - drag/Confirm idempotence must survive reacquisition;
 - build logs must identify source, policy and tablemap provenance.
 
-Subsequent runtime experiments exist in `pmartins87/myoh_private` on multiple `openofc-v54*` / `openofc-v543*` branches. They are preserved, but the field-build naming lineage is not yet consolidated enough to declare one later chat/build label the canonical project runtime version.
+Subsequent runtime source work, including later v5.8.x-labelled tooling, is preserved in `pmartins87/myoh_private`. The field-build naming lineage is not yet consolidated enough to declare one later chat/build label the canonical package identity.
 
-Accordingly, **no unbound field label such as a chat-only `v5.8.0` should be treated as a canonical source version until its source commit + policy + tablemap + build manifest are recorded.**
+Accordingly, **no unbound field label such as `v5.8.0` is a canonical source/package version until source commit + policy + tablemap + recognizer/calibration + build/artifact provenance are recorded together.**
 
 ## Global roadmap interpretation
 
-The R0–R13 roadmap remains the production readiness framework. Its older status table is retained as historical structure, while current status is interpreted as follows:
+The R0–R13 roadmap remains the production-readiness framework. Its older status table is retained as historical structure, while current status is interpreted as follows:
 
 | Area | Current interpretation |
 |---|---|
 | R0–R3 rules/scoring/actions | Advanced foundation; keep closing edge cases and independent validation |
 | R4 simulator | Advanced foundation; full representative game scaling remains |
-| R5/R6 decision + solver architecture | Advanced; architecture selected and continuation/Bellman work now staged through M5C |
+| R5/R6 decision + solver architecture | Advanced; continuation/Bellman architecture now staged through M5G, with real route evidence/certification still blocked |
 | R7 training | Not productionized; must emerge from certified solver architecture and reproducible artifact protocol |
 | R8 exploitation | Deferred until a stronger certified base policy exists |
 | R9 recognition/state bridge | Runtime live-safety blocker |
@@ -99,26 +129,28 @@ The R0–R13 roadmap remains the production readiness framework. Its older statu
 
 ### Governance / continuity
 
-1. Merge this consolidation checkpoint.
-2. Inventory the M4/M5 staging tree and dependency closure.
-3. Migrate the solver tree into DeepOFC with source-path/commit/hash provenance preserved.
-4. Run cross-repository equivalence tests before changing authority.
-5. Remove the temporary solver-staging exception only after equivalence passes.
+1. Merge the frozen G1 inventory and corrected M5G frontier into `DeepOFC/main`.
+2. Define the pure-migration target layout and generate old-path/source-blob/new-path provenance mapping.
+3. Copy the 119 `migrate` files with no semantic edits.
+4. Run independent DeepOFC CI plus deterministic old-vs-new equivalence gates.
+5. Switch M4/M5 authority to DeepOFC only after equivalence PASS.
+6. Freeze `myoh_private@c21c3c4...` as historical strategic provenance after authority transfer.
 
 ### Strategy
 
-1. Generate independent held-out M5C evidence for Normal × Normal.
-2. Generate independent held-out M5C evidence for Normal × Fantasy.
-3. Generate Fantasy × Fantasy M4X support-gap + M5B deviation + M4W model-error evidence.
-4. Freeze thresholds from an independently justified protocol.
-5. Certify all 50 routes state-by-state.
-6. Enable the first REAL 50-state M4Z Bellman trace only after all required routes are ready.
-7. Measure convergence/stability/exploitability and decide the next scaling/training gate from evidence.
+1. Generate independent held-out Normal × Normal deviation/uncertainty evidence.
+2. Generate independent held-out Normal × Fantasy deviation/uncertainty evidence.
+3. Generate Fantasy × Fantasy support-gap + deviation + held-out model/action-value error evidence under the M5E/M5F contracts.
+4. Freeze thresholds from a separately justified protocol.
+5. Certify all 50 exact-V routes state-by-state.
+6. Build the real-ready M5G registry from 50/50 real certificates.
+7. Enable the first REAL dynamic M4Z 50-state Bellman trace.
+8. Measure convergence/stability/exploitability and decide the next scaling/training gate from evidence.
 
 ### Runtime
 
 1. Consolidate runtime build provenance into one machine-readable manifest.
-2. Bind every field package to native source commit, policy/solver version and tablemap version.
+2. Bind every field package to native source commit, policy/solver version, tablemap/recognizer identity and artifact SHA.
 3. Continue deterministic pixels → physical cards → raw observation → canonical state proof.
 4. Certify transaction loop: drag → fresh scrape → exact verification; Confirm → committed-state verification.
 5. Shadow mode before controlled live use.
@@ -127,6 +159,7 @@ The R0–R13 roadmap remains the production readiness framework. Its older statu
 
 - A code path existing is not a gate PASS.
 - A CI PASS for a certification framework is not a strategic policy certificate.
+- M5G architecture presence is not 50/50 real certification.
 - Training loss, imitation agreement or smoke-test improvement cannot substitute for held-out strategic evidence.
 - No ambiguous visual state may be guessed into a live action.
 - No runtime build label is canonical without immutable provenance.
