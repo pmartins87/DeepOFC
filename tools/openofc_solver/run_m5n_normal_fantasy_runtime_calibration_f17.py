@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-"""F17 companion to the M5N F14 phase-timed runtime calibration."""
+"""F17 companion to the M5N F14 phase-timed runtime calibration.
+
+This calibration is runtime-only.  Phase start markers are flushed before each
+expensive operation so a workflow timeout identifies the phase that failed to
+finish rather than yielding an opaque no-artifact cancellation.
+"""
 
 from dataclasses import asdict
 import hashlib
@@ -19,7 +24,7 @@ from run_m5n_normal_fantasy_runtime_calibration import (
     SCREEN_CONFIG,
 )
 
-SCHEMA = "openofc-m5n-normal-fantasy-runtime-calibration-f17-v1"
+SCHEMA = "openofc-m5n-normal-fantasy-runtime-calibration-f17-v2"
 AUTHORITY = "RUNTIME_CALIBRATION_NOT_STRATEGIC_EVIDENCE"
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "artifacts" / "m5n_normal_fantasy_runtime_calibration_f17.json"
@@ -32,6 +37,11 @@ def _canonical_bytes(payload: object) -> bytes:
 
 def _sha(payload: object) -> str:
     return hashlib.sha256(_canonical_bytes(payload)).hexdigest()
+
+
+def _phase(label: str, event: str, **extra: object) -> None:
+    payload = {"phase": label, "event": event, **extra}
+    print("M5N_F17_PHASE " + json.dumps(payload, sort_keys=True), flush=True)
 
 
 def main() -> None:
@@ -49,16 +59,31 @@ def main() -> None:
     )
 
     wall_start = perf_counter()
+    _phase("candidate_materialization", "start")
     phase_start = perf_counter()
     candidate = candidate_oracle.materialize_fixed_policy(STATE, values)
     candidate_seconds = perf_counter() - phase_start
     candidate_eval_count = terminal.evaluations
+    _phase(
+        "candidate_materialization",
+        "done",
+        seconds=candidate_seconds,
+        terminal_evaluations=candidate_eval_count,
+    )
 
+    _phase("challenger_materialization", "start")
     phase_start = perf_counter()
     challenger = challenger_oracle.materialize_fixed_policy(STATE, values)
     challenger_seconds = perf_counter() - phase_start
     challenger_eval_count = terminal.evaluations - candidate_eval_count
+    _phase(
+        "challenger_materialization",
+        "done",
+        seconds=challenger_seconds,
+        terminal_evaluations=challenger_eval_count,
+    )
 
+    _phase("paired_screening", "start")
     phase_start = perf_counter()
     screen = screen_paired_normal_fantasy_candidate(
         candidate.fixed_oracle,
@@ -73,6 +98,12 @@ def main() -> None:
     )
     screening_seconds = perf_counter() - phase_start
     screening_eval_count = terminal.evaluations - candidate_eval_count - challenger_eval_count
+    _phase(
+        "paired_screening",
+        "done",
+        seconds=screening_seconds,
+        terminal_evaluations=screening_eval_count,
+    )
     total_seconds = perf_counter() - wall_start
 
     timings = {
@@ -99,6 +130,7 @@ def main() -> None:
         "schema": SCHEMA,
         "authority": AUTHORITY,
         "source_timeout_run": 33089463461,
+        "source_f17_timeout_run": 33114482820,
         "companion_f14_payload_sha256": "2ecfe913abf6d7d0c7ef8697be55ec9733515731b470cd0b778345de8258847e",
         "state": STATE.as_key(),
         "candidate_config": CANDIDATE_CONFIG.payload(),
@@ -121,7 +153,7 @@ def main() -> None:
     payload["sha256"] = _sha(payload)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
-    print(json.dumps({"artifact": str(OUT.relative_to(ROOT)), "sha256": payload["sha256"], "timings": timings, "summary": payload["summary"]}, sort_keys=True))
+    print(json.dumps({"artifact": str(OUT.relative_to(ROOT)), "sha256": payload["sha256"], "timings": timings, "summary": payload["summary"]}, sort_keys=True), flush=True)
 
 
 if __name__ == "__main__":
