@@ -1,0 +1,42 @@
+{
+  "schema": "deepofc-strategic-evidence-record-v1",
+  "evidence_kind": "M5M_GENERALIZED_RESPONSE_SCREENING_RESULT",
+  "source_run": 33088654128,
+  "source_artifact": "openofc-m5m-normal-normal-pilot",
+  "source_artifact_schema": "openofc-m5m-normal-normal-pilot-v1",
+  "source_artifact_authority": "GENERALIZED_PAIRED_RESPONSE_PILOT_NOT_CERTIFICATION",
+  "source_artifact_sha256": "a8e078497aff7e7f0005f5f290b0fd56a3d697de3650b5699eb139005e8e3c7c",
+  "routes": [
+    {
+      "state": "B0:P0F0:P1F0",
+      "p0_seed_mean_signed_gain": -0.1064453125,
+      "p0_seed_standard_error": 0.11942711243571567,
+      "p0_conservative_lower_signal": 0.0,
+      "p1_seed_mean_signed_gain": 0.087890625,
+      "p1_seed_standard_error": 0.17672993420805172,
+      "p1_conservative_lower_signal": 0.0,
+      "max_conservative_deviation_signal": 0.0,
+      "response_validation_top1_accuracy": [0.11142587346553352, 0.11741682974559686],
+      "response_validation_mean_policy_l1": [0.6757763758969559, 0.893986025466433]
+    },
+    {
+      "state": "B1:P0F0:P1F0",
+      "p0_seed_mean_signed_gain": -0.310546875,
+      "p0_seed_standard_error": 0.11594940590541078,
+      "p0_conservative_lower_signal": 0.0,
+      "p1_seed_mean_signed_gain": -0.2734375,
+      "p1_seed_standard_error": 0.22205579671665576,
+      "p1_conservative_lower_signal": 0.0,
+      "max_conservative_deviation_signal": 0.0,
+      "response_validation_top1_accuracy": [0.125, 0.09915014164305949],
+      "response_validation_mean_policy_l1": [0.8541325537218343, 0.700158643579803]
+    }
+  ],
+  "summary": {
+    "routes_screened": 2,
+    "max_conservative_deviation_signal": 0.0,
+    "ready_for_real_bellman": 0,
+    "certification_claimed": false,
+    "interpretation": "screening failed to prove a profitable deviation; response approximation quality is insufficient for an adequacy or exploitability-upper-bound inference"
+  }
+}
