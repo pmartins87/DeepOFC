@@ -32,7 +32,7 @@ Historical status files remain evidence, but they must not silently override a n
 - OpenHoldem runtime fork: `pmartins87/myoh_private`, branch `deepofc` plus explicitly named runtime experiment branches.
 - OpenHoldem bootstrap commit: `3aa8a28944e3759fecc9323fb9f7361d54d4c9af`.
 
-A temporary consolidation exception is documented in `VERSION_MANIFEST.md`: the latest M4/M5 strategic solver staging currently lives in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, frozen at `c21c3c4f1017c83df07eb22230318a8131bf40d1`, and is being migrated back here through provenance/equivalence gates.
+The former M4/M5 strategic staging exception is being closed by the migration/equivalence change documented in `VERSION_MANIFEST.md`. Frozen source `pmartins87/myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1` is retained as immutable provenance; the corrected DeepOFC migration has passed byte identity and deterministic behavioral equivalence.
 
 ## Authoritative supplied evidence
 
@@ -98,14 +98,16 @@ DeepOFC has four main layers:
 
 ## Current status
 
-As of the 2026-08-27 consolidation/migration checkpoint:
+As of the 2026-08-27 migration checkpoint:
 
-- the continuation/Bellman strategic **architecture is implemented through M5G** in the frozen staging tree;
+- the continuation/Bellman strategic **architecture is implemented through M5G**;
 - M5G is a 50-state registry factory/certification firewall, not a claim that the strategy is solved;
+- corrected G1 v2 inventory found **187** frozen solver-subtree files, with **126** in the fixed-point migration set, **61** preserved historical and **38** related M4/M5 workflows;
+- pure migration run `33070802793` passed with **126/126 byte-identical** source/target files;
+- deterministic old-vs-new equivalence run `33070910873` passed **20/20**, including engine, M4U–M4Z, M5A–M5G and Normal/Fantasy/Fantasy kernel/payoff probes;
+- migration equivalence proves repository/source transfer, not strategic optimality;
 - a REAL dynamic M4Z Bellman surface still requires **50/50 real-certified exact-V routes**: 2 Normal×Normal, 16 Normal×Fantasy and 32 Fantasy×Fantasy;
-- the next strategic blocker is independent held-out route evidence, defensible threshold provenance and state-local certification;
-- G1 repository inventory passed: 152 staging files were inventoried, 119 classified for migration, 33 preserved historical, with 38 related M4/M5 workflows recorded;
-- recent strategic source is being consolidated into DeepOFC without discarding Git/blob/hash provenance;
+- the next substantive strategic blocker is independent held-out route evidence, defensible threshold provenance and state-local certification;
 - the R0–R13 roadmap remains the production-readiness framework;
 - R9 recognition/reconstruction remains a runtime live-safety blocker;
 - R10 transaction/drag/Confirm infrastructure remains separately gated;
