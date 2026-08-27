@@ -1,4 +1,4 @@
-name: OpenOFC M5H normal held-out evidence
+name: OpenOFC M5H-M5I normal held-out evidence
 
 on:
   push:
@@ -6,17 +6,20 @@ on:
       - strategy/m5h-normal-heldout-evidence
     paths:
       - tools/openofc_solver/M5H_NORMAL_HELDOUT_EVIDENCE_CONTRACT.md
+      - tools/openofc_solver/M5I_NORMAL_NORMAL_SCREENING_CONTRACT.md
       - tools/openofc_solver/m5h_normal_heldout_evidence.py
       - tools/openofc_solver/m5h_reference_evaluator_manifest.py
+      - tools/openofc_solver/m5i_normal_normal_screening.py
       - tools/openofc_solver/m5c_route_certification.py
       - tools/openofc_solver/test_m5h_normal_heldout_evidence.py
       - tools/openofc_solver/test_m5h_reference_evaluator_manifest.py
+      - tools/openofc_solver/test_m5i_normal_normal_screening.py
       - tools/openofc_solver/test_m5c_route_certification.py
       - .github/workflows/openofc-m5h-normal-heldout-evidence.yml
   workflow_dispatch:
 
 jobs:
-  m5h-contract:
+  m5h-m5i-contract:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -29,16 +32,18 @@ jobs:
           python-version: '3.12'
       - name: Install canonical test dependencies
         run: python -m pip install -r requirements-dev.txt
-      - name: Run M5H authority and evidence tests
+      - name: Run M5H-M5I authority and evidence tests
         run: |
           PYTHONPATH=tools/openofc_solver \
             python -m pytest -q \
               tools/openofc_solver/test_m5h_reference_evaluator_manifest.py \
               tools/openofc_solver/test_m5h_normal_heldout_evidence.py \
+              tools/openofc_solver/test_m5i_normal_normal_screening.py \
               tools/openofc_solver/test_m5c_route_certification.py
-      - name: Compile M5H authority implementation
+      - name: Compile M5H-M5I authority implementation
         run: |
           python -m py_compile \
             tools/openofc_solver/m5h_reference_evaluator_manifest.py \
             tools/openofc_solver/m5h_normal_heldout_evidence.py \
+            tools/openofc_solver/m5i_normal_normal_screening.py \
             tools/openofc_solver/m5c_route_certification.py
