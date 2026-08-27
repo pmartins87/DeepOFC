@@ -1,0 +1,76 @@
+{
+  "authority": "REACH_WEIGHTED_AVERAGE_SEMANTIC_GATE_NOT_CERTIFICATION",
+  "candidate_average_authority": "EXACT_REDUCED_GAME_REACH_WEIGHTED_CFR_AVERAGE_REFERENCE_NOT_CERTIFICATION",
+  "family_equivalence": [
+    {
+      "candidate_average_authority": "EXACT_REDUCED_GAME_REACH_WEIGHTED_CFR_AVERAGE_REFERENCE_NOT_CERTIFICATION",
+      "candidate_recorded_iterations": 1,
+      "family_id": "joker",
+      "frozen_profile_rule": "hash-mixed",
+      "max_action_probability_difference": 0.0,
+      "passes": true,
+      "tolerance": 1e-15
+    },
+    {
+      "candidate_average_authority": "EXACT_REDUCED_GAME_REACH_WEIGHTED_CFR_AVERAGE_REFERENCE_NOT_CERTIFICATION",
+      "candidate_recorded_iterations": 1,
+      "family_id": "hidden-discard",
+      "frozen_profile_rule": "hash-mixed",
+      "max_action_probability_difference": 0.0,
+      "passes": true,
+      "tolerance": 1e-15
+    }
+  ],
+  "legacy_average_distinction": {
+    "family_id": "joker",
+    "max_difference_vs_local_behavioral_time_average": 0.5,
+    "passes": true,
+    "seed": 2026090429,
+    "status": {
+      "authority": "EXACT_REDUCED_GAME_REACH_WEIGHTED_CFR_AVERAGE_REFERENCE_NOT_CERTIFICATION",
+      "production_certification_eligible": false,
+      "real_routes_certified": 0,
+      "recorded_iterations": 4
+    },
+    "steps": 4
+  },
+  "sampled_training_invariance": {
+    "family_id": "joker",
+    "max_regret_difference": 0.0,
+    "passes": true,
+    "rng_state_identical": true,
+    "seed": 2026090411,
+    "steps": 3
+  },
+  "schema": "openofc-m5q-reach-weighted-average-gate-v1",
+  "sha256": "2c51534c4528d4b53e807a4e76fa8f93872d462c9ca8839ba1073fd23e0e268c",
+  "source_manifest": {
+    "files": [
+      {"path": "deepofc/hu_two_round_cfr.py", "sha256": "e1d1fe65d68d47c07e2757124a3516fd6e53c8be8c05ac6f8458533064d9fba1"},
+      {"path": "deepofc/hu_two_round_mccfr.py", "sha256": "55efe47b1e9420c6f8a2dbe50b62c8590f90d1e8c7ad5e72e215e8c2db50fdf3"},
+      {"path": "tools/openofc_solver/M5Q_REACH_WEIGHTED_AVERAGE_GATE_CONTRACT.md", "sha256": "efd8a188e3015d88eebd52cc11ca979b591b944de21aa8f230f87e6f38ea2df2"},
+      {"path": "tools/openofc_solver/m5q_reach_weighted_mccfr_average.py", "sha256": "0321cf8ce3d4ae5150d1e4a83a21bc7ea560d430c06a8a92c309eb2457353246"},
+      {"path": "tools/openofc_solver/test_m5q_reach_weighted_mccfr_average.py", "sha256": "4ddc783d6a1c0608b6046b75b1e5e7a51819497a9b6c49eb0bc8fa69a6f5aa69"},
+      {"path": "tools/openofc_solver/run_m5q_reach_weighted_average_gate.py", "sha256": "28a859865a4cf02a63c2a472b156375f5167161fb8b07bc93d124a70ea6537c0"}
+    ],
+    "sha256": "3ffb1eb1ea4fde16adbd2f8e8b7c2ae06c1b4ec0ee54f768d0e7fb51283697e8"
+  },
+  "summary": {
+    "candidate_distinct_from_local_behavioral_time_average": true,
+    "full_game_scalable_average_implementation_validated": false,
+    "gate_pass": true,
+    "next_blocker": "PREDICTABLE_VARIANCE_ACCOUNTING_MISSING",
+    "predictable_variance_accounting_available": false,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0,
+    "reduced_game_reach_weighted_average_semantics_validated": true,
+    "sampled_regret_training_semantics_unchanged": true
+  },
+  "workflow": {
+    "run_id": 33124398189,
+    "job_id": 98698912484,
+    "head_sha": "322136e14032a3f195298f9acdfaad6302e4ed88",
+    "artifact_id": 9667813640,
+    "artifact_zip_sha256": "1f1768821ac2f389b699cb2b55afd3a422dea1d5f17be48c241f0105176be98f"
+  }
+}
