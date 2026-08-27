@@ -13,13 +13,26 @@ The end goal is a production player that is mathematically optimal, or as close 
 - expensive offline search/training can be delegated to a Ryzen 9 when the chosen solver architecture justifies it;
 - no live click path is enabled merely because code exists: runtime authority is gated separately from implementation.
 
+## Start here
+
+The canonical current project state is [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+
+For continuation/versioning, read in this order:
+
+1. [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md)
+2. [`docs/VERSION_MANIFEST.md`](docs/VERSION_MANIFEST.md)
+3. [`docs/HANDOFF.md`](docs/HANDOFF.md)
+4. [`docs/ROADMAP.md`](docs/ROADMAP.md)
+
+This ordering is deliberate. Historical status files remain evidence, but they must not silently override a newer frozen current-state checkpoint.
+
 ## Authoritative repositories
 
-- DeepOFC model/solver/reference: `pmartins87/DeepOFC`, branch `main`.
-- OpenHoldem runtime fork: `pmartins87/myoh_private`, branch `deepofc`.
+- DeepOFC game model / solver / reference / project documentation: `pmartins87/DeepOFC`, branch `main`.
+- OpenHoldem runtime fork: `pmartins87/myoh_private`, branch `deepofc` plus explicitly named runtime experiment branches.
 - OpenHoldem bootstrap commit: `3aa8a28944e3759fecc9323fb9f7361d54d4c9af`.
 
-DeepOFC-specific OpenHoldem changes remain isolated on `deepofc` until they pass the project gates and are deliberately promoted.
+A temporary consolidation exception is documented in `VERSION_MANIFEST.md`: the latest M4/M5 strategic solver staging currently lives in `pmartins87/myoh_private`, branch `openofc-m4v-continuation-transport`, and must be migrated back here through a provenance/equivalence gate before ownership is switched.
 
 ## Authoritative supplied evidence
 
@@ -74,7 +87,7 @@ Hero Fantasy is represented as a one-shot `round_index=-1` state inside `joker_u
 - all current Hero row cards are tentative until Confirm;
 - the curved fan can reflow after every drag, so source-card geometry is ephemeral and must be re-scraped.
 
-Real user-supplied frames 52→53 are now frozen as golden Fantasy-15 semantic fixtures.
+Real user-supplied frames 52→53 are frozen as golden Fantasy-15 semantic fixtures.
 
 ## Architecture
 
@@ -87,21 +100,19 @@ DeepOFC has four main layers:
 
 ## Current status
 
-The authoritative progress/gates are in [`docs/ROADMAP.md`](docs/ROADMAP.md). In summary:
+As of the 2026-08-27 consolidation checkpoint:
 
-- R0 bootstrap: operational;
-- R1 rules/state: advanced;
-- R2 scoring: advanced, including board-aware Joker evaluation;
-- R3 action generation: advanced, including lazy exact 14–17-card Fantasy generation and board-aware foul filtering;
-- R4–R8 solver/simulator/training/exploitation: still ahead;
-- R9 OpenHoldem scrape/state: current critical path;
-- R10 drag infrastructure: already exists behind hard safety gates, but live execution remains blocked by R9;
-- R11–R13 shadow/live/production: blocked until their predecessors pass.
+- the strategic solver has advanced through **M5C staging**;
+- M5C's dedicated CI verifies the fail-closed certification mechanism, but the 50 state-local strategic routes are **not yet certified**;
+- the next strategic gate is independent held-out route evidence, explicit threshold provenance and route-by-route certification before the first REAL 50-state M4Z Bellman trace;
+- the R0–R13 roadmap remains the production-readiness framework;
+- R9 recognition/reconstruction remains a runtime live-safety blocker;
+- R10 transaction/drag/Confirm infrastructure remains separately gated;
+- R11 shadow, R12 controlled live and R13 production remain downstream gates;
+- recent solver staging is being consolidated back into this repository without discarding its Git provenance.
 
-OpenHoldem `Release|Win32` already builds with the isolated OFC integration. The current R9 gap is not “can OpenHoldem represent OFC?”; it is the stronger proof:
+OpenHoldem `Release|Win32` has already built with isolated OFC integration in earlier gates. Runtime readiness still requires the stronger deterministic proof:
 
-`real KKPoker pixels -> tablemap/recognizer -> raw OFC observation -> canonical C++ state == independent DeepOFC Python state`.
+`real KKPoker pixels -> tablemap/recognizer -> raw OFC observation -> canonical C++ state == independent DeepOFC state`.
 
-For Fantasy, detection and recognition authority are intentionally separate. The replay-backed Fantasy detector exists, while `ofc_fantasy_recognizer_calibrated` remains `0` until exact 14–17-card recognition is independently certified.
-
-The R9 hard no-click guard remains active. Production readiness is reached only at R13, not when an intermediate scraper or drag primitive compiles.
+Production readiness is reached only at R13 after strategy, runtime, training and operations are reproducible and certified.
