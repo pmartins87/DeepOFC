@@ -1,0 +1,89 @@
+{
+  "familywise_failure_probability": 0.05,
+  "probe_iterations": 1000000,
+  "report": {
+    "authority": "COORDINATE_FREEDMAN_UNION_FEASIBILITY_NOT_CERTIFICATION",
+    "coordinate_concentration_kind": "ONE_SIDED_FREEDMAN_PLUS_UNION_BOUND",
+    "families": [
+      {
+        "concentration_only_exploitability_at_probe": 102.15144671638896,
+        "coordinate_radius_at_probe": 20881.32598454394,
+        "familywise_failure_probability": 0.05,
+        "probe_iterations": 1000000,
+        "required_iterations_for_target_concentration_only": 462168059358,
+        "structure": {
+          "action_coordinates": 39456,
+          "family_id": "joker",
+          "martingale_difference_upper_envelope": 8.0,
+          "per_iteration_variance_upper_bound": 16.0,
+          "player0_infosets": 4892,
+          "player1_infosets": 4892,
+          "sampled_regret_abs_envelope": 4.0,
+          "total_infosets": 9784,
+          "utility_range": 4.0
+        },
+        "target_exploitability": 0.15
+      },
+      {
+        "concentration_only_exploitability_at_probe": 2243.3543728697814,
+        "coordinate_radius_at_probe": 67465.2463872784,
+        "familywise_failure_probability": 0.05,
+        "probe_iterations": 1000000,
+        "required_iterations_for_target_concentration_only": 222837682425538,
+        "structure": {
+          "action_coordinates": 344304,
+          "family_id": "hidden-discard",
+          "martingale_difference_upper_envelope": 24.0,
+          "per_iteration_variance_upper_bound": 144.0,
+          "player0_infosets": 33252,
+          "player1_infosets": 33252,
+          "sampled_regret_abs_envelope": 12.0,
+          "total_infosets": 66504,
+          "utility_range": 12.0
+        },
+        "target_exploitability": 0.15
+      }
+    ],
+    "predictable_variance_accounting_kind": "POPOVICIU_WORST_CASE_DELTA_U_SQUARED_PER_ITERATION",
+    "production_certification_eligible": false,
+    "real_routes_certified": 0,
+    "regret_bridge_source": "Zinkevich-Johanson-Bowling-Piccione 2007 counterfactual-regret decomposition",
+    "sampled_positive_regret_term_assumed_zero_for_feasibility": true,
+    "schema": "openofc-m5q-freedman-union-feasibility-v1",
+    "sha256": "acf022fbdf17d7262263c7d72352af720bee7ba3c177cdd3456dc5b24aa8c396",
+    "theorem_source": "Freedman scalar martingale inequality; predictable quadratic variation form"
+  },
+  "sha256": "2a38e5415cd68ae8fa5bbf213b3944273c7291e635a622612ab642e17eb7c01e",
+  "source_manifest": {
+    "files": [
+      {"path": "deepofc/hu_two_round.py", "sha256": "a876c8fdfecc78c2670847a3c8b23f4a3ce4395845eae32a3bd7fd9082c657c3"},
+      {"path": "deepofc/hu_two_round_hidden_discard.py", "sha256": "10ecfea1a9d80a6140b81fd00ec38b361ffad7a02cf0b91f664c2ef97ccd2467"},
+      {"path": "deepofc/hu_two_round_joker.py", "sha256": "c0c3c8f91b957058cba21be932723e430289925bc2600afbf1deaf18704d3c84"},
+      {"path": "tools/openofc_solver/M5Q_FREEDMAN_UNION_FEASIBILITY_CONTRACT.md", "sha256": "d36b6c66436df403e2ab695f0251bfb48092d0dc90c7495edc5173bdaa72b7b1"},
+      {"path": "tools/openofc_solver/m5q_freedman_union_feasibility.py", "sha256": "e9d1d809bbf8b261e161b67ca5c75242b168b5b0d469a1fade2e50eb574a12a6"},
+      {"path": "tools/openofc_solver/m5q_support_range_feasibility.py", "sha256": "1a52b5766876a0da1ced0b2c02a0b9aa113bc18c3eb064bc7b6e6de45e996908"},
+      {"path": "tools/openofc_solver/run_m5q_freedman_union_feasibility.py", "sha256": "71c7cc82dbb499594fe410035998bbc42752276d6ca735c8bebe3aa6db23043b"},
+      {"path": "tools/openofc_solver/test_m5q_freedman_union_feasibility.py", "sha256": "e7e0ef95f5291e9e93f9bf27ad75aa38f625da3a0b48d944a9a564ad3ef20761"}
+    ],
+    "sha256": "8c8a0ef84b958bf2190370136f1ef885a2597fd5bb50ed4b1995be7476610a2d"
+  },
+  "summary": {
+    "action_coordinates": {"hidden-discard": 344304, "joker": 39456},
+    "actual_predictable_variance_measured": false,
+    "concentration_only_exploitability_at_probe": {"hidden-discard": 2243.3543728697814, "joker": 102.15144671638896},
+    "coordinate_union_architecture_fully_evaluated": true,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0,
+    "required_iterations_for_target_concentration_only": {"hidden-discard": 222837682425538, "joker": 462168059358},
+    "sampled_positive_regret_term_assumed_zero": true,
+    "worst_case_variance_envelope_only": true
+  },
+  "target_exploitability": 0.15,
+  "workflow_metadata": {
+    "run_id": 33124925558,
+    "job_id": 98700629091,
+    "head_sha": "97e137fc48eb9ea0a98cd79eb95308f586ef0753",
+    "artifact_id": 9668042795,
+    "artifact_zip_sha256": "41577d69d4f64ccd1444cf38092ab838c4247fbbff55669f56aecf0d7d479cc4"
+  }
+}

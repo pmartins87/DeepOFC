@@ -1,0 +1,96 @@
+{
+  "authority": "PREDICTABLE_VISIT_VARIANCE_AUDIT_NOT_CERTIFICATION",
+  "profile_rules": ["uniform", "hash-mixed"],
+  "rows": [
+    {
+      "action_coordinates": 39456,
+      "crude_all_coordinates_second_moment_bound": 631296.0,
+      "exact_terminal_utility_range": {"maximum_p0_utility": 2.0, "minimum_p0_utility": -2.0, "terminal_histories": 41472, "utility_range": 4.0},
+      "family_id": "joker",
+      "production_certification_eligible": false,
+      "profile_rule": "uniform",
+      "real_routes_certified": 0,
+      "traversers": [
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 9.0, "infosets": 4892, "maximum_coordinate_conditional_second_moment_bound": 4.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.002044153720359771, "minimum_positive_visit_probability": 0.0005787037037037037, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 9.0, "total_coordinate_conditional_second_moment_bound": 720.0, "traverser": 0, "utility_range": 4.0},
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 9.0, "infosets": 4892, "maximum_coordinate_conditional_second_moment_bound": 4.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.002044153720359771, "minimum_positive_visit_probability": 0.0005787037037037037, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 9.0, "total_coordinate_conditional_second_moment_bound": 720.0, "traverser": 1, "utility_range": 4.0}
+      ],
+      "visit_weighted_to_crude_second_moment_ratio": 0.002281021897810219,
+      "visit_weighted_total_coordinate_second_moment_bound": 1440.0
+    },
+    {
+      "action_coordinates": 39456,
+      "crude_all_coordinates_second_moment_bound": 631296.0,
+      "exact_terminal_utility_range": {"maximum_p0_utility": 2.0, "minimum_p0_utility": -2.0, "terminal_histories": 41472, "utility_range": 4.0},
+      "family_id": "joker",
+      "production_certification_eligible": false,
+      "profile_rule": "hash-mixed",
+      "real_routes_certified": 0,
+      "traversers": [
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 9.0, "infosets": 4892, "maximum_coordinate_conditional_second_moment_bound": 4.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.002044153720359771, "minimum_positive_visit_probability": 1.0461570948120908e-06, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 9.0, "total_coordinate_conditional_second_moment_bound": 720.0, "traverser": 0, "utility_range": 4.0},
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 9.0, "infosets": 4892, "maximum_coordinate_conditional_second_moment_bound": 4.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.002044153720359771, "minimum_positive_visit_probability": 3.149631301945996e-05, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 9.0, "total_coordinate_conditional_second_moment_bound": 720.0, "traverser": 1, "utility_range": 4.0}
+      ],
+      "visit_weighted_to_crude_second_moment_ratio": 0.002281021897810219,
+      "visit_weighted_total_coordinate_second_moment_bound": 1440.0
+    },
+    {
+      "action_coordinates": 344304,
+      "crude_all_coordinates_second_moment_bound": 49579776.0,
+      "exact_terminal_utility_range": {"maximum_p0_utility": 6.0, "minimum_p0_utility": -6.0, "terminal_histories": 373248, "utility_range": 12.0},
+      "family_id": "hidden-discard",
+      "production_certification_eligible": false,
+      "profile_rule": "uniform",
+      "real_routes_certified": 0,
+      "traversers": [
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 21.0, "infosets": 33252, "maximum_coordinate_conditional_second_moment_bound": 36.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.0006616143389871286, "minimum_positive_visit_probability": 0.000248015873015873, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 21.0, "total_coordinate_conditional_second_moment_bound": 18576.0, "traverser": 0, "utility_range": 12.0},
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 21.0, "infosets": 33252, "maximum_coordinate_conditional_second_moment_bound": 36.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.0006616143389871286, "minimum_positive_visit_probability": 0.000248015873015873, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 21.0, "total_coordinate_conditional_second_moment_bound": 18576.0, "traverser": 1, "utility_range": 12.0}
+      ],
+      "visit_weighted_to_crude_second_moment_ratio": 0.0007493377945071796,
+      "visit_weighted_total_coordinate_second_moment_bound": 37152.0
+    },
+    {
+      "action_coordinates": 344304,
+      "crude_all_coordinates_second_moment_bound": 49579776.0,
+      "exact_terminal_utility_range": {"maximum_p0_utility": 6.0, "minimum_p0_utility": -6.0, "terminal_histories": 373248, "utility_range": 12.0},
+      "family_id": "hidden-discard",
+      "production_certification_eligible": false,
+      "profile_rule": "hash-mixed",
+      "real_routes_certified": 0,
+      "traversers": [
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 21.0, "infosets": 33252, "maximum_coordinate_conditional_second_moment_bound": 36.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.0006616143389871286, "minimum_positive_visit_probability": 4.605286964276543e-07, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 21.0, "total_coordinate_conditional_second_moment_bound": 18576.0, "traverser": 0, "utility_range": 12.0},
+        {"authority": "EXACT_REDUCED_GAME_EXTERNAL_SAMPLING_VISIT_VARIANCE_REFERENCE_NOT_CERTIFICATION", "expected_round4_visit_mass": 21.0, "infosets": 33252, "maximum_coordinate_conditional_second_moment_bound": 36.0, "maximum_visit_probability": 0.25, "mean_visit_probability": 0.0006616143389871286, "minimum_positive_visit_probability": 8.832673827020916e-07, "production_certification_eligible": false, "real_routes_certified": 0, "round3_visit_mass": 1.0, "round4_visit_mass": 21.0, "total_coordinate_conditional_second_moment_bound": 18576.0, "traverser": 1, "utility_range": 12.0}
+      ],
+      "visit_weighted_to_crude_second_moment_ratio": 0.0007493377945071796,
+      "visit_weighted_total_coordinate_second_moment_bound": 37152.0
+    }
+  ],
+  "schema": "openofc-m5q-predictable-visit-variance-audit-v1",
+  "sha256": "bd0312c66eb13151a7159f1e42eafbba72544b7ab1ad272bf867cba27ce13f51",
+  "source_manifest": {
+    "files": [
+      {"path": "deepofc/hu_two_round.py", "sha256": "a876c8fdfecc78c2670847a3c8b23f4a3ce4395845eae32a3bd7fd9082c657c3"},
+      {"path": "deepofc/hu_two_round_mccfr.py", "sha256": "55efe47b1e9420c6f8a2dbe50b62c8590f90d1e8c7ad5e72e215e8c2db50fdf3"},
+      {"path": "tools/openofc_solver/M5Q_PREDICTABLE_VISIT_VARIANCE_CONTRACT.md", "sha256": "388ac28ff4e15cceeefc8be89b4e6e7cd69e3c39beb5f2b0522b7973a26901fd"},
+      {"path": "tools/openofc_solver/m5q_predictable_visit_variance.py", "sha256": "b0eb8cdaf90efb4915b90be21dc4c407da310b44c6af8123ddd05cc69dadb700"},
+      {"path": "tools/openofc_solver/m5q_external_sampling_unbiasedness.py", "sha256": "3f6ffeb17f0e3bb755c9b033b3520b06cdaa36544cfdd03ffa4a51aa7871556d"},
+      {"path": "tools/openofc_solver/m5q_support_range_feasibility.py", "sha256": "1a52b5766876a0da1ced0b2c02a0b9aa113bc18c3eb064bc7b6e6de45e996908"},
+      {"path": "tools/openofc_solver/run_m5q_predictable_visit_variance.py", "sha256": "eb596fcd926d83029a9218632c0365f0e7cdf9a16ee1cd5504e93491548b8b09"},
+      {"path": "tools/openofc_solver/test_m5q_predictable_visit_variance.py", "sha256": "a169a8de9ebc7b1f071c0e890aac50cd7b9435c67e5ca00ad8b9c8157da10a64"}
+    ],
+    "sha256": "51e4df7cc8f5587a47ca947c83acdf560c7750d4aaebb09d7176327a296f4195"
+  },
+  "summary": {
+    "all_visit_mass_invariants_passed": true,
+    "full_game_scalable_predictable_variance_implementation_validated": false,
+    "predictable_variance_accounting_available_on_reduced_games": true,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0,
+    "visit_weighted_to_crude_second_moment_ratios": {"hidden-discard:hash-mixed": 0.0007493377945071796, "hidden-discard:uniform": 0.0007493377945071796, "joker:hash-mixed": 0.002281021897810219, "joker:uniform": 0.002281021897810219}
+  },
+  "workflow_metadata": {
+    "run_id": 33125162221,
+    "job_id": 98701420634,
+    "head_sha": "0b21a34c5e2fa3480b84b2541d829037486c22e8",
+    "artifact_id": 9668085050,
+    "artifact_zip_sha256": "96232f4f49182ee94dc8aa87417b2af653fbd5b582819cb02d86ba2b07e64260"
+  }
+}

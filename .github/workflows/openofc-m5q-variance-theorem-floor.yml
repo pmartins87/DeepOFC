@@ -1,0 +1,68 @@
+name: OpenOFC M5Q variance-theorem optimistic floor
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - deepofc/hu_two_round.py
+      - deepofc/hu_two_round_hidden_discard.py
+      - deepofc/hu_two_round_joker.py
+      - tools/openofc_solver/M5Q_VARIANCE_THEOREM_FLOOR_CONTRACT.md
+      - tools/openofc_solver/m5q_variance_theorem_floor.py
+      - tools/openofc_solver/run_m5q_variance_theorem_floor.py
+      - tools/openofc_solver/test_m5q_variance_theorem_floor.py
+      - .github/workflows/openofc-m5q-variance-theorem-floor.yml
+  workflow_dispatch:
+
+jobs:
+  floor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5Q variance-floor mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_variance_theorem_floor.py
+      - name: Run frozen M5Q variance-theorem optimistic floor
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_variance_theorem_floor.py
+      - name: Validate M5Q variance-floor authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('artifacts/m5q_variance_theorem_floor.json').read_text(encoding='utf-8'))
+          assert data['schema'] == 'openofc-m5q-variance-theorem-floor-pilot-v1'
+          assert data['authority'] == 'GIBSON_THEOREM2_OPTIMISTIC_FLOOR_PILOT_NOT_CERTIFICATION'
+          assert data['variance_assumption'] == 0.0
+          assert data['delta_hats'] == [1.0, 206.0]
+          assert {row['family_id'] for row in data['rows']} == {'joker', 'hidden-discard'}
+          assert data['summary']['variance_measurement_needed_for_rejection'] is False
+          assert data['summary']['certification_eligible'] is False
+          assert data['summary']['real_routes_certified'] == 0
+          assert data['summary']['min_unit_iterations_for_0_15'] > 0
+          assert data['summary']['max_raw_206_iterations_for_0_15'] > data['summary']['max_unit_iterations_for_0_15']
+          print('OPENOFC_M5Q_VARIANCE_THEOREM_FLOOR_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-variance-theorem-floor
+          path: artifacts/m5q_variance_theorem_floor.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,73 @@
+{
+  "schema": "openofc-m5q-support-range-feasibility-durable-record-v1",
+  "authority": "EXTERNAL_SAMPLING_SUPPORT_RANGE_PILOT_NOT_CERTIFICATION",
+  "workflow_run": 33114239605,
+  "artifact_id": 9663878721,
+  "artifact_zip_sha256": "c800caee89f8d4d83737eb0bb7b1d0d470c0d6905c0af1b6df59ca7b35c57f94",
+  "source_artifact_payload_sha256": "bfd0167572f741c6260851efcf92bf47752e18ba17c9d49798bbdbeefea1b139",
+  "mccfr_seed": 2026090201,
+  "checkpoints": [0, 1, 4, 16],
+  "target_exploitability": 0.15,
+  "exact_terminal_ranges": {
+    "joker": {
+      "terminal_histories": 41472,
+      "minimum_p0_utility": -2.0,
+      "maximum_p0_utility": 2.0,
+      "utility_range": 4.0,
+      "appendix_c_var0_delta1_required_iterations_for_0_15": 307703947
+    },
+    "hidden-discard": {
+      "terminal_histories": 373248,
+      "minimum_p0_utility": -6.0,
+      "maximum_p0_utility": 6.0,
+      "utility_range": 12.0,
+      "appendix_c_var0_delta1_required_iterations_for_0_15": 85046671698
+    }
+  },
+  "joker_external_sampling_support": [
+    {
+      "iteration": 0,
+      "player0_zero_probability_histories": 0,
+      "player1_zero_probability_histories": 0,
+      "player0_min_sampling_probability": 0.0005787037037037037,
+      "player1_min_sampling_probability": 0.0005787037037037037,
+      "strictly_positive_global_floor": true
+    },
+    {
+      "iteration": 1,
+      "player0_zero_probability_histories": 5184,
+      "player1_zero_probability_histories": 112,
+      "player0_min_sampling_probability": 0.0,
+      "player1_min_sampling_probability": 0.0,
+      "strictly_positive_global_floor": false
+    },
+    {
+      "iteration": 4,
+      "player0_zero_probability_histories": 9456,
+      "player1_zero_probability_histories": 886,
+      "player0_min_sampling_probability": 0.0,
+      "player1_min_sampling_probability": 0.0,
+      "player0_min_positive_sampling_probability": 1.1564823173178708e-18,
+      "player1_min_positive_sampling_probability": 0.0001488095238095236,
+      "strictly_positive_global_floor": false
+    },
+    {
+      "iteration": 16,
+      "player0_zero_probability_histories": 14715,
+      "player1_zero_probability_histories": 11817,
+      "player0_min_sampling_probability": 0.0,
+      "player1_min_sampling_probability": 0.0,
+      "player0_min_positive_sampling_probability": 2.7105054312137616e-19,
+      "player1_min_positive_sampling_probability": 7.860465750519907e-19,
+      "strictly_positive_global_floor": false
+    }
+  ],
+  "decision": {
+    "exact_reduced_range_materially_tighter_than_global_206": true,
+    "post_update_global_sampling_floor_collapses_to_zero": true,
+    "delta_division_appendix_c_route_valid_for_current_no_exploration_kernel": false,
+    "actual_estimator_variance_measured": false,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0
+  }
+}

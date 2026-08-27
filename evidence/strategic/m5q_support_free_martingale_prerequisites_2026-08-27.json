@@ -1,0 +1,84 @@
+{
+  "decision": {
+    "instantiate_support_free_concentration_bound_now": false,
+    "reason": "THEOREM_COMPATIBLE_REACH_WEIGHTED_AVERAGE_MISSING",
+    "required_follow_up": [
+      "implement_and_independently_validate theorem-compatible reach-weighted average strategy semantics",
+      "implement and validate predictable/conditional sampled-regret variance accounting",
+      "only then instantiate a named martingale concentration theorem"
+    ]
+  },
+  "report": {
+    "authority": "SUPPORT_FREE_MARTINGALE_PREREQUISITE_AUDIT_NOT_CERTIFICATION",
+    "available_average_profile_methods": [
+      "behavioral_time_average_profile"
+    ],
+    "bounded_increment_prerequisite_pass": true,
+    "families": [
+      {
+        "envelope_derivation": "|action_value-node_value| <= max_u-min_u",
+        "exact_utility_range": 4.0,
+        "family_id": "joker",
+        "maximum_terminal_utility": 2.0,
+        "minimum_terminal_utility": -2.0,
+        "sampled_regret_coordinate_abs_envelope": 4.0
+      },
+      {
+        "envelope_derivation": "|action_value-node_value| <= max_u-min_u",
+        "exact_utility_range": 12.0,
+        "family_id": "hidden-discard",
+        "maximum_terminal_utility": 6.0,
+        "minimum_terminal_utility": -6.0,
+        "sampled_regret_coordinate_abs_envelope": 12.0
+      }
+    ],
+    "m5q_a_unbiasedness_payload_sha256": "0188c219f6946055b8dae8c350ebfbca7aef65c93403dbb5f79c793cf30cedf5",
+    "next_blocker": "THEOREM_COMPATIBLE_REACH_WEIGHTED_AVERAGE_MISSING",
+    "predictable_variance_accounting_available": false,
+    "production_certification_eligible": false,
+    "real_routes_certified": 0,
+    "sampled_regret_path_has_explicit_inverse_weight_candidate": false,
+    "schema": "openofc-m5q-support-free-martingale-prerequisites-v1",
+    "sha256": "01d4ba74d067835f010b4e2bf797b6f1cbd032bbe1328344ff13ef8124151d25",
+    "support_free_certificate_prerequisites_complete": false,
+    "theorem_compatible_reach_weighted_average_available": false,
+    "unbiasedness_binding_status": "FINITE_MONTE_CARLO_DIAGNOSTIC_NOT_PROOF"
+  },
+  "sha256": "c434bfcc5267ddb0d5b57964c0e6319effd1383fbbb33d029c0ea19a18e96e54",
+  "source_manifest": {
+    "files": [
+      {
+        "path": "deepofc/hu_two_round_mccfr.py",
+        "sha256": "55efe47b1e9420c6f8a2dbe50b62c8590f90d1e8c7ad5e72e215e8c2db50fdf3"
+      },
+      {
+        "path": "tools/openofc_solver/M5Q_SUPPORT_FREE_MARTINGALE_PREREQUISITES_CONTRACT.md",
+        "sha256": "97e0c7f63b2a72f54773be1de295cbdf3d7062c07e931118b1ea71d0beebbe97"
+      },
+      {
+        "path": "tools/openofc_solver/m5q_support_free_martingale_prerequisites.py",
+        "sha256": "e49b05c39038d07d3fc2a0cda142b1988c11eb2ce46f18ce98e1101faa49c9c6"
+      },
+      {
+        "path": "tools/openofc_solver/m5q_support_range_feasibility.py",
+        "sha256": "1a52b5766876a0da1ced0b2c02a0b9aa113bc18c3eb064bc7b6e6de45e996908"
+      },
+      {
+        "path": "tools/openofc_solver/run_m5q_support_free_martingale_prerequisites.py",
+        "sha256": "37abf55d4cac942c020000a54ad4266d68b14c01f0368b847cea58f69f638a2a"
+      },
+      {
+        "path": "tools/openofc_solver/test_m5q_support_free_martingale_prerequisites.py",
+        "sha256": "b7185f92a64c26f6ea64d3c503598977a55f44afdbcf29f544e98399accdbe6f"
+      }
+    ],
+    "sha256": "a5365a680aa1dbddff9999fc5308fb3529db76bb9024df8eff3152795f46f7e5"
+  },
+  "workflow": {
+    "run_id": 33118314904,
+    "job_id": 98678571813,
+    "head_sha": "1b488b5135fce4010a5a23e43278697fe55fcbab",
+    "artifact_id": 9665589179,
+    "artifact_zip_sha256": "af5efc0fa9463642957cef3f6aea610dc5159939cf123e9f3ac131ec480dfa37"
+  }
+}

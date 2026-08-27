@@ -1,0 +1,71 @@
+name: OpenOFC M5Q exploration-support feasibility
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_EXPLORATION_SUPPORT_FEASIBILITY_CONTRACT.md
+      - tools/openofc_solver/m5q_exploration_support_feasibility.py
+      - tools/openofc_solver/run_m5q_exploration_support_feasibility.py
+      - tools/openofc_solver/test_m5q_exploration_support_feasibility.py
+      - .github/workflows/openofc-m5q-exploration-support-feasibility.yml
+  workflow_dispatch:
+
+jobs:
+  feasibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run exploration-support mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_exploration_support_feasibility.py
+      - name: Run frozen exploration-support feasibility pilot
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_exploration_support_feasibility.py
+      - name: Validate authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_exploration_support_feasibility.json').read_text(encoding='utf-8'))
+          assert data['authority'] == 'EXPLORATION_SUPPORTED_EXTERNAL_SAMPLING_PILOT_NOT_CERTIFICATION'
+          assert data['epsilon_ladder'] == [0.01, 0.05, 0.1, 0.2, 1.0]
+          assert data['summary']['strictly_positive_support_restored_for_all_epsilon_rows'] is True
+          assert data['summary']['epsilon1_is_best_guaranteed_support_endpoint'] is True
+          assert data['summary']['actual_training_semantics_changed'] is False
+          assert data['summary']['actual_convergence_quality_measured'] is False
+          assert data['summary']['actual_estimator_variance_measured'] is False
+          assert data['summary']['production_certification_eligible'] is False
+          assert data['summary']['real_routes_certified'] == 0
+          assert len(data['families']) == 2
+          for family in data['families']:
+              assert len(family['epsilon_rows']) == 5
+              for row in family['epsilon_rows']:
+                  assert row['support']['global_sampling_probability_floor'] > 0.0
+                  assert row['support']['production_solver_modified'] is False
+                  assert row['support']['production_certification_eligible'] is False
+                  assert row['support']['real_routes_certified'] == 0
+          print('OPENOFC_M5Q_EXPLORATION_SUPPORT_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-exploration-support-feasibility
+          path: artifacts/m5q_exploration_support_feasibility.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,65 @@
+name: OpenOFC M5Q support/range feasibility
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_SUPPORT_RANGE_FEASIBILITY_CONTRACT.md
+      - tools/openofc_solver/m5q_support_range_feasibility.py
+      - tools/openofc_solver/run_m5q_support_range_feasibility.py
+      - tools/openofc_solver/test_m5q_support_range_feasibility.py
+      - .github/workflows/openofc-m5q-support-range-feasibility.yml
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5Q support/range mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_support_range_feasibility.py
+      - name: Run frozen M5Q support/range pilot
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_support_range_feasibility.py
+      - name: Validate support/range authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_support_range_feasibility.json').read_text(encoding='utf-8'))
+          assert data['authority'] == 'EXTERNAL_SAMPLING_SUPPORT_RANGE_PILOT_NOT_CERTIFICATION'
+          assert data['checkpoints'] == [0, 1, 4, 16]
+          assert len(data['range_rows']) == 2
+          assert len(data['support_rows']) == 4
+          assert data['summary']['actual_estimator_variance_measured'] is False
+          assert data['summary']['production_certification_eligible'] is False
+          assert data['summary']['real_routes_certified'] == 0
+          for row in data['support_rows']:
+              support = row['support']
+              assert support['production_certification_eligible'] is False
+              assert support['real_routes_certified'] == 0
+          print('OPENOFC_M5Q_SUPPORT_RANGE_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-support-range-feasibility
+          path: artifacts/m5q_support_range_feasibility.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,67 @@
+name: OpenOFC M5Q predictable visit variance
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_PREDICTABLE_VISIT_VARIANCE_CONTRACT.md
+      - tools/openofc_solver/m5q_predictable_visit_variance.py
+      - tools/openofc_solver/run_m5q_predictable_visit_variance.py
+      - tools/openofc_solver/test_m5q_predictable_visit_variance.py
+      - .github/workflows/openofc-m5q-predictable-visit-variance.yml
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run predictable visit-variance mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_predictable_visit_variance.py
+      - name: Run frozen predictable visit-variance audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_predictable_visit_variance.py
+      - name: Validate authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_predictable_visit_variance.json').read_text(encoding='utf-8'))
+          summary = data['summary']
+          assert data['authority'] == 'PREDICTABLE_VISIT_VARIANCE_AUDIT_NOT_CERTIFICATION'
+          assert len(data['rows']) == 4
+          assert summary['all_visit_mass_invariants_passed'] is True
+          assert summary['predictable_variance_accounting_available_on_reduced_games'] is True
+          assert summary['full_game_scalable_predictable_variance_implementation_validated'] is False
+          assert summary['production_certification_eligible'] is False
+          assert summary['real_routes_certified'] == 0
+          for row in data['rows']:
+              ratio = row['visit_weighted_to_crude_second_moment_ratio']
+              assert 0.0 < ratio <= 1.0
+              assert row['production_certification_eligible'] is False
+              assert row['real_routes_certified'] == 0
+          print('OPENOFC_M5Q_PREDICTABLE_VISIT_VARIANCE=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-predictable-visit-variance
+          path: artifacts/m5q_predictable_visit_variance.json
+          if-no-files-found: error
+          retention-days: 14
