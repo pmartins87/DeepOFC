@@ -1,0 +1,69 @@
+name: OpenOFC M5P external-sampling theorem feasibility
+
+on:
+  push:
+    branches:
+      - strategy/m5p-external-sampling-theoretical-bound
+    paths:
+      - deepofc/hu_two_round.py
+      - deepofc/hu_two_round_hidden_discard.py
+      - deepofc/hu_two_round_joker.py
+      - deepofc/scoring.py
+      - tools/openofc_solver/M5P_EXTERNAL_SAMPLING_THEORETICAL_BOUND_CONTRACT.md
+      - tools/openofc_solver/m5p_external_sampling_theoretical_bound.py
+      - tools/openofc_solver/run_m5p_external_sampling_theoretical_bound.py
+      - tools/openofc_solver/test_m5p_external_sampling_theoretical_bound.py
+      - .github/workflows/openofc-m5p-external-sampling-theoretical-bound.yml
+  workflow_dispatch:
+
+jobs:
+  feasibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5P theorem accounting tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5p_external_sampling_theoretical_bound.py
+      - name: Run frozen M5P feasibility pilot
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5p_external_sampling_theoretical_bound.py
+      - name: Validate M5P authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('artifacts/m5p_external_sampling_theoretical_bound.json').read_text(encoding='utf-8'))
+          assert data['schema'] == 'openofc-m5p-external-sampling-theorem-feasibility-pilot-v1'
+          assert data['authority'] == 'CLASSICAL_EXTERNAL_SAMPLING_BOUND_FEASIBILITY_PILOT_NOT_CERTIFICATION'
+          assert data['joint_confidence'] == 0.95
+          assert data['utility_ranges'] == [1.0, 206.0]
+          assert {row['family_id'] for row in data['rows']} == {'joker', 'hidden-discard'}
+          assert all(row['production_certification_eligible'] is False for row in data['rows'])
+          assert data['summary']['production_certification_eligible'] is False
+          assert data['summary']['data_dependent_bound_tested'] is False
+          assert data['summary']['min_unit_range_iterations_for_0_15'] > 0
+          assert data['summary']['max_raw_206_iterations_for_0_15'] > data['summary']['max_unit_range_iterations_for_0_15']
+          print('OPENOFC_M5P_THEOREM_FEASIBILITY_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5p-external-sampling-theorem-feasibility
+          path: artifacts/m5p_external_sampling_theoretical_bound.json
+          if-no-files-found: error
+          retention-days: 14
