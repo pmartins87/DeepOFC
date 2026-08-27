@@ -1,11 +1,13 @@
 # DeepOFC solver migration plan
 
 Date: 2026-08-27
-Status: **G1–G4 PASS; G5/G6 PR/merge pending**
+Status: **G1–G6 COMPLETE**
 
 ## Goal
 
-Move the recent M4/M5 strategic development from its temporary staging location in `pmartins87/myoh_private/tools/openofc_solver` into the intended authoritative solver repository `pmartins87/DeepOFC`, while preserving provenance and proving behavioral equivalence before authority transfer.
+Move the M4/M5 strategic development from its temporary staging location in `pmartins87/myoh_private/tools/openofc_solver` into the authoritative solver repository `pmartins87/DeepOFC`, preserving provenance and proving behavioral equivalence before authority transfer.
+
+That goal is now complete.
 
 ## Frozen source
 
@@ -14,40 +16,32 @@ Move the recent M4/M5 strategic development from its temporary staging location 
 - commit: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
 - solver tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
 
-No later source revision may silently enter this migration. Later strategic changes must be recorded as separate deltas in DeepOFC after authority transfer.
+This ref is historical strategic provenance only. Later strategic changes belong in DeepOFC.
 
-## Gate results
+## Final gate results
 
-### G1 — inventory / dependency closure
+### G1 — inventory / dependency closure — PASS
 
 #### G1 v1 — superseded after fail-closed detection
 
-The first inventory implementation computed the dependency closure for the M4U–M5G roots and then added matching tests for selected modules. It failed to recompute dependencies introduced by those newly selected tests.
+The first inventory implementation computed dependency closure for the M4U–M5G roots and then added matching tests for selected modules without recomputing dependencies introduced by those newly selected tests.
 
-The first behavioral-equivalence run `33070445519` exposed this correctly:
+Behavioral-equivalence run `33070445519` exposed this correctly:
 
 - 19/20 old-vs-new probes matched;
 - frozen-source `test_engine.py` PASS;
 - migrated-target `test_engine.py` failed with `ModuleNotFoundError: teacher_search`;
 - all other executable comparisons were identical.
 
-Interpretation: **inventory closure defect, not solver semantic divergence**. The migration remained fail-closed and no authority was transferred.
+Interpretation: **inventory closure defect, not solver semantic divergence**. Authority remained fail-closed.
 
-#### G1 v2 — PASS
-
-The inventory algorithm was corrected to a fixed point over:
-
-1. current M4U–M5G implementation/test roots;
-2. selected Python → all project-local imports;
-3. migrated implementation/helper module → matching test when present;
-4. dependencies introduced by those newly selected tests;
-5. repeat until the selected set stops changing;
-6. include all current M4/M5 contracts;
-7. keep unrelated staging history explicitly classified as historical.
+#### G1 v2 — authoritative fixed-point inventory
 
 Workflow run `33070689091`: **PASS**.
 
-Authoritative v2 inventory:
+The inventory algorithm was corrected to a fixed point over selected Python modules, project-local imports, matching tests for migrated modules, and dependencies introduced by those tests, repeating until stable.
+
+Authoritative inventory:
 
 - schema: `deepofc-openofc-solver-inventory-v2`;
 - solver-subtree files: **187**;
@@ -66,9 +60,9 @@ Artifacts:
 
 **G1 result: PASS.**
 
-### G2 — provenance map / pure copy
+### G2 — provenance map / pure copy — PASS
 
-The corrected migration copies all **126** selected files byte-for-byte and preserves their exact relative path beneath `tools/openofc_solver/`. No import rename, namespace change, solver refactor or semantic edit is allowed in this gate.
+The corrected migration copied all **126** selected files byte-for-byte and preserved their exact relative path beneath `tools/openofc_solver/`. No import rename, namespace change, solver refactor or semantic edit was permitted.
 
 For every migrated file the provenance record binds:
 
@@ -81,7 +75,7 @@ Corrected pure-migration workflow run `33070802793`: **PASS**.
 - provenance canonical SHA-256: `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`;
 - inventory payload bound inside provenance: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`.
 
-Generated `__pycache__`/`.pyc` files are deleted before persistence and are not migration evidence.
+Generated `__pycache__`/`.pyc` files were deleted before persistence and are not migration evidence.
 
 Artifacts:
 
@@ -91,7 +85,7 @@ Artifacts:
 
 **G2 result: PASS.**
 
-### G3 — independent DeepOFC strategic tests
+### G3 — independent DeepOFC strategic tests — PASS
 
 The corrected pure-migration workflow independently validated the migrated DeepOFC tree:
 
@@ -106,14 +100,14 @@ Workflow run: `33070802793`.
 
 **G3 result: PASS.**
 
-### G4 — deterministic old-vs-new behavioral equivalence
+### G4 — deterministic old-vs-new behavioral equivalence — PASS
 
-A separate workflow checks out both repositories independently:
+A separate workflow checked out both repositories independently:
 
 - frozen source: `myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1`;
-- migrated target: `DeepOFC` migration branch.
+- migrated target: DeepOFC migration branch.
 
-The comparison environment is controlled with:
+Controlled comparison environment:
 
 - Python `3.11.16`;
 - NumPy `2.4.6`;
@@ -122,27 +116,9 @@ The comparison environment is controlled with:
 - controlled temp directories;
 - Python bytecode writes disabled.
 
-Each predeclared test must independently exit zero on source and target **and** produce byte-identical normalized stdout/stderr.
+Each predeclared test had to independently exit zero on source and target and produce byte-identical normalized stdout/stderr.
 
-Suite coverage:
-
-- engine/reference evaluation;
-- HU continuation;
-- M4U continuation boundary;
-- M4V targets;
-- M4W outcome model;
-- M4X robust support;
-- M4Y Bellman trace;
-- M4Z outer Bellman;
-- M5A component + Normal/Fantasy adapters;
-- M5B Fantasy self-play probe;
-- M5C general + Normal route certification;
-- M5D dynamic certified Bellman;
-- M5E Fantasy route certification;
-- M5F Fantasy held-out evidence;
-- M5G full registry factory;
-- Normal×Fantasy kernel;
-- Fantasy×Fantasy kernel and payoff.
+Suite coverage included engine/reference evaluation, HU continuation, M4U–M4Z, M5A–M5G, Normal×Fantasy and Fantasy×Fantasy kernel/payoff behavior.
 
 Workflow run `33070910873`: **PASS**.
 
@@ -150,7 +126,6 @@ Workflow run `33070910873`: **PASS**.
 - target PASS: **20/20**;
 - normalized transcript equality: **20/20**;
 - equivalence report SHA-256: `935162877ad8f7821fa106ba7cd2f5bfc588a60f2273c34443eb805926e93664`;
-- gate-start target commit: `dd5839c364e7a9d18b97ab580c1ad38d9814ac9f`;
 - persisted equivalence evidence commit: `d45a9b77df8d75c1feaf45c8354ea152cd311355`.
 
 Artifacts:
@@ -162,45 +137,61 @@ Artifacts:
 
 **G4 result: PASS.**
 
-### G5 — PR-level DeepOFC CI
+### G5 — PR-level canonical DeepOFC CI — PASS
 
-Next action:
+PR #13 was opened from `migration/openofc-solver-code-c21c3c4` to `main`.
 
-1. open a PR from `migration/openofc-solver-code-c21c3c4` to `main`;
-2. require the repository's canonical PR CI to pass against the complete migration change;
-3. inspect any merge conflicts or unexpected changed files before authority transfer.
+The first PR-level CI run correctly failed during test collection because newly migrated solver tests import NumPy while repository-level `requirements-dev.txt` declared only pytest. This was an integration dependency declaration defect, not a semantic solver failure.
 
-**G5 result: PENDING PR CI.**
+`requirements-dev.txt` was corrected with:
 
-### G6 — authority transfer
+`numpy==2.4.6`
 
-Only after G5 PASS:
+matching the successful migration/equivalence environment.
 
-1. merge the migration/equivalence PR into `DeepOFC/main`;
-2. interpret `docs/VERSION_MANIFEST.md` on main as closing the temporary strategic staging exception;
-3. freeze `myoh_private@c21c3c4...` as historical strategic provenance;
-4. perform future strategic development in DeepOFC;
-5. export explicitly versioned policy artifacts to the runtime repository rather than developing solver authority there.
+- corrected PR head: `c364a3056349ba627f273265c7c7a742b2d72c99`;
+- canonical PR CI run `33074562167`: **PASS**.
 
-**G6 result: PENDING MERGE.**
+**G5 result: PASS.**
+
+### G6 — authority transfer — PASS
+
+PR #13 was merged only after G5 was green.
+
+- PR: `#13`;
+- merge commit: `4842d01dc68b14bae5a083d8ae0138297d7a0783`;
+- post-merge `main` canonical CI run: `33074839933` — **PASS**.
+
+Authority decision from that merge onward:
+
+1. `pmartins87/DeepOFC`, branch `main`, is the active strategic source authority for the migrated M4/M5 solver tree;
+2. `myoh_private@c21c3c4...` is immutable historical strategic provenance;
+3. future strategic development stays in DeepOFC;
+4. runtime consumes explicit versioned/exported policy artifacts instead of owning the only strategic source.
+
+Final completion record:
+
+- `docs/migration/OPENOFC_SOLVER_AUTHORITY_TRANSFER_C21C3C4.md`
+
+**G6 result: PASS.**
 
 ## Strategic meaning of migration completion
 
-These gates establish that the migrated DeepOFC solver tree is the same strategic implementation as the frozen source for the declared migration surface.
+These gates establish that the migrated DeepOFC solver tree is the same strategic implementation as the frozen source for the declared migration surface, and that DeepOFC is now the active repository authority.
 
 They do **not** establish that the strategies are optimal, exploitability-bounded or production-ready.
 
-The exact frozen tree contains architecture through M5G, but M5G is a 50-state registry/certification factory. A REAL Bellman surface still requires:
+The migrated tree contains architecture through M5G, but M5G is a 50-state registry/certification factory. A REAL Bellman surface still requires:
 
 - 2 Normal × Normal real-certified exact-V routes;
 - 16 Normal × Fantasy real-certified exact-V routes;
 - 32 Fantasy × Fantasy real-certified exact-V routes.
 
-After G6, the next substantive strategic work is independent held-out evidence and a defensible threshold protocol, followed by state-local certification and only then the first REAL dynamic M4Z Bellman trace.
+The next substantive strategic work is independent held-out evidence plus a defensible threshold protocol, followed by state-local certification and only then the first REAL dynamic M4Z Bellman trace.
 
-## Non-goals
+## Non-goals preserved
 
-The migration must not simultaneously:
+The migration did not simultaneously:
 
 - redesign M5C–M5G;
 - tune strategic thresholds;
@@ -209,10 +200,6 @@ The migration must not simultaneously:
 - claim strategic certification from migration identity.
 
 Those changes belong in later, separately validated DeepOFC commits.
-
-## Failure rule
-
-If any remaining PR-level equivalence/CI check fails, the frozen staging source remains fallback authority for the affected component until the divergence is explained. Do not waive a migration gate merely to complete repository consolidation.
 
 ## Completion record checklist
 
@@ -225,7 +212,8 @@ If any remaining PR-level equivalence/CI check fails, the frozen staging source 
 - [x] independent migrated strategic tests PASS;
 - [x] 20/20 deterministic old-vs-new behavioral equivalence PASS;
 - [x] equivalence report hash recorded;
-- [ ] PR-level canonical DeepOFC CI PASS;
-- [ ] migration PR merged;
-- [ ] final main merge commit recorded;
-- [ ] strategic authority formally closed onto DeepOFC main.
+- [x] PR-level canonical DeepOFC CI PASS;
+- [x] migration PR merged;
+- [x] final main merge commit recorded;
+- [x] post-merge main CI PASS;
+- [x] strategic authority formally closed onto DeepOFC main.

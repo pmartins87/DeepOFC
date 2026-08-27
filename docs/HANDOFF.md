@@ -14,47 +14,35 @@ This is the operational continuation document for the next chat/session/agent. D
 
 ## One-line state
 
-DeepOFC is an advanced but strategically uncertified KKPoker OFC Joker Ultimate project. The continuation/Bellman architecture reaches **M5G**, and the frozen strategic tree has now passed corrected fixed-point inventory, 126-file byte-identical migration and **20/20 deterministic old-vs-new behavioral equivalence** into DeepOFC. Repository authority transfer is ready for PR/merge; the next substantive strategic blocker is real held-out evidence and 50/50 exact-V route certification.
+DeepOFC is an advanced but strategically uncertified KKPoker OFC Joker Ultimate project. The continuation/Bellman architecture reaches **M5G**. The former OpenHoldem strategic staging tree has completed provenance-preserving transfer into `DeepOFC/main` through corrected fixed-point inventory, **126/126 byte-identical migration**, **20/20 deterministic old-vs-new equivalence**, canonical PR CI PASS, merge PR #13 and post-merge `main` CI PASS. The repository migration is complete; the next substantive blocker is real held-out evidence and 50/50 exact-V route certification.
 
-## Repository consolidation status
+## Canonical strategic authority
 
-Initial canonical-state consolidation and M5G frontier correction are already durable on `DeepOFC/main` through PR #12, merge commit:
+Active strategic source:
 
-`43ff3d588725aa868eeb49e54fbdea96aea135e8`
+- repository: `pmartins87/DeepOFC`
+- branch: `main`
+- authority-transfer merge commit: `4842d01dc68b14bae5a083d8ae0138297d7a0783`
+- post-merge canonical CI run: `33074839933` — **PASS**
 
-Strategic migration branch:
+Frozen historical provenance:
 
-`migration/openofc-solver-code-c21c3c4`
-
-Frozen source:
-
-- repo: `pmartins87/myoh_private`
+- repository: `pmartins87/myoh_private`
 - branch: `openofc-m4v-continuation-transport`
 - commit: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
 - solver tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
 
-The source tree remains immutable historical provenance after transfer. New strategic development belongs in DeepOFC.
+Future strategic development belongs in DeepOFC. The runtime repository should consume explicit versioned/exported policy artifacts rather than become the sole owner of strategic source.
 
-## Migration gates
+## Completed migration gates
 
 ### G1 v1 — superseded by evidence
 
-The first migration inventory was not fully closed over dependencies introduced by matching tests. The first old-vs-new equivalence run `33070445519` returned **19/20** exact matches. The sole target failure was `test_engine.py -> teacher_search.py` missing from the migration set, while the frozen source passed. No semantic divergence was observed in the 19 executable comparisons.
+The first migration inventory was not fully closed over dependencies introduced by matching tests. Old-vs-new run `33070445519` returned **19/20** exact matches. The sole target failure was `test_engine.py -> teacher_search.py` missing from the migration set, while the frozen source passed. This was an inventory-policy defect, not a solver semantic divergence.
 
-This failure was used to improve the migration contract rather than bypass it.
-
-### G1 v2 — PASS
-
-The inventory now computes a fixed point over:
-
-- selected Python → local dependencies;
-- migrated module → matching test;
-- newly selected tests → their local dependencies;
-- repeat until stable.
+### G1 v2 — fixed-point inventory — PASS
 
 Workflow run `33070689091`: **PASS**.
-
-Current authoritative inventory:
 
 - schema `deepofc-openofc-solver-inventory-v2`;
 - frozen subtree: **187 files**;
@@ -63,7 +51,7 @@ Current authoritative inventory:
 - M4/M5 workflows recorded: **38**;
 - payload SHA-256: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`.
 
-### G2/G3 — pure migration — PASS
+### G2/G3 — pure migration / independent migrated tests — PASS
 
 Workflow run `33070802793`: **PASS**.
 
@@ -73,17 +61,13 @@ Workflow run `33070802793`: **PASS**.
 - M5 core tests PASS;
 - migrated M5 test surface PASS;
 - `test_engine.py` regression PASS;
-- generated Python bytecode is removed before persistence;
+- generated Python bytecode removed before persistence;
 - materialized solver commit: `0c0ae8d77c8ca35c344f59c1515f6712b2ca1a2a`;
 - provenance canonical SHA-256: `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`.
 
-### G4 — behavioral equivalence — PASS
+### G4 — deterministic behavioral equivalence — PASS
 
 Workflow run `33070910873`: **PASS**.
-
-The gate executed source and migrated solver independently under the same Python 3.11 / NumPy / hash-seed / numerical-thread controls.
-
-Result:
 
 - source PASS: **20/20**;
 - target PASS: **20/20**;
@@ -93,20 +77,32 @@ Result:
 
 The suite covers engine, HU continuation, M4U–M4Z, M5A–M5G and Normal×Fantasy/Fantasy×Fantasy kernel/payoff behavior.
 
-### G5/G6 — immediate repository action
+### G5 — canonical DeepOFC PR CI — PASS
 
-Next repository action:
+PR #13 was opened from `migration/openofc-solver-code-c21c3c4` to `main`.
 
-1. open the migration/equivalence PR to `DeepOFC/main`;
-2. require canonical DeepOFC PR CI PASS;
-3. merge only on green;
-4. once merged, treat `myoh_private@c21c3c4...` as historical strategic provenance and DeepOFC as the active strategic source.
+The first PR-level CI run correctly exposed one repository integration omission: migrated tests import NumPy, while `requirements-dev.txt` contained only pytest. `numpy==2.4.6` was added, matching the proven equivalence environment.
 
-The migration/equivalence evidence proves source-transfer identity. It does **not** certify strategic quality or production exploitability.
+- corrected PR head: `c364a3056349ba627f273265c7c7a742b2d72c99`;
+- canonical PR CI run `33074562167`: **PASS**.
+
+### G6 — merge / authority transfer — PASS
+
+- PR #13 merged;
+- merge commit: `4842d01dc68b14bae5a083d8ae0138297d7a0783`;
+- post-merge `main` CI run `33074839933`: **PASS**;
+- DeepOFC now owns active strategic authority;
+- `myoh_private@c21c3c4...` is historical provenance only.
+
+Final completion record:
+
+`docs/migration/OPENOFC_SOLVER_AUTHORITY_TRANSFER_C21C3C4.md`
+
+Migration identity/equivalence proves source transfer. It does **not** certify strategic quality or production exploitability.
 
 ## Strategic architecture state
 
-The exact frozen tree contains architecture through M5G:
+The migrated tree contains architecture through M5G:
 
 - M5A — fixed-policy/model continuation-aware adapters;
 - M5B — current-V policy-improvement probes;
@@ -126,7 +122,7 @@ A full real surface requires **50 real-certified exact-V routes**:
 - 16 Normal × Fantasy;
 - 32 Fantasy × Fantasy.
 
-After repository authority transfer, proceed with:
+Proceed with:
 
 1. independent held-out Normal × Normal deviation + uncertainty evidence;
 2. independent held-out Normal × Fantasy acting-player deviation + uncertainty evidence;
@@ -165,12 +161,13 @@ M5A–M5G subsequently moved the project from architecture selection into contin
 - Do not substitute migration equivalence for exploitability evidence.
 - Do not substitute training loss/top-1 agreement for unilateral-deviation/held-out strategic evidence.
 - Do not resurrect the superseded 119/123-file inventory numbers; the authoritative v2 migration set is 126.
+- Do not move new strategic source back into the runtime repository.
 - Do not infer latest runtime authority from the highest chat version number.
 - Do not issue live clicks from ambiguous visual state.
 - Do not let chat history become the only durable record of a milestone.
 
 ## Definition of the next meaningful strategic milestone
 
-The repository milestone is the merged **migration/equivalence authority transfer**.
+The repository migration milestone is **complete**.
 
 The next true strategy milestone is the first meaningful set of **real held-out route certificates under an independently justified threshold protocol**. The full strategic promotion milestone is 50/50 real-certified exact-V routes plus an M5G real-ready registry enabling the first REAL dynamic M4Z Bellman trace.
