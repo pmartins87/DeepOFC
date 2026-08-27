@@ -1,0 +1,148 @@
+name: OpenOFC M5R rigorous truncated BR interval
+
+on:
+  push:
+    branches:
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_TRUNCATED_BR_INTERVAL_CONTRACT.md
+      - tools/openofc_solver/m5r_truncated_br_interval.py
+      - tools/openofc_solver/test_m5r_truncated_br_interval.py
+      - tools/openofc_solver/run_m5r_truncated_br_interval_case.py
+      - .github/workflows/openofc-m5r-truncated-br-interval.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate truncated-BR interval mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_truncated_br_interval.py
+
+  cases:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [joker, hidden-discard]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Run rigorous interval case
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_truncated_br_interval_case.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_interval_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Validate fail-closed case
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_interval_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          rows = data["rows"]
+          assert len(rows) == 3
+          assert [row["resolution_modulus"] for row in rows] == [16, 4, 1]
+          assert all(row["lower_br_value"] <= row["exact_br_value"] + 1e-10 for row in rows)
+          assert all(row["exact_br_value"] <= row["upper_br_value"] + 1e-10 for row in rows)
+          assert all(row["upper_deviation_gain"] + 1e-10 >= row["exact_deviation_gain"] for row in rows)
+          assert rows[0]["interval_width"] + 1e-10 >= rows[1]["interval_width"]
+          assert rows[1]["interval_width"] + 1e-10 >= rows[2]["interval_width"]
+          assert rows[2]["unresolved_terminal_histories"] == 0
+          assert abs(rows[2]["interval_width"]) <= 1e-12
+          assert data["decision"]["rigorous_interval_algebra_validated_on_case"] is True
+          assert data["decision"]["subtree_pruning_work_saving_validated"] is False
+          assert data["decision"]["full_game_scalable_evaluator_validated"] is False
+          assert data["decision"]["production_certification_eligible"] is False
+          assert data["decision"]["real_routes_certified"] == 0
+          print("OPENOFC_M5R_TRUNCATED_BR_INTERVAL_CASE=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-interval-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_interval_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-interval-*
+          path: interval-artifacts
+          merge-multiple: true
+      - name: Freeze interval-pilot summary
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          files = sorted(Path("interval-artifacts").glob("*.json"))
+          assert len(files) == 4
+          rows = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+          assert all(row["decision"]["rigorous_interval_algebra_validated_on_case"] for row in rows)
+          payload = {
+              "schema": "openofc-m5r-truncated-br-interval-pilot-v1",
+              "authority": "RIGOROUS_TRUNCATED_REDUCED_BR_INTERVAL_PILOT_NOT_ROUTE_CERTIFICATION",
+              "cases": rows,
+              "decision": {
+                  "rigorous_remainder_bound_algebra_validated": True,
+                  "nested_interval_contraction_validated": True,
+                  "exact_collapse_at_full_resolution_validated": True,
+                  "terminal_work_reduction_validated": False,
+                  "full_game_scalable_evaluator_validated": False,
+                  "next_blocker": "PREFIX_SUBTREE_REACH_MASS_PRUNING_WITH_RIGOROUS_REMAINDER_BOUND_MISSING",
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+              },
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_truncated_br_interval_pilot.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "sha256": payload["sha256"],
+              "case_widths": {f'{r["family"]}:p{r["player"]}': [x["interval_width"] for x in r["rows"]] for r in rows},
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-truncated-br-interval-pilot
+          path: artifacts/m5r_truncated_br_interval_pilot.json
+          if-no-files-found: error
+          retention-days: 30
