@@ -25,7 +25,7 @@ jobs:
         run: python -m pip install -r requirements-dev.txt
       - name: Run base two-round exact-BR response smoke
         run: |
-          PYTHONPATH=tools/openofc_solver \
+          PYTHONPATH=.:tools/openofc_solver \
             python tools/openofc_solver/run_m5l_two_round_response_smoke.py
       - name: Validate smoke authority
         run: |
