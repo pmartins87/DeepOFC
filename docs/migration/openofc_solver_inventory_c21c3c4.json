@@ -1,0 +1,3387 @@
+{
+  "files": [
+    {
+      "blob_sha": "7f16e8c0e0077d7566f49f8cdbfb6180e0a02070",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "491cb500efd3652407f9c09bd8d3be9f983db557cfd0605b007f9fabc0578cd3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "contract",
+      "size": 4641,
+      "source_path": "tools/openofc_solver/M2B_INFORMATION_SET_CONTRACT.md"
+    },
+    {
+      "blob_sha": "30551e365cb3f4ae7aa87e387e26b0d7744b2c5b",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "2c94612c5811bc4b3a0d78127e4bbef0ffc9f4bd6361fba6c296ba347e4c07e6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "contract",
+      "size": 3362,
+      "source_path": "tools/openofc_solver/M3A_DEALER_R3_BACKUP_CONTRACT.md"
+    },
+    {
+      "blob_sha": "5be2dfccddaae2df60b055cff9d01ab7c4c8c812",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "692f0f4cf35c03d639f5b3db222df3fc2816b6132a93f44d9cae37c0a2157476",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "contract",
+      "size": 2603,
+      "source_path": "tools/openofc_solver/M3A_SCALE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "6010a1fdca6c4ebeea66c043d9f28d428915adf8",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9e90c9f68aaa8e5c993206db653cbf5412eb481511c3a6ca71a4a34915cdcbf0",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3208,
+      "source_path": "tools/openofc_solver/M4B_CONTINUATION_COUPLED_NORMAL_CONTRACT.md"
+    },
+    {
+      "blob_sha": "f89c17e3a7f57cae336d1b78472f53233a375a4c",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "dfd82074afdbf8c047d05bff7bc71ee1241df54d6d7a6a4348da63b815216c9b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 4056,
+      "source_path": "tools/openofc_solver/M4C2_ACTION_ADVANTAGE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "47f2dfb91ff53a0200e2804f77f18a86c19425bf",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "41d4f84b9cd9f447b53429d2c934d0dfd03cf127d2cef22845f67c2f0f9361f7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 4512,
+      "source_path": "tools/openofc_solver/M4C3_MULTISEED_EXACT_ANCHOR_CONTRACT.md"
+    },
+    {
+      "blob_sha": "60be1085da6c5b4747cd6191ee4c4d211e03d02e",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "635e5f449e4a1fa143bd1f35bc1e744f0a1e5c72d49290ef6bd354b560f4154f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2293,
+      "source_path": "tools/openofc_solver/M4C4_CONTINUATION_R4_TEACHER_CONTRACT.md"
+    },
+    {
+      "blob_sha": "000f9624200b849d915e32f8c8ea904ce95fcb21",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "0c54bcfe860c7ffd9c2bba5df638f2f2a3354a3fd1f85f3570ca91f06f194072",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3637,
+      "source_path": "tools/openofc_solver/M4C_STRATEGIC_GENERALIZATION_CONTRACT.md"
+    },
+    {
+      "blob_sha": "b706f484cbc7db195706bf2947b3fdec835fc77f",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "3d1aedd83876672452e5dc0f66979193c574124be7bbdb605f586c3568dc4cf9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3032,
+      "source_path": "tools/openofc_solver/M4D_FANTASY_RESPONSE_FRONTIER_CONTRACT.md"
+    },
+    {
+      "blob_sha": "7b2961e5271ba3c8f9f7b98b7aa5139bd94250c0",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "f6e5b01197dff7fae6daa2269d3c1a2cb445055462032245ac85750987bad002",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2777,
+      "source_path": "tools/openofc_solver/M4E_NORMAL_FANTASY_KERNEL_CONTRACT.md"
+    },
+    {
+      "blob_sha": "7702b671ce10da9d0ae2b075e4b2b63bf5e7db9e",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "fdd05544b87880ea139104cdb3530f2bcf26c7a33715c3a5e90f94b20969cf5f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2638,
+      "source_path": "tools/openofc_solver/M4F_ASYMMETRIC_SCALING_CONTRACT.md"
+    },
+    {
+      "blob_sha": "dd6d77109ad546d6d1eeff8598e0b7797e17bdca",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "57ea2965dca4caad37a0a82547566fa9ae2c77bb5d3f2fe62cec124a480039f8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2236,
+      "source_path": "tools/openofc_solver/M4H_ONEPASS_FRONTIER_CONTRACT.md"
+    },
+    {
+      "blob_sha": "2f678a2d418590063804f281e97f61e6828e4e52",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "61bc015748f8f90666d5647d954fd97449d7e57b4de0caf776695283e3b722a9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3273,
+      "source_path": "tools/openofc_solver/M4I_EXACT_FRONTIER_CORPUS_CONTRACT.md"
+    },
+    {
+      "blob_sha": "9db572d9f533cefd4a703e03190477b0a4ca101a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "5047fe66ccefa56c37a6cbc0116cab584f3d12ebf23fd289e009ab463e159144",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2624,
+      "source_path": "tools/openofc_solver/M4J_TERMINAL_FRONTIER_MODEL_CONTRACT.md"
+    },
+    {
+      "blob_sha": "96751bd25e1785157060bf89069245b35966d2a6",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "15edecfccffd899f15488dfb45e77fc33d0970b4f38ef43b76ca9f33cbd7cce6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "helper",
+      "size": 3708,
+      "source_path": "tools/openofc_solver/M4K_TERMINAL_MLP_RYZEN_PLAN.md"
+    },
+    {
+      "blob_sha": "e1521e2a99ec1bd22b9a5386e27ddbd3fbebc365",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "c71a4a94a13c2b336172a52ed116f57050e33eb8e106377c6bf565237f018857",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3957,
+      "source_path": "tools/openofc_solver/M4L_NORMAL_FANTASY_STRATEGIC_CONTRACT.md"
+    },
+    {
+      "blob_sha": "219f26d7474f80b22dc076c24f96294b45acad3e",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "43827f4a1e35d4f20050915159a1002fac805bdb92ee3e95ec6bf4b5b23250ac",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2749,
+      "source_path": "tools/openofc_solver/M4M_FANTASY_FANTASY_BOUNDARY_CONTRACT.md"
+    },
+    {
+      "blob_sha": "cacc7abfe1585feab40872f4265c78c04d25143a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "8aeddd8bd5b226e72beaf4428536a9a272a2f04dec66297efbfef128626c1a32",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2607,
+      "source_path": "tools/openofc_solver/M4N_COUNTERFACTUAL_FRONTIER_CONTRACT.md"
+    },
+    {
+      "blob_sha": "6de34ae40df4b915d3ad636dca03b47408e238e6",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ed2913fc0f7262dda61a31519b084681e5a1bc33379db84626bf00e995ba57a3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3194,
+      "source_path": "tools/openofc_solver/M4O_FANTASY_PROPOSAL_SUPPORT_CONTRACT.md"
+    },
+    {
+      "blob_sha": "1b45556ca32e8e521471e7e1c69f7ddac44d9e69",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ce5338a30209220d53af897b879b6d172d4651a837f5723fa61c79509492b551",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3517,
+      "source_path": "tools/openofc_solver/M4P_SEALED_SUPPORT_MATRIX_CONTRACT.md"
+    },
+    {
+      "blob_sha": "ede5a811f019b4a9bcfa5e02ecd14ea0cc29d945",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ba4026245a1dd58bf93b8d462d276f99d4a8636de58a7f695e1f3871ce89573a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3763,
+      "source_path": "tools/openofc_solver/M4Q_SEALED_POLICY_BOOTSTRAP_CONTRACT.md"
+    },
+    {
+      "blob_sha": "f6b999274b02903edb7a8f3d50b039d4c8a63e68",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "888a3f11494af29a8dfe821f09151b7a664ff869ea0f544d5a8fc28321de650f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3615,
+      "source_path": "tools/openofc_solver/M4R_GENERALIZED_SEALED_SELFPLAY_CONTRACT.md"
+    },
+    {
+      "blob_sha": "e4455d03dcebc1f92efca2064878d47d873f9886",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "39b69c88801d390bb20b8be86d7a7262d4de706acac5abe3f129576b0e826fed",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 4302,
+      "source_path": "tools/openofc_solver/M4S_MULTISEED_MEASUREMENT_CONTRACT.md"
+    },
+    {
+      "blob_sha": "606b23a1321f779185e4503b64d2528c09438f7d",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "b8b61970994414abb09b280720613ee79bbaeef871a0f053133b4d7a96a03a1e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 5021,
+      "source_path": "tools/openofc_solver/M4T_ADAPTIVE_SCALE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "571af16e3b03ffbb24d74746768f8cb6cc14c8f3",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "54e131031c3a31971f48ac4e373a0d9e0b0fb641fd467f96c3746de691465fa9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 4362,
+      "source_path": "tools/openofc_solver/M4U_CONTINUATION_BOUNDARY_CONTRACT.md"
+    },
+    {
+      "blob_sha": "f106fbd67544977ca46803f08c4238e55f90164b",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "35ea299180afcd070eeacd96745f4b8d893a0ee9e9015a88c6ec0933d94ece71",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3234,
+      "source_path": "tools/openofc_solver/M4V_CONTINUATION_TARGET_CONTRACT.md"
+    },
+    {
+      "blob_sha": "94fc5abc35190bef530a6cf97fcf551d2a703e5e",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "15c232f2a813300a5d151ad8bd6e9e93afbb2bbff337fa114bd7dbcea4da7e52",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 5197,
+      "source_path": "tools/openofc_solver/M4W_OUTCOME_MODEL_CONTRACT.md"
+    },
+    {
+      "blob_sha": "f95a398f536aab376153be166619c4107a8d52ac",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "f6f108a28ad9e7cf218ed2df8200bf9d6a365a088a0bb9388df4a22a1c841466",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 6402,
+      "source_path": "tools/openofc_solver/M4X_ROBUST_SUPPORT_CONTRACT.md"
+    },
+    {
+      "blob_sha": "672df3001e94186f12cbb5455bd428dfd95b9959",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "03f161fec0b00a4f9099c32fc185a9e010ffbdd1a183b6d7917f0c3efd92f885",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3476,
+      "source_path": "tools/openofc_solver/M4Y_BELLMAN_TRACE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "6f29f1e0eb6f1c8f73ca1473b42c99c889cd7a69",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "2a2c112fdc02b80c72b78c9c5d9c061d84230d2a1ebbbff8d33fc093b301814b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2723,
+      "source_path": "tools/openofc_solver/M4Z_OUTER_BELLMAN_CONTRACT.md"
+    },
+    {
+      "blob_sha": "33a25e0983dd6807029bb1fc24cad3a367a93d04",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "89f996d883b6fd4f6b824b30a44886f785775a80bbf6f0744072d6c6667d70e2",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 8849,
+      "source_path": "tools/openofc_solver/M4_STRATEGIC_EQUILIBRIUM_CONTRACT.md"
+    },
+    {
+      "blob_sha": "5e8f3ad8b05fff969458888f621e401e538d142d",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "1dc878978bcb711655ed6bd0d882d4871a37f141cf344df35cdb25b14e94ff50",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 4035,
+      "source_path": "tools/openofc_solver/M5A_NORMAL_FANTASY_ORACLE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "a093ef11ea672374c8e60a16cb573438555ff671",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "a59b7dc33879356d2932a1b282a00a22e243fc36b5bcf9de6229387e90ebe9bc",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2413,
+      "source_path": "tools/openofc_solver/M5B_FANTASY_SELFPLAY_CONTRACT.md"
+    },
+    {
+      "blob_sha": "b8131ec2112ad3e9a906769d4af1d3f255a5d605",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "623dfd952b40f027be3e15a8f7e02ce5f3c0fc9dc0a7228e5cd1113d00eb81b0",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2275,
+      "source_path": "tools/openofc_solver/M5C_NORMAL_ROUTE_CERTIFICATION_CONTRACT.md"
+    },
+    {
+      "blob_sha": "cda98374628c4692fc5207396dc0017fce3c04af",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "30e0e23636e4da606a90c718283bb4c48b5c12179cce42014f4158e48934c3ab",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 3050,
+      "source_path": "tools/openofc_solver/M5C_ROUTE_CERTIFICATION_CONTRACT.md"
+    },
+    {
+      "blob_sha": "e94481ea7bcd4715cdcfc4bec266c498a1aab93e",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "f6b34619f87cb560a3c963012ed4b2de23bd0851f8486d314a765c2135da53f1",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2793,
+      "source_path": "tools/openofc_solver/M5D_DYNAMIC_CERTIFIED_BELLMAN_CONTRACT.md"
+    },
+    {
+      "blob_sha": "93854c4cd5613efd27f7d1f03648b0e929732c72",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "4fe9e243ad599bdedb2d9444842124768422a5d2afc685cdab431c0bd420c950",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2571,
+      "source_path": "tools/openofc_solver/M5E_FANTASY_ROUTE_CERTIFICATION_CONTRACT.md"
+    },
+    {
+      "blob_sha": "9bdd3eab378483c60b15b9b2c1fc07c7f6c80e4a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "fc53ab2b5093dbb5d23eda164117e8e193f3d86e1cc4f84cf777ddb38f5b6747",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2846,
+      "source_path": "tools/openofc_solver/M5F_FANTASY_HELDOUT_EVIDENCE_CONTRACT.md"
+    },
+    {
+      "blob_sha": "d11f33c4541fcf31e1741e40fab503b28d0a1cfc",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ce176dbdbab1cedb253e96332830b4fd2ab9e3df0b1616843034cd0a1bf776b2",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "contract",
+      "size": 2793,
+      "source_path": "tools/openofc_solver/M5G_FULL_REGISTRY_FACTORY_CONTRACT.md"
+    },
+    {
+      "blob_sha": "453dfa68dfb30766802e201c78eb43db8d2543e2",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "3d788954b1d64af5a51f0bb0753bf0cc1d3f20023b4af61b459078ac81cf4225",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 10097,
+      "source_path": "tools/openofc_solver/README.md"
+    },
+    {
+      "blob_sha": "cdf1772279a6d9e78bde58548fa5be89a90afb2f",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "21e1e024d1e2e9683f0584d9c9de2472ccaade2f4e41a4c1b063e3799a498817",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "contract",
+      "size": 3280,
+      "source_path": "tools/openofc_solver/RULE_CONTRACT_M1B_JOKERS.md"
+    },
+    {
+      "blob_sha": "c77d68b01595ec6d2379ab2d4c48c8f9fbddfeee",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "b2b54adac06070d0a2c809254406d55e9959b33c5b966040faa89f7b94d389a6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 7392,
+      "source_path": "tools/openofc_solver/RYZEN_STRATEGIC_TRAINING.md"
+    },
+    {
+      "blob_sha": "bd8698cb6eb7ae71b7ed5424022da5b8ce10bb3c",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "1acb25b83b7584d1788bcdd3941a3a3ba26e80fb6e3f2eb96aa42566068dbc74",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 7611,
+      "source_path": "tools/openofc_solver/apply_m1b_joker_semantics.py"
+    },
+    {
+      "blob_sha": "09d1770bd43b8a598af3dba03cc8fcdb71c817d9",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "6ca51de670a8214d2239f6d83f63c7bbe61e642edb92ada5243ed6016f8eb38e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_frontier_cache_onepass.py",
+        "tools/openofc_solver/fantasy_frontier_corpus.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 5182,
+      "source_path": "tools/openofc_solver/audit_fantasy_frontier_corpus.py"
+    },
+    {
+      "blob_sha": "36c217b7829a7ad27c92a1a5113002bbb747b27b",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "fdde7cd162121277b571f2542077baa1c6eaba19508e17b99a0f7d0f0c47fdce",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/audit_r3_dealer_corpus.py",
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/generate_r3_dealer_corpus.py",
+        "tools/openofc_solver/teacher_search_r3_dealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 11684,
+      "source_path": "tools/openofc_solver/audit_r3_convergence.py"
+    },
+    {
+      "blob_sha": "6fc5e22c0f86d53b6d538be8dfac2e3786315b30",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "ed5a8314413f2c835a0bfb449487d281ccb6eb972f51e322731a5d6877f7a9a3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/generate_r3_dealer_corpus.py",
+        "tools/openofc_solver/teacher_search_r3_dealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 6732,
+      "source_path": "tools/openofc_solver/audit_r3_dealer_corpus.py"
+    },
+    {
+      "blob_sha": "5f3e28be75484e3f0207cdc9d154f01b6ac54011",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "003f4b3b9024f74c5fda0102377eb6d6377576fd8bceb1f729b288462a6feef8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 12281,
+      "source_path": "tools/openofc_solver/audit_r3_shard_manifest.py"
+    },
+    {
+      "blob_sha": "2b9eb90c1048818d2a84ea5c81fdac0170d591a5",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "29d32f27ba0d3e09f8b636ebb92f99cdb298fcfd935a9f82237e51045343c1f8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/generate_r4_dealer_corpus.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 4929,
+      "source_path": "tools/openofc_solver/audit_r4_dealer_corpus.py"
+    },
+    {
+      "blob_sha": "b852dd2439693956e83edf98e514ad67c538bb48",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "8d4e18966f2382fe743912bcbbe3471a9f7ff5144cd2656febba53d0b3680a71",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/generate_r4_nondealer_corpus.py",
+        "tools/openofc_solver/teacher_search_nondealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 6189,
+      "source_path": "tools/openofc_solver/audit_r4_nondealer_corpus.py"
+    },
+    {
+      "blob_sha": "97ecad1db8e90e88697510311a7741b33aaea1c8",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "eca8ff5af36aed9fcb71ce876c53bc95e7615e013e6d972a4feb37a879610c76",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 7494,
+      "source_path": "tools/openofc_solver/audit_r4_shard_manifest.py"
+    },
+    {
+      "blob_sha": "151b64f2b3f3946c7f1d9a5b270b8f453f866b85",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "cf8d78e5d5417674d1f869b9b2ad3b2bcf9e4f92c72c4742c96cfa5c6feef598",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr_runner.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 4549,
+      "source_path": "tools/openofc_solver/audit_strategic_convergence.py"
+    },
+    {
+      "blob_sha": "1f81c1d827e67ddb9effb9a9b6138c118d7f74db",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "0de8ffe8869a43d12abaa1ae6a88a74f9e8c8489312ac73343ca14c71006de9f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 11860,
+      "source_path": "tools/openofc_solver/check_cpp_parity.py"
+    },
+    {
+      "blob_sha": "c9ee7decd30801e6196d0de12d56e38f9e873c74",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "b486b12cd9eebe5f23009185650d6068aa8d82a41c70ffb3208216a9bae355b6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 3480,
+      "source_path": "tools/openofc_solver/cpp_exact_parity_probe.cpp"
+    },
+    {
+      "blob_sha": "2985e2dc36f7b84a63f54c4799d12fb27a752abb",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "6bdf205cb17a8d23299dcb0dec5527c80b1a3fa0afb26864552edfeb991110d7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 4016,
+      "source_path": "tools/openofc_solver/cpp_parity_probe.cpp"
+    },
+    {
+      "blob_sha": "4c89dccefeb990b77923cda2b5d82e2419827b74",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "5d3c5fb46e398c295fdd98b7bf5baae01dc42029922415c1db8e43e263ebb434",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 14523,
+      "source_path": "tools/openofc_solver/engine.py"
+    },
+    {
+      "blob_sha": "3a9af7d08000390dd5a45b15699a301667c1f8ec",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "b6b8e593511f4cf33415a3a08da970cba1848d56534f330f95080af87896521e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 3479,
+      "source_path": "tools/openofc_solver/extract_r4_log.py"
+    },
+    {
+      "blob_sha": "96ab9ca0b83be42b80062e22abbaa71dd99f0073",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "304fa209f556f11c7e6f8aee544cda3ea928ba17e4684a4e27c75cd96a9bbf02",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/fantasy_response_frontier_onepass.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 4597,
+      "source_path": "tools/openofc_solver/fantasy_counterfactual_frontier.py"
+    },
+    {
+      "blob_sha": "0b7bb5e911608b60e9eb89ee159e442ce078dc5b",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "7dbabfaa4e8574736424100e89ccff7d5182192462fba7e9dba08894b8cf9c1f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 18236,
+      "source_path": "tools/openofc_solver/fantasy_delayed_response.py"
+    },
+    {
+      "blob_sha": "3e3b6b3fe0d4d65e1445c8b3b8c981e34a4a849c",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "b762d0f5e218c86ae7974f262aece8208e510873f00da6ef8d4574c7267e27ff",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 5052,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_bootstrap.py"
+    },
+    {
+      "blob_sha": "a0fad63de559e97bc3e2f2e98a1e1a01984acfb5",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "062cbd2e233d634747eaea28a0038f1e16d2bec64295def3c6f0d402b690e975",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 7367,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_kernel.py"
+    },
+    {
+      "blob_sha": "de0befff360951fad96f31fbec3606095ba5b91a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "8e356d58e5675ff5dbc71603d1f20cc1b12279d14b3b3fe4824703947c8ae2fe",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 7391,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_payoff.py"
+    },
+    {
+      "blob_sha": "0578d6ea694768e6c486943e34397d7899095985",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "1b0bc4dfc3499b6328cd2edd3463a1d6bd387cc5fba47716b734d63ab6ab41bb",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 5492,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_policy_features.py"
+    },
+    {
+      "blob_sha": "31e1ec37d281d66163f2a2cbdd869f2179a220f3",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "10d882ad76e94123c248483b2c31c147cba4932ea8f66192f2b7a50b3edb5ddd",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 13963,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_policy_model.py"
+    },
+    {
+      "blob_sha": "43f40400a89f55c92e2c1232825eefea5d2ba544",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "2e040aec71c695049e88718a2e264d4f9ddd098c0318083d7b0f008cc16d6031",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_counterfactual_frontier.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 11586,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_proposals.py"
+    },
+    {
+      "blob_sha": "5e77cc05d16dcadd73fbc5e69752426053a0e510",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "e0cc548cc7ae4459b22380c9eb34d0f989394af3cbae1fb5c1b6091649aeb5be",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_bootstrap.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 6927,
+      "source_path": "tools/openofc_solver/fantasy_fantasy_selfplay.py"
+    },
+    {
+      "blob_sha": "a203a05e728e85aa3270d8088443132afcf5d159",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "99ba17bff202fec7ba85afb8cef65a654d0841f05870b2d44b3009b90cd7b5ea",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 8124,
+      "source_path": "tools/openofc_solver/fantasy_frontier_cache.py"
+    },
+    {
+      "blob_sha": "31f82719fb8f34fed2256463f1bb0098f32f6ebb",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "93c5273077425bbff1a4881f049853e4c087b0f25a5a87f7b2449b1d9742b68b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_frontier_cache.py",
+        "tools/openofc_solver/fantasy_response_frontier_onepass.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 3034,
+      "source_path": "tools/openofc_solver/fantasy_frontier_cache_onepass.py"
+    },
+    {
+      "blob_sha": "1d36af130f607e2b1f0a70cab185b7b219605680",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ae76ae955e91d6c0518d6e73ea012c2a8a1d5043f37f0f7754df7b490a73ee7b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_cache_onepass.py",
+        "tools/openofc_solver/normal_fantasy_feasibility.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 6628,
+      "source_path": "tools/openofc_solver/fantasy_frontier_corpus.py"
+    },
+    {
+      "blob_sha": "567575b343e34cf08b46f0690d6c2c8584a648e4",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "31e4fa81f1522676ff6bde50cbf18c544ff783d166d470fc8329703f5984f629",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_features.py",
+        "tools/openofc_solver/fantasy_frontier_model.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 5710,
+      "source_path": "tools/openofc_solver/fantasy_frontier_distillation.py"
+    },
+    {
+      "blob_sha": "5698f0a63692cfa9572ddc86e4a57bab828944d2",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9a5bc58bc5991e3750d63e79d97d450c834c15e53837c1f71135bbb7b026e019",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 2538,
+      "source_path": "tools/openofc_solver/fantasy_frontier_features.py"
+    },
+    {
+      "blob_sha": "e3652354114f52bba6bc5b2af6a44547ea5b4dd7",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "0bf77520cd044cb5269df69063c35f563a9387792286860a383ef1a3007a9f8e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_features.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 11103,
+      "source_path": "tools/openofc_solver/fantasy_frontier_mlp.py"
+    },
+    {
+      "blob_sha": "f5e6f66d121aff142f45a128972a8e8b5a2f764e",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "888c5636eccc9f7227c743aa2241b4792b7d77a5dbd74b34b48e20910a8486b7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_mlp.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 4021,
+      "source_path": "tools/openofc_solver/fantasy_frontier_mlp_eval.py"
+    },
+    {
+      "blob_sha": "d04566c1979d5c703257a1350da9fa37432f4e86",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "e939284d049679d03d40b742242b865f06ad61c805976adb3b41d236bc8c1987",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_features.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 10719,
+      "source_path": "tools/openofc_solver/fantasy_frontier_model.py"
+    },
+    {
+      "blob_sha": "14543476659caf7dfc88fd98d6d4d765534ebb31",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "f7edfe0c95b3d69895c66e7bf0ddeafb0515d619825bdc9214c85485559cfa73",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_delayed_response.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 7738,
+      "source_path": "tools/openofc_solver/fantasy_response_frontier.py"
+    },
+    {
+      "blob_sha": "2d098f99d25145dc30d26eb036a47494d9f1b584",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "df0aee0195a76942cd8fc24ec63b9609a53e4758316d439699c48f5bae0bef22",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_delayed_response.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 12086,
+      "source_path": "tools/openofc_solver/fantasy_response_frontier_onepass.py"
+    },
+    {
+      "blob_sha": "8dc14d3772f782b941c016055ff977ce5d70132a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "55f05a4c4fbe3d0cdc0b622e6cb174d428bf482a16c684284764c599abd3bbec",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 4105,
+      "source_path": "tools/openofc_solver/fantasy_transition.py"
+    },
+    {
+      "blob_sha": "c212a886006b8e8cf59b67a085a3595972a45db3",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "d366d4547c577c501e339c545ac48f8f647e95edfee5db20eed3912e475710e6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search_r3_dealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 11497,
+      "source_path": "tools/openofc_solver/generate_r3_dealer_corpus.py"
+    },
+    {
+      "blob_sha": "5fe7c980c8ecbdf516d7eb66340d132b599c3f6e",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "9b427d9399ba8f126db0d27e1631eeddf0d9371a93f7d757430fad7554e3f279",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 9128,
+      "source_path": "tools/openofc_solver/generate_r4_dealer_corpus.py"
+    },
+    {
+      "blob_sha": "1528e0e9610863074a6f83e29e6581afbdb4186c",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "42e68ab1f9a5f336fc082758abde0457c81f9fff2f5619c2dc1e0d40b342ec90",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search_nondealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 11366,
+      "source_path": "tools/openofc_solver/generate_r4_nondealer_corpus.py"
+    },
+    {
+      "blob_sha": "016487aaee6b5e1610352c630e70e18a75afc19f",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "a50efa67a66a50dada3c0839b79c83f317cae61d6dfdf69d791c8ef3d6c5b2b4",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_transition.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 10255,
+      "source_path": "tools/openofc_solver/hu_continuation.py"
+    },
+    {
+      "blob_sha": "039aa5411d6dc661f48abaf7b65f06d1d12dded3",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9ed9add4b558e61960ff5a6d42665795b253391656b0fb05344dd9a434631c31",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/plan_m4t_adaptive_scale.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 11293,
+      "source_path": "tools/openofc_solver/m4u_continuation_boundary.py"
+    },
+    {
+      "blob_sha": "70e7404d72120bca69c87c98da6857ef2423e74f",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9f5dc384534048bbf70d8384bbf44b2d24762a861f94dbb0b26a4328bfc69f2a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 6441,
+      "source_path": "tools/openofc_solver/m4v_continuation_targets.py"
+    },
+    {
+      "blob_sha": "33daae7f2cd96c2f12b6ba8154967d9b9527296d",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "5baa7da076fbe4a3704c6b23cbed5d2e21c96d1a99019861e86f508d5076013b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4v_continuation_targets.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 16943,
+      "source_path": "tools/openofc_solver/m4w_outcome_model.py"
+    },
+    {
+      "blob_sha": "a1c05947ddb16bf86915a7600a8a09d169a3d955",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "1dd3c566cb4ed53b48f4e6a531678cb93435dfe6fa1bbb694009f14190a26a6c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_counterfactual_frontier.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 20228,
+      "source_path": "tools/openofc_solver/m4x_robust_support.py"
+    },
+    {
+      "blob_sha": "9ab170ba0a6eb3cf9b11d59f0b6408b1a6dd8666",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "be5d9551489e9666b3676198b3cb5bbe76e451e7ce424625d4a0751f4a723e20",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4x_robust_support.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 21914,
+      "source_path": "tools/openofc_solver/m4y_bellman_trace.py"
+    },
+    {
+      "blob_sha": "3e311f9f0b8706fc0acfc969a48ce97872d48d08",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9c4deda5588388f0139bfcb6817c5c38218bb23740e9a5f3fa8ccc2474aec336",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4y_bellman_trace.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 17269,
+      "source_path": "tools/openofc_solver/m4z_outer_bellman.py"
+    },
+    {
+      "blob_sha": "64eeecb8072dd17e3847bfeb65b2def2276e00bd",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "6bd691f253ed6ba1b6c1aec8d164c299b4e46d6375cb9ad5b5be1be5c18ca4b7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 9679,
+      "source_path": "tools/openofc_solver/m5a_fantasy_fantasy_oracle.py"
+    },
+    {
+      "blob_sha": "d8c0f4b1d5339cf3397ba6bd9f67b32ab1d2e6d0",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "2f0daabcaa8aaaaf47d3fa7987e6094955d846113cfe871247a4d4336432d30b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py",
+        "tools/openofc_solver/normal_fantasy_policy_features.py",
+        "tools/openofc_solver/normal_fantasy_symmetry.py",
+        "tools/openofc_solver/normal_fantasy_terminal.py",
+        "tools/openofc_solver/strategic_advantage_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 10157,
+      "source_path": "tools/openofc_solver/m5a_normal_fantasy_oracle.py"
+    },
+    {
+      "blob_sha": "6d6ef90b30559665e91b35b66a3f695088000c38",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "8fb9d156b186f8c53abdc51a001aa8e9cf0b4f38c6978e5945a52d2a49d83e3d",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_feature_encoder.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 8891,
+      "source_path": "tools/openofc_solver/m5a_normal_normal_oracle.py"
+    },
+    {
+      "blob_sha": "75fcf43fac165e33e6eea753aea61d0e2baa6e0d",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "45e62f38f9ab5e5496e2b87d058a726d877b4170edfa1d71e291ec7b46a0c275",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5a_normal_fantasy_oracle.py",
+        "tools/openofc_solver/m5a_normal_normal_oracle.py",
+        "tools/openofc_solver/normal_fantasy_cfr.py",
+        "tools/openofc_solver/normal_fantasy_policy_distillation.py",
+        "tools/openofc_solver/normal_fantasy_terminal.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py",
+        "tools/openofc_solver/strategic_policy_distillation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 12136,
+      "source_path": "tools/openofc_solver/m5b_adaptive_normal_oracles.py"
+    },
+    {
+      "blob_sha": "05ba058236e84ca8e444b16fef7defe2f53d8e21",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ff45932be460bbc8492cfcdd0808a399cace1bd569effefc031c113271b945b3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py",
+        "tools/openofc_solver/m4v_continuation_targets.py",
+        "tools/openofc_solver/m4w_outcome_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 6759,
+      "source_path": "tools/openofc_solver/m5b_fantasy_selfplay.py"
+    },
+    {
+      "blob_sha": "dbf3df56e2e2dec362f92a097a88a5cfbd6d2b89",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "d29add3030ad0a3dd7c263722be8f6a086ca97dea446f1bdac9317a14cbeda0c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 16051,
+      "source_path": "tools/openofc_solver/m5c_normal_route_certification.py"
+    },
+    {
+      "blob_sha": "a090c25c78a6a0311d9d616e3dafeee378cc0624",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "28e5cd3c5eb246b13c9917d4b422f973569ce0cb371088f23d531fedbc71c4b9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 16958,
+      "source_path": "tools/openofc_solver/m5c_route_certification.py"
+    },
+    {
+      "blob_sha": "a655fe639ebdc34fcc3eb7c7a3ae8883ff242140",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "eb1559378000260644258ea97ec1f0cadea80f7ea025e6d3399128e34362e3d8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4y_bellman_trace.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 13549,
+      "source_path": "tools/openofc_solver/m5d_dynamic_certified_bellman.py"
+    },
+    {
+      "blob_sha": "12207b7724764714e55cbeaed11cb36b6e963550",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ac6dede4c7c9bc13bf14eecefc3126777a72e55d0db2b450ec958c8b30f07fee",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 18634,
+      "source_path": "tools/openofc_solver/m5e_fantasy_route_certification.py"
+    },
+    {
+      "blob_sha": "0e8ca320970b3565a729f090676b591995794338",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "0741d1be30c3dc47bf7e98f56ffee16ccd7eb9272454a27e7fa6f9b455f7d3ad",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py",
+        "tools/openofc_solver/m4v_continuation_targets.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m5a_fantasy_fantasy_oracle.py",
+        "tools/openofc_solver/m5b_fantasy_selfplay.py",
+        "tools/openofc_solver/m5e_fantasy_route_certification.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 14988,
+      "source_path": "tools/openofc_solver/m5f_fantasy_heldout_evidence.py"
+    },
+    {
+      "blob_sha": "ef00bf002a11705ada39887cdbf11a5fc8c1b43d",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "fa4a09498da5ccab1cd035c41845dcf5636ffc37ea97714c2e692ad8bf359c2e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4y_bellman_trace.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5c_normal_route_certification.py",
+        "tools/openofc_solver/m5e_fantasy_route_certification.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 7375,
+      "source_path": "tools/openofc_solver/m5g_full_registry_factory.py"
+    },
+    {
+      "blob_sha": "5a3a74bbcbb4cc3e7efcbe5081a3032080a1c8f5",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "0816e84469df4e5638c288157239813d49904ead04c72f02a33ecd72a5b174cd",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 2205,
+      "source_path": "tools/openofc_solver/materialize_cpp_parity.py"
+    },
+    {
+      "blob_sha": "561f1e49ec69871143711ffc7a6ddfbd82a1dd96",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9d9fb13c685b7fe08cea31527e6816724167df2698cd8773acbbd2ac27c896e7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py",
+        "tools/openofc_solver/normal_fantasy_symmetry.py",
+        "tools/openofc_solver/normal_fantasy_terminal.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 13187,
+      "source_path": "tools/openofc_solver/normal_fantasy_cfr.py"
+    },
+    {
+      "blob_sha": "379381a5e3db149fcd2892bb279c4cd207033652",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "d1c74e6edcae3c207c95768d26c3344553e83283d3b82efd43534093926526df",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_cache.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 5489,
+      "source_path": "tools/openofc_solver/normal_fantasy_feasibility.py"
+    },
+    {
+      "blob_sha": "4c54efb62eeefa8615c25b117209e1e9c8006e09",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "c23debf7c6b40f93e77087c924eba0b0c8fe74acf2dd29883f2296ebe45c1875",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_cache_onepass.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/normal_fantasy_feasibility.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 3790,
+      "source_path": "tools/openofc_solver/normal_fantasy_feasibility_onepass.py"
+    },
+    {
+      "blob_sha": "1278f04440dbd0c06bef74a879c00546432d99a6",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "988c1f9ce8e2f66391006be1861d0edb7a86e798a41ed8ce1f5eea7bbc02add7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 8317,
+      "source_path": "tools/openofc_solver/normal_fantasy_kernel.py"
+    },
+    {
+      "blob_sha": "b81b168ff6cd7bddd56d20815d614b30b5b919f5",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "0caa607e817f645c56a6cedfd90661943e2d0ef07a86e2328769787058315b68",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/normal_fantasy_policy_features.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_policy_distillation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 2081,
+      "source_path": "tools/openofc_solver/normal_fantasy_policy_distillation.py"
+    },
+    {
+      "blob_sha": "de38122cdc3601a4a3716f5e1ba60b0d808a2fb5",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "583cc2b1b8e71da88e7b2833f0367d06adee35abd7ae82275003b76c999a3225",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_feature_encoder.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 4460,
+      "source_path": "tools/openofc_solver/normal_fantasy_policy_features.py"
+    },
+    {
+      "blob_sha": "6925d2d396afbc0d77aba4896079bb153c05ce86",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "9ff65997f463f8004adcc252c01abbf70d2ce4bc6e38c06666c54008f00edf16",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 2983,
+      "source_path": "tools/openofc_solver/normal_fantasy_symmetry.py"
+    },
+    {
+      "blob_sha": "53a8a00de7959e881c807ca576077bbca8af7467",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "87074d2b67740458d81e5c37187a6952b72986e49043f5305bb334305a7b0287",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_cache.py",
+        "tools/openofc_solver/fantasy_frontier_cache_onepass.py",
+        "tools/openofc_solver/fantasy_frontier_features.py",
+        "tools/openofc_solver/fantasy_frontier_mlp.py",
+        "tools/openofc_solver/fantasy_transition.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 12859,
+      "source_path": "tools/openofc_solver/normal_fantasy_terminal.py"
+    },
+    {
+      "blob_sha": "0fdaff9f3e28fbc7d6f58160a168451b2cf4d337",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "98d9115d9459ffbb3ca12942e602b4748d8391525bc166fb35011b19d82a466f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "migrate",
+      "role": "benchmark",
+      "size": 11342,
+      "source_path": "tools/openofc_solver/plan_m4t_adaptive_scale.py"
+    },
+    {
+      "blob_sha": "d2340c6cb159a78ffebf814da06477a24d7e8267",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "cc1bb5432bfc6850e6261769f43070c681fba01ba0bda6fcdef0499795ee2960",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/normal_fantasy_feasibility.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 3736,
+      "source_path": "tools/openofc_solver/run_fantasy_frontier_shards.py"
+    },
+    {
+      "blob_sha": "595c162625f563d513ef7e8600c3f30102da2850",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "68a831714ba5619b2da172fb711c2e63c4c16efae4697de6c9d648edd8382bfc",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/audit_fantasy_frontier_corpus.py",
+        "tools/openofc_solver/run_fantasy_frontier_shards.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 4646,
+      "source_path": "tools/openofc_solver/run_m4k_ryzen_pilot.py"
+    },
+    {
+      "blob_sha": "0560709e4bcc5b13db187a08ab32c98d2109f8ff",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "fc9a95612166201dd5c3bee0a3aa6c83ea4fd22506b9cfd6335b7070d7eb4b5b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/fantasy_fantasy_selfplay.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 25459,
+      "source_path": "tools/openofc_solver/run_m4s_multiseed.py"
+    },
+    {
+      "blob_sha": "da08403c8fab391e0692460d52abbd2280f94311",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "aac265ea692d1d3d6618be21f993e24c4a3ed484b2d12b417fc233fa01e3dad7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "helper",
+      "size": 832,
+      "source_path": "tools/openofc_solver/run_m4s_ryzen_pilot.ps1"
+    },
+    {
+      "blob_sha": "b16ffabb01841065b8aeb6c915c7a3deddd49256",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "4160b008260d460c3dd465edcf3d9959e13496e4dab4927c95e382799708570f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 13835,
+      "source_path": "tools/openofc_solver/run_r3_dealer_shards.py"
+    },
+    {
+      "blob_sha": "eab54a496b8f908e2594eb6392ac9efb85472615",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "40aeee480cc06f89967abefd2c2dabf9536354ea237f3ff73781aba718a4d0b7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 10686,
+      "source_path": "tools/openofc_solver/run_r4_dealer_shards.py"
+    },
+    {
+      "blob_sha": "5e7a320f018d1f0dee28715ff056b69c3a63347a",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "48cd1b74b1c46a96ce915b0d31ef757b4ee0f38b0a7ee155c3b0253610a763c8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_feature_encoder.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 14224,
+      "source_path": "tools/openofc_solver/strategic_advantage_model.py"
+    },
+    {
+      "blob_sha": "0622a79a7083cb2a11882a2463b129b4ee53ab67",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "c9cf99fe5edb5b4219db1b080622672197776fe6b609ecd12cd575fae9ec0af5",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 21961,
+      "source_path": "tools/openofc_solver/strategic_cfr.py"
+    },
+    {
+      "blob_sha": "32dcb0131cb8e64d85415917a33f6e1af74641f8",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "eca513c054cb96e751f7e2fa68f8581930a6ece0abc9a4d8e810984d0af01081",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 9305,
+      "source_path": "tools/openofc_solver/strategic_cfr_runner.py"
+    },
+    {
+      "blob_sha": "05cd14f8c7835f17b646c90225c871ae9d4d2119",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "e0a2db832e66c98ab04c1fe5b16e1c9c520376546a530bba492133ac8e61d575",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 8879,
+      "source_path": "tools/openofc_solver/strategic_continuation_cfr.py"
+    },
+    {
+      "blob_sha": "412d7daf9285b8c06403f44ed42d0cf192cea0d3",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "6d80f7fa814553b0063919ad0eab1df986adeaf46839ddccc15bb84e5faec696",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_feature_encoder.py",
+        "tools/openofc_solver/strategic_policy_distillation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 5962,
+      "source_path": "tools/openofc_solver/strategic_continuation_r4_teacher.py"
+    },
+    {
+      "blob_sha": "fc3865d12f925afce8626a1d5b8734131d068946",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "7d58f278b35f878ecaaf2cadd058be60161cc4edd958ef7600a49b8a82752812",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 10035,
+      "source_path": "tools/openofc_solver/strategic_continuation_runner.py"
+    },
+    {
+      "blob_sha": "051d00a4d016aec456c61b2a7b70fc7838361209",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "026aca6fe269e8580c4eade50015264c659c8c4b2ad2f9c99c8c325b0a3f242b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr_runner.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 14495,
+      "source_path": "tools/openofc_solver/strategic_feasibility.py"
+    },
+    {
+      "blob_sha": "c529a00473ab47255280eb45fed763d308809e66",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "6299b8aeefb56387403b6d2c37d7df93f917f3c7bac6fbc0e2da05248431ff2e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 5651,
+      "source_path": "tools/openofc_solver/strategic_feature_encoder.py"
+    },
+    {
+      "blob_sha": "67861bd4cb28680f09ac5fff8c31b6a8fd0efb21",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "7c20f377160c79a384fc6480fdb04ed8f59bc2f890d50b23e5babd192e2541a7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr_runner.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 8415,
+      "source_path": "tools/openofc_solver/strategic_multiseed.py"
+    },
+    {
+      "blob_sha": "f2c460cea9538d868745612abb0993f0f11fa190",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "f2714bb816fa377f5939c8790481b9c3ae69deb7ec65d3c3acd63205d77f7bf2",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_policy_distillation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py",
+        "tools/openofc_solver/strategic_teacher_anchors.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 9810,
+      "source_path": "tools/openofc_solver/strategic_multiseed_benchmark.py"
+    },
+    {
+      "blob_sha": "9fb364311dc18799185e6bbd7a621950ded03177",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "f5f59877af323484ad742a2a55eb3b84398b17969b2406ecd88f8acfdeab4dc6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_feature_encoder.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 6087,
+      "source_path": "tools/openofc_solver/strategic_policy_distillation.py"
+    },
+    {
+      "blob_sha": "349dc1b7ad85e02777aed5614fe5822c5593c83b",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "79b31fb78286949b2902e3271f476a60ab6980d76c60b01b7c82e776315674b8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/strategic_cfr.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "source",
+      "size": 7861,
+      "source_path": "tools/openofc_solver/strategic_suit_symmetry.py"
+    },
+    {
+      "blob_sha": "3a1a713d49fd62deded9ba01d219fece6c118f0a",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "220aee1916369c2900955831c178cb461cddd697b2635e645077eb2601cbb28b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_feature_encoder.py",
+        "tools/openofc_solver/strategic_policy_distillation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 10215,
+      "source_path": "tools/openofc_solver/strategic_teacher_anchors.py"
+    },
+    {
+      "blob_sha": "53354232627b84dd70cd80a784499a6d543e9133",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "6ebc40afc854bd6b96a08aa45d4099e18182bf5a01b2d5f4a791e29dc2a69b8e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 6207,
+      "source_path": "tools/openofc_solver/table_scoring.py"
+    },
+    {
+      "blob_sha": "9c13e508637a08e46321c567de4426582edc9df7",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "7a95f921668e098f23a1a0830e21b9d2c29fc9a84561915b20c0a3c3ee000b01",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 1832,
+      "source_path": "tools/openofc_solver/teacher_search.py"
+    },
+    {
+      "blob_sha": "28eb9b793e3c0662b7990a0ab348362e3963278d",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "31887d3bdb636412d70b1d6f6e447635b3e09d9ba2c6d7928d806bb9d7c876a3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 8025,
+      "source_path": "tools/openofc_solver/teacher_search_nondealer.py"
+    },
+    {
+      "blob_sha": "6f0ef69241b81249e0a26f991aa89d2c2d833055",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "dc40150265ae8b8cb7d32ed848702afcf63dbb19c3dea8a0b18e9cd5bf9fabc5",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search.py",
+        "tools/openofc_solver/teacher_search_nondealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "source",
+      "size": 10430,
+      "source_path": "tools/openofc_solver/teacher_search_r3_dealer.py"
+    },
+    {
+      "blob_sha": "0893bfa036431b869aba1e0a145d6bc369b518cc",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "5e8538203930795feaa730af1f50783b25e26a441109af272a68f2c65823ec82",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5164,
+      "source_path": "tools/openofc_solver/test_engine.py"
+    },
+    {
+      "blob_sha": "948bdad263528cd0449ac2ea8096409cf7cf69db",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "d4e04181a630f286dc1f9817c6c269197514076ce0a70be4986c02b5b5b8db66",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_counterfactual_frontier.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/fantasy_response_frontier_onepass.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4731,
+      "source_path": "tools/openofc_solver/test_fantasy_counterfactual_frontier.py"
+    },
+    {
+      "blob_sha": "2bb31d62409353d7ff742f05b3c9177453ed898a",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "583454eb9a6cdf9c3fa67f10c6bb1bc1fac69f00e4b5b227d6e627c26ce473ef",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_delayed_response.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3303,
+      "source_path": "tools/openofc_solver/test_fantasy_delayed_response.py"
+    },
+    {
+      "blob_sha": "a0244611780b551af14e79f1d3e5eddcb04a2f85",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "4a394351ee6782306f00478cd644fe6912dd9068535db936831c126252340aae",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3787,
+      "source_path": "tools/openofc_solver/test_fantasy_fantasy_kernel.py"
+    },
+    {
+      "blob_sha": "c21e5cb165119ffe9730e7e4bd8690fb2c1e0a87",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "261c6a7ad241e874ab7459a80361cfad2be241047145f9f912f7f035e7767fcb",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 6733,
+      "source_path": "tools/openofc_solver/test_fantasy_fantasy_payoff.py"
+    },
+    {
+      "blob_sha": "0a53160b7b9740094a5b507761d4f38b15c3268f",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "3e3979208bf24440c5aa85189f5cc3e9bcd344df190428af5dc1cb798b1fca8d",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_bootstrap.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5411,
+      "source_path": "tools/openofc_solver/test_fantasy_fantasy_policy_model.py"
+    },
+    {
+      "blob_sha": "23d72d7ffce33d18e05a26c3e447f98ef556fb58",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "8a4df7e2d3bbd20e2112ca05048d84d51040a60c9c9555a25ec0dc19f73e8b8f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4908,
+      "source_path": "tools/openofc_solver/test_fantasy_fantasy_proposals.py"
+    },
+    {
+      "blob_sha": "a011965ba58c367eb512f01979fc8e809b6ae65b",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "40336d77ab316c2bfd985b33f14894e22faec30da972f4a5eabe2ac38c891daa",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/fantasy_fantasy_selfplay.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 4773,
+      "source_path": "tools/openofc_solver/test_fantasy_fantasy_selfplay.py"
+    },
+    {
+      "blob_sha": "1e1adf1775b829c7bafbf632a6f5ec53c31cdc86",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "19f04b7579d0ccbe16cb389b668b5a616112ec911ca8674fefa258bada60cfd8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_frontier_cache.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4059,
+      "source_path": "tools/openofc_solver/test_fantasy_frontier_cache.py"
+    },
+    {
+      "blob_sha": "234709ae577c224a38928553325dce8edadb7d84",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "7533beea786c57df5f93552f32bb8452205f9f3dcd29d3fe68c31be1591fac13",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/audit_fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_corpus.py",
+        "tools/openofc_solver/fantasy_frontier_features.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 2949,
+      "source_path": "tools/openofc_solver/test_fantasy_frontier_corpus.py"
+    },
+    {
+      "blob_sha": "526e90cd5400c5c11ff11d3021a88cfdbe0cc599",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "37d2616c5a42ca0d1624fd989958a288e2a44298fbb00f87f1b72d11d0d6de55",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_features.py",
+        "tools/openofc_solver/fantasy_frontier_mlp.py",
+        "tools/openofc_solver/fantasy_frontier_mlp_eval.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3616,
+      "source_path": "tools/openofc_solver/test_fantasy_frontier_mlp.py"
+    },
+    {
+      "blob_sha": "e0f4b6b0105db0d6934fae72eff25f094506bb1b",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "a40e07d612a446b5ae664b374ff80c29cc1693510c2865b76ce187c71f90b51a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_distillation.py",
+        "tools/openofc_solver/fantasy_frontier_features.py",
+        "tools/openofc_solver/fantasy_frontier_model.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 3009,
+      "source_path": "tools/openofc_solver/test_fantasy_frontier_model.py"
+    },
+    {
+      "blob_sha": "c8c9e56daaf49f3eedc750100bcf4bf1ac10d6e2",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "34504f0365eea6eeda5f144d9178092ba6c1907191cbc3c4c954679f5465087b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_delayed_response.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3576,
+      "source_path": "tools/openofc_solver/test_fantasy_response_frontier.py"
+    },
+    {
+      "blob_sha": "1521a21c434a5ff39aca1014076d9a6d9a56bb07",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "11864ce622e004046738f1bb9a44c88a3d1758be47a6e22ec3df3c939f644475",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_cache.py",
+        "tools/openofc_solver/fantasy_frontier_cache_onepass.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/fantasy_response_frontier_onepass.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3335,
+      "source_path": "tools/openofc_solver/test_fantasy_response_frontier_onepass.py"
+    },
+    {
+      "blob_sha": "a4f4ab8a973e2897cb6a78728f5d07cfee28b85f",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "557173ec34e95aaf2a43217d036a7136f664bd89a8e677808a57aa7f12d93ca9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_transition.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3316,
+      "source_path": "tools/openofc_solver/test_fantasy_transition.py"
+    },
+    {
+      "blob_sha": "f1a098fc2bc589035adce33dab6bb676e74f0269",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "b4ca18a3fcd73f0f82c61ba4c728e038d17d52e90544c55829a5b8ec862e26ee",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/hu_continuation.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5506,
+      "source_path": "tools/openofc_solver/test_hu_continuation.py"
+    },
+    {
+      "blob_sha": "a6b5e8938ac1d88e1e183f7fe7115ae9defe10e6",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "aea31e12ba73fc02f628af6f051517b28e1b049ee1056fa4f8c516728353cd5f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2847,
+      "source_path": "tools/openofc_solver/test_m1b_joker_semantics.py"
+    },
+    {
+      "blob_sha": "8767bc8f56d52c0f6d290b291615f0470f6985b3",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "9971d40b0524c7b9566be4d64ac073e2e387b533377adde7de70bfb71de111d3",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_model.py",
+        "tools/openofc_solver/fantasy_fantasy_proposals.py",
+        "tools/openofc_solver/fantasy_fantasy_selfplay.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/run_m4s_multiseed.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 5545,
+      "source_path": "tools/openofc_solver/test_m4s_multiseed.py"
+    },
+    {
+      "blob_sha": "a3765598002cd21f1135361131d6474387d046af",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "ccdd72a709c3c141dec19fe32f8207b12b346ba6d2bf38d1a78192a8b707a1a9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/plan_m4t_adaptive_scale.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 3638,
+      "source_path": "tools/openofc_solver/test_m4t_adaptive_scale.py"
+    },
+    {
+      "blob_sha": "1543ee6c2962b438e9c0c3aba646bd899b01800f",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "b2841795f3b88adea244bd8777989ee627e66f5290a4659534656917ac786620",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py",
+        "tools/openofc_solver/plan_m4t_adaptive_scale.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 6662,
+      "source_path": "tools/openofc_solver/test_m4u_continuation_boundary.py"
+    },
+    {
+      "blob_sha": "76b4c9adca45f46e9270081f78db8a1554f6f9f3",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "158f5e469aa598e3539a318860e117039d4cef0e92264526fc9a65d10b750936",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_bootstrap.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py",
+        "tools/openofc_solver/m4v_continuation_targets.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3600,
+      "source_path": "tools/openofc_solver/test_m4v_continuation_targets.py"
+    },
+    {
+      "blob_sha": "c69853d47f8a0d609869484a167523203b08f210",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "5c3924294839a3ce88ea5e1244c4b896972f7eb56fc36dca3e19238f9d997c83",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/fantasy_fantasy_policy_features.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4u_continuation_boundary.py",
+        "tools/openofc_solver/m4v_continuation_targets.py",
+        "tools/openofc_solver/m4w_outcome_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4908,
+      "source_path": "tools/openofc_solver/test_m4w_outcome_model.py"
+    },
+    {
+      "blob_sha": "d7b56a246cd7046ddf5d1fb11e536664f998b016",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ce3106c05ae8b990da8bfeb9eb5e45cd96231d42a27fd2125e4fbb616695dbc2",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4x_robust_support.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5528,
+      "source_path": "tools/openofc_solver/test_m4x_robust_support.py"
+    },
+    {
+      "blob_sha": "7d61ec98324a5f9d59e03cdeef15a108586726a3",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "bd78b843e6e671dab470fc499b39a586b4aaa2e069996d20dc8a38b7a433df00",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4y_bellman_trace.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4983,
+      "source_path": "tools/openofc_solver/test_m4y_bellman_trace.py"
+    },
+    {
+      "blob_sha": "dcd8f02c6a148c2e07093fa41b6c72a950270cdf",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "c8193395b582950faafa4c022a02406ec9186dc2d4cf8d71a2a8ab459ca703d2",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4y_bellman_trace.py",
+        "tools/openofc_solver/m4z_outer_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5167,
+      "source_path": "tools/openofc_solver/test_m4z_outer_bellman.py"
+    },
+    {
+      "blob_sha": "2d3aeab7111f287456707776b2c8a9c35fe0cd94",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ecb756adaa2c8d907c6d62956a6afef0be91a26eb12bb7764b642c7fdaaa0d6f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5a_fantasy_fantasy_oracle.py",
+        "tools/openofc_solver/m5a_normal_normal_oracle.py",
+        "tools/openofc_solver/strategic_advantage_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3238,
+      "source_path": "tools/openofc_solver/test_m5a_component_adapters.py"
+    },
+    {
+      "blob_sha": "01017e464337fe66d27f579c28d7ee3e5f7af984",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "0356dfcc0e33af0b649340e60977f8626148b2ea9dc5078637764ecc4d040a5e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5a_normal_fantasy_oracle.py",
+        "tools/openofc_solver/normal_fantasy_policy_features.py",
+        "tools/openofc_solver/strategic_advantage_model.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4642,
+      "source_path": "tools/openofc_solver/test_m5a_normal_fantasy_oracle.py"
+    },
+    {
+      "blob_sha": "32ec13230f9980d41b2569f2a60c58bf67b18cfc",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ecb1a7b405b39370f0bb5d5de7c4e7b3474f6a249d9d81d6b7ca20b1604a228f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m5b_fantasy_selfplay.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3156,
+      "source_path": "tools/openofc_solver/test_m5b_fantasy_selfplay.py"
+    },
+    {
+      "blob_sha": "5a3273df6a8a288e166c21293ae8e2b456e98b3c",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "b4be4482e1e2344f99a27e939f5ccae8ab8ce207b2e37b5483afedff6c2b870f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5c_normal_route_certification.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5183,
+      "source_path": "tools/openofc_solver/test_m5c_normal_route_certification.py"
+    },
+    {
+      "blob_sha": "7da091ab43d435ec2dde520e7d05153d144cbb06",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "301bed844466614844b4ed403830c31367da3d5fd6088c808407dbcea4520b01",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5c_route_certification.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 6647,
+      "source_path": "tools/openofc_solver/test_m5c_route_certification.py"
+    },
+    {
+      "blob_sha": "ccccf266dc49dd3b23bee74a41288903016b88ab",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "1cf3f7201d172861a89f461e546edddab4bbbe79c4c4130fdf83579403e1ac07",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4y_bellman_trace.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5d_dynamic_certified_bellman.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5777,
+      "source_path": "tools/openofc_solver/test_m5d_dynamic_certified_bellman.py"
+    },
+    {
+      "blob_sha": "bf594fc6a84e9f6317f49c23d3cfa3626ea097fd",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "7ff5d013cde1cc28ed76553b066a7d0e5eecddb61c25e07678bf8de4c10e8b58",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5e_fantasy_route_certification.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 7505,
+      "source_path": "tools/openofc_solver/test_m5e_fantasy_route_certification.py"
+    },
+    {
+      "blob_sha": "7e6ed465101572eb87e60518fafe4672fca47c84",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "ebd2faf16749b9dd85392f57c2600254191b9d6991a795822aafe61c035e60ce",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_fantasy_kernel.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4w_outcome_model.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m5a_fantasy_fantasy_oracle.py",
+        "tools/openofc_solver/m5b_fantasy_selfplay.py",
+        "tools/openofc_solver/m5f_fantasy_heldout_evidence.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 7972,
+      "source_path": "tools/openofc_solver/test_m5f_fantasy_heldout_evidence.py"
+    },
+    {
+      "blob_sha": "f7d2391895f53208af0e6c5520da30edd261db68",
+      "disposition_reason": "current M4/M5 lineage or transitive local dependency",
+      "file_sha256": "93b4766bc8380cfaf1398602b41a8b065a7b63dd670eb898e0e5b5d5af297ff7",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_fantasy_payoff.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/m4x_robust_support.py",
+        "tools/openofc_solver/m4y_bellman_trace.py",
+        "tools/openofc_solver/m4z_outer_bellman.py",
+        "tools/openofc_solver/m5c_normal_route_certification.py",
+        "tools/openofc_solver/m5e_fantasy_route_certification.py",
+        "tools/openofc_solver/m5g_full_registry_factory.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 8650,
+      "source_path": "tools/openofc_solver/test_m5g_full_registry_factory.py"
+    },
+    {
+      "blob_sha": "3134d7a22a0aaeaa339e07d039ce792acf489c50",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "ba950f0a3d990a35cee2265356e851e5c3b25be72af0938404cc8d07acfa0c19",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_cfr.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py",
+        "tools/openofc_solver/normal_fantasy_symmetry.py",
+        "tools/openofc_solver/normal_fantasy_terminal.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 6160,
+      "source_path": "tools/openofc_solver/test_normal_fantasy_cfr.py"
+    },
+    {
+      "blob_sha": "0472d09a59671290df7104d74d51955510b98fcf",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "fb202be56d668045896d197ca27a632be6e0e291df414f24011c2e7ce547539d",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/normal_fantasy_feasibility.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 1430,
+      "source_path": "tools/openofc_solver/test_normal_fantasy_feasibility.py"
+    },
+    {
+      "blob_sha": "d18532bbed11bbba169f0844599701d8732a8163",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "e6fc2dc609ee8279a090b1eddf471d16918a327100ce2f8cac4bff04ece782e4",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/fantasy_response_frontier.py",
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3749,
+      "source_path": "tools/openofc_solver/test_normal_fantasy_kernel.py"
+    },
+    {
+      "blob_sha": "ee3dcea846e84878354b7b4c9ec55969bc5960ff",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "5e981c53555612a799764a1576795005301528a43c17777b50a9d2d2a9e3d96a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/normal_fantasy_kernel.py",
+        "tools/openofc_solver/normal_fantasy_symmetry.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 3020,
+      "source_path": "tools/openofc_solver/test_normal_fantasy_symmetry.py"
+    },
+    {
+      "blob_sha": "c4cdcb8c19f83c29a0ab83fd63d7d4ab70ee5f31",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "417a00ed4acc163cd7a5a415e99e145310adc0a3d1b62624250a9b345b2ec6ca",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/generate_r3_dealer_corpus.py",
+        "tools/openofc_solver/teacher_search_r3_dealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 5110,
+      "source_path": "tools/openofc_solver/test_r3_dealer.py"
+    },
+    {
+      "blob_sha": "f0fa3e0886740e30efaea605d6aeeb0d9b2ee76e",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "b6828d5840a090396617a2a16c2ad5db193f20f7f7694891b22eeea90dfc3401",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/run_r3_dealer_shards.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 3005,
+      "source_path": "tools/openofc_solver/test_r3_scaling.py"
+    },
+    {
+      "blob_sha": "69492da4a226ad15688b979fa8cda2d6972728db",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "07970e84bf93eb143d61784f7aadb6d5b4782e05d67fd22d4f4d9c97aa7a592c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/generate_r4_dealer_corpus.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2231,
+      "source_path": "tools/openofc_solver/test_r4_dealer_corpus.py"
+    },
+    {
+      "blob_sha": "5598aac7564c4e4dbda1104ee306a5a69d59ef8a",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "991d7ae75a04e2c444fd046154bbc8cdd3bbae7502de1de8facf126320051f92",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/teacher_search_nondealer.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 4579,
+      "source_path": "tools/openofc_solver/test_r4_nondealer.py"
+    },
+    {
+      "blob_sha": "26cd935aa6cc41c566a5d886fd077d6f32fe4f23",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "c7d37fb06658da5b9d0b9bcef4dd981422b5a7f0509c37ee81cd851055db1614",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_feature_encoder.py",
+        "tools/openofc_solver/strategic_policy_distillation.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 5580,
+      "source_path": "tools/openofc_solver/test_strategic_advantage_model.py"
+    },
+    {
+      "blob_sha": "061de17fd038d6253783a02dba494308e61c5fe8",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "a2585b0429095cf9cd7f4def088d63b43d03c398bbe1243d40087da79f6c87c4",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4905,
+      "source_path": "tools/openofc_solver/test_strategic_cfr.py"
+    },
+    {
+      "blob_sha": "482921d1f039fc4f5e5ff0c3401508a28037ad77",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "f3f1e0dc0084d5ddecf31b3a5d17d736dd847bb18d9a73e7c8872200d1d7cf2c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4613,
+      "source_path": "tools/openofc_solver/test_strategic_continuation_cfr.py"
+    },
+    {
+      "blob_sha": "e98ecb1f69624370b92a61f539b9a6cb8513bab9",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "c97e73ba774bc966ff28a6beb3f26b00ae410a152f317aa8aa157c36c86ba53c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_continuation_r4_teacher.py",
+        "tools/openofc_solver/strategic_teacher_anchors.py",
+        "tools/openofc_solver/teacher_search.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 4192,
+      "source_path": "tools/openofc_solver/test_strategic_continuation_r4_teacher.py"
+    },
+    {
+      "blob_sha": "4b1e4126430040e884bc138bf5166293b7a15a16",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "dba78966ebfb7220df237eb2aaeef294d68e0e00050d3ffa56e354ca17210754",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/hu_continuation.py",
+        "tools/openofc_solver/strategic_continuation_cfr.py",
+        "tools/openofc_solver/strategic_continuation_runner.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2188,
+      "source_path": "tools/openofc_solver/test_strategic_continuation_runner.py"
+    },
+    {
+      "blob_sha": "d1f5f2982a65b862196afbe4602ce2947ae8eb12",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "29bc78563421bf4cec8c02fc432691ccb1b7ae9154349182b4ca8bb2f0e0a182",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_feasibility.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2353,
+      "source_path": "tools/openofc_solver/test_strategic_feasibility.py"
+    },
+    {
+      "blob_sha": "78c41b2cd47c0a3b2626631dccc0681521cde629",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "a9d117c29ed70a422d33d1746a5055689cff034124d02d002d3d5da72efe952f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_feature_encoder.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4078,
+      "source_path": "tools/openofc_solver/test_strategic_feature_encoder.py"
+    },
+    {
+      "blob_sha": "acda5d8cd47af1dfea146d63bd804f71889899e4",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "5bfa193747a6f38f4955869600ab152978d2dd4745980bc7b1a541c270144791",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_multiseed.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2158,
+      "source_path": "tools/openofc_solver/test_strategic_multiseed.py"
+    },
+    {
+      "blob_sha": "67367383b6bd3795adb8adf9f30a42752317118c",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "960228521206ad1a201c1761ee4fb0a64c2ed74820eef60eaa82784c9d032a0b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_multiseed_benchmark.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 1847,
+      "source_path": "tools/openofc_solver/test_strategic_multiseed_benchmark.py"
+    },
+    {
+      "blob_sha": "5eaec53c2b604e5fbe2db0e16b68dc8a49f41e98",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "89badc4b471f3d49065d2dfced81ef2d6e13032d4e63c608425d80c1cc1f830a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/audit_strategic_convergence.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_cfr_runner.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 3757,
+      "source_path": "tools/openofc_solver/test_strategic_runner.py"
+    },
+    {
+      "blob_sha": "2102b739dd56cc9c21eb057260a4e0c760cf4fb7",
+      "disposition_reason": "test for a migrated dependency module",
+      "file_sha256": "6bf433ef3dd91cc2f52f07cf345c90f67fe25514afae290aa66157ae3ee72947",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/strategic_cfr.py",
+        "tools/openofc_solver/strategic_suit_symmetry.py"
+      ],
+      "migration_disposition": "migrate",
+      "role": "test",
+      "size": 4139,
+      "source_path": "tools/openofc_solver/test_strategic_suit_symmetry.py"
+    },
+    {
+      "blob_sha": "3b3138faca259d74975b292ff5f53bb6de032bb8",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "5a70b223f1c7d5fa7adb747a2c725cc517945fccc0206cf3facbcb2597ee7fd8",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/strategic_advantage_model.py",
+        "tools/openofc_solver/strategic_policy_distillation.py",
+        "tools/openofc_solver/strategic_teacher_anchors.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 4211,
+      "source_path": "tools/openofc_solver/test_strategic_teacher_anchors.py"
+    },
+    {
+      "blob_sha": "72b607447f6fc4bb23d131c3ecbcae7222f7d648",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "9a56767404933b959dad1dc3047abd054bed496ee218f163b631cbb9505fe1ad",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/engine.py",
+        "tools/openofc_solver/table_scoring.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "test",
+      "size": 2905,
+      "source_path": "tools/openofc_solver/test_table_scoring.py"
+    },
+    {
+      "blob_sha": "f3d2a35be547af03230c4ea4be8314be10dbd47f",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "a032d2c4d0a8ffa38b1f839939237c88158f2d3211f05ed2b4968ffe3872a969",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_mlp.py",
+        "tools/openofc_solver/fantasy_frontier_mlp_eval.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 2754,
+      "source_path": "tools/openofc_solver/train_fantasy_frontier_mlp.py"
+    },
+    {
+      "blob_sha": "4d6e68cda59324933eb9b7a80266cf4ccc759e26",
+      "disposition_reason": "preserved staging history; not in current M4U-M5G dependency closure",
+      "file_sha256": "1f9dd4ea7be0dcc89fe7fd379364d883599758fc702ff336f3f9a1469b9d7581",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "local_imports": [
+        "tools/openofc_solver/fantasy_frontier_distillation.py",
+        "tools/openofc_solver/fantasy_frontier_model.py"
+      ],
+      "migration_disposition": "historical",
+      "role": "benchmark",
+      "size": 2896,
+      "source_path": "tools/openofc_solver/train_fantasy_frontier_model.py"
+    }
+  ],
+  "observations": {
+    "m5d_present": true,
+    "m5e_present": true,
+    "m5f_present": true,
+    "m5g_present": true,
+    "strategic_quality_note": "M5D-M5G architecture/source presence does not imply real route evidence or production certification."
+  },
+  "policy": {
+    "all_m4_m5_contracts_migrate": true,
+    "dependency_closure_count": 78,
+    "nonclosure_files_default": "historical",
+    "roots": [
+      "tools/openofc_solver/M4U_CONTINUATION_BOUNDARY_CONTRACT.md",
+      "tools/openofc_solver/M4V_CONTINUATION_TARGET_CONTRACT.md",
+      "tools/openofc_solver/M4W_OUTCOME_MODEL_CONTRACT.md",
+      "tools/openofc_solver/M4X_ROBUST_SUPPORT_CONTRACT.md",
+      "tools/openofc_solver/M4Y_BELLMAN_TRACE_CONTRACT.md",
+      "tools/openofc_solver/M4Z_OUTER_BELLMAN_CONTRACT.md",
+      "tools/openofc_solver/M5A_NORMAL_FANTASY_ORACLE_CONTRACT.md",
+      "tools/openofc_solver/M5B_FANTASY_SELFPLAY_CONTRACT.md",
+      "tools/openofc_solver/M5C_NORMAL_ROUTE_CERTIFICATION_CONTRACT.md",
+      "tools/openofc_solver/M5C_ROUTE_CERTIFICATION_CONTRACT.md",
+      "tools/openofc_solver/M5D_DYNAMIC_CERTIFIED_BELLMAN_CONTRACT.md",
+      "tools/openofc_solver/M5E_FANTASY_ROUTE_CERTIFICATION_CONTRACT.md",
+      "tools/openofc_solver/M5F_FANTASY_HELDOUT_EVIDENCE_CONTRACT.md",
+      "tools/openofc_solver/M5G_FULL_REGISTRY_FACTORY_CONTRACT.md",
+      "tools/openofc_solver/m4u_continuation_boundary.py",
+      "tools/openofc_solver/m4v_continuation_targets.py",
+      "tools/openofc_solver/m4w_outcome_model.py",
+      "tools/openofc_solver/m4x_robust_support.py",
+      "tools/openofc_solver/m4y_bellman_trace.py",
+      "tools/openofc_solver/m4z_outer_bellman.py",
+      "tools/openofc_solver/m5a_fantasy_fantasy_oracle.py",
+      "tools/openofc_solver/m5a_normal_fantasy_oracle.py",
+      "tools/openofc_solver/m5a_normal_normal_oracle.py",
+      "tools/openofc_solver/m5b_adaptive_normal_oracles.py",
+      "tools/openofc_solver/m5b_fantasy_selfplay.py",
+      "tools/openofc_solver/m5c_normal_route_certification.py",
+      "tools/openofc_solver/m5c_route_certification.py",
+      "tools/openofc_solver/m5d_dynamic_certified_bellman.py",
+      "tools/openofc_solver/m5e_fantasy_route_certification.py",
+      "tools/openofc_solver/m5f_fantasy_heldout_evidence.py",
+      "tools/openofc_solver/m5g_full_registry_factory.py",
+      "tools/openofc_solver/test_m4u_continuation_boundary.py",
+      "tools/openofc_solver/test_m4v_continuation_targets.py",
+      "tools/openofc_solver/test_m4w_outcome_model.py",
+      "tools/openofc_solver/test_m4x_robust_support.py",
+      "tools/openofc_solver/test_m4y_bellman_trace.py",
+      "tools/openofc_solver/test_m4z_outer_bellman.py",
+      "tools/openofc_solver/test_m5a_component_adapters.py",
+      "tools/openofc_solver/test_m5a_normal_fantasy_oracle.py",
+      "tools/openofc_solver/test_m5b_fantasy_selfplay.py",
+      "tools/openofc_solver/test_m5c_normal_route_certification.py",
+      "tools/openofc_solver/test_m5c_route_certification.py",
+      "tools/openofc_solver/test_m5d_dynamic_certified_bellman.py",
+      "tools/openofc_solver/test_m5e_fantasy_route_certification.py",
+      "tools/openofc_solver/test_m5f_fantasy_heldout_evidence.py",
+      "tools/openofc_solver/test_m5g_full_registry_factory.py"
+    ]
+  },
+  "related_workflows": [
+    {
+      "blob_sha": "1347ece442c46f9109be1c3d47f6734561a94c04",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "671644ee4e56d52a13a74205965981f3f73dd933ef5adf67c455051984118755",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 7515,
+      "source_path": ".github/workflows/openofc-m4-strategic-cfr.yml"
+    },
+    {
+      "blob_sha": "d464376c37f88b842cd936dfbbb9104a897f0462",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "1a19367a853952f94d596520d8835bc409209b366469203c607e5951855740c5",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 3316,
+      "source_path": ".github/workflows/openofc-m4b-continuation.yml"
+    },
+    {
+      "blob_sha": "e480a480fea3ae1a6d8de9090d663a6229e46976",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "617cc9afd184cb22ee318f39df6c0fe76bc4519f021daf72e0696f29f1d76f0b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1048,
+      "source_path": ".github/workflows/openofc-m4c-visible-features.yml"
+    },
+    {
+      "blob_sha": "9bd849966ee80474a372f443f0461b6a0043260e",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "60820001a0f35f6753fbc0323bea0d6b86d4a7bc660e2c527bd84e9e69c52345",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1151,
+      "source_path": ".github/workflows/openofc-m4c2-action-advantage.yml"
+    },
+    {
+      "blob_sha": "dae7116558bc3115307592be8f8f0be217b43371",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "c45040c3cd6378777009bbfb5f7e548ce2ef36297e18ef5bf85fcfaa78b242e9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 2605,
+      "source_path": ".github/workflows/openofc-m4c3-multiseed-exact-r4.yml"
+    },
+    {
+      "blob_sha": "4fd1db8375777fa723cc31c98ae925234861bbd8",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "106cacc05e95f2f4214d41b8a6785e3fa0c052e55633dcd856ea1788c01f0237",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1403,
+      "source_path": ".github/workflows/openofc-m4c4-continuation-r4.yml"
+    },
+    {
+      "blob_sha": "c31d46875fbf218b8a7ab01d5cd635d8b838ea58",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "74512fd8358d4559be2047fd62cec20f27326dc8359fcda96306572a3f31aebb",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1337,
+      "source_path": ".github/workflows/openofc-m4d-fantasy-frontier.yml"
+    },
+    {
+      "blob_sha": "fa522772737b5bec82896278914c3fb273da2775",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "33f7ea6cfbc0a3e2e5f63e0655d298c9e51eb6b8f57fc01f86e5c3e9b49ed6d9",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1314,
+      "source_path": ".github/workflows/openofc-m4e-normal-fantasy-kernel.yml"
+    },
+    {
+      "blob_sha": "af2d791349047f9c964ece661cfc7794ec4d21bf",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "076a5cab7037b5ec695543169004f08e555b50f82efb48a75fba7b7f3c1e487b",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1391,
+      "source_path": ".github/workflows/openofc-m4f-asymmetric-scaling.yml"
+    },
+    {
+      "blob_sha": "8821b6251b2801e98e41a59a560ca02512636e9e",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "2941324c76f0eef6d3dfe979681e03eb153bfa00e156f4734e7fdd57b73b6477",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1945,
+      "source_path": ".github/workflows/openofc-m4g-asymmetric-feasibility.yml"
+    },
+    {
+      "blob_sha": "fb761f3ada014e3efb4cd6423cb3e8fc960a992a",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "55ab4c0d9a79e805460b32a84820e1a082d70464ea0262dbd65f2f5860316d46",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 2542,
+      "source_path": ".github/workflows/openofc-m4h-onepass-frontier.yml"
+    },
+    {
+      "blob_sha": "f93d2218180c8c35f12d8de2d4d46f35f166a692",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "acd2a4ca831ef17038bc1c03c6780f45107ca978061e191e936350b25948fff0",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 2002,
+      "source_path": ".github/workflows/openofc-m4i-frontier-corpus.yml"
+    },
+    {
+      "blob_sha": "75b7b8a417ab7f9aa89e0cbf38145c6238d088b3",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "2049dd3ac542a78622ab04dce1d07bd18a8af6de712869ab8ecb0bca434a2bc5",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 2901,
+      "source_path": ".github/workflows/openofc-m4j-terminal-model.yml"
+    },
+    {
+      "blob_sha": "2e2eb9f9a3d3ca1ac03d5b05f399acc65d7d0918",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "295c57764328e8927300f0d73c599733215b3e5e7495fd6bc2ed2c99a1767b73",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 3055,
+      "source_path": ".github/workflows/openofc-m4k-terminal-mlp.yml"
+    },
+    {
+      "blob_sha": "fd632ef187f2fd5a3d93c2214eb130414d2b699f",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "90e7041357333fb14e4d79503376dd84456d077c1554e0114bf1c803b4c289c0",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 868,
+      "source_path": ".github/workflows/openofc-m4l-normal-fantasy-strategic.yml"
+    },
+    {
+      "blob_sha": "52eddfd171820e56b53f2f17ed66b9d4dbfdc406",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "6e6e6177be7c5b5e6af0d5737cdfa6da34a8c807d292864139fed5c27770fb8a",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 928,
+      "source_path": ".github/workflows/openofc-m4m-fantasy-fantasy-boundary.yml"
+    },
+    {
+      "blob_sha": "32becd63f5e18bcb926f25d473e11c5b58bd4925",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "fde3f246fdb35f93491714d01d6e0a572e6dc2dd21ca550ff6cd0a88187aa999",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 955,
+      "source_path": ".github/workflows/openofc-m4n-counterfactual-frontier.yml"
+    },
+    {
+      "blob_sha": "2e254b9bd0404bc26ff48e8e778d55721840c06c",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "e2a8b1156f08de3a6354a481ccdde17951371f0a1fa5555b0d23a9b1788f78fb",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 930,
+      "source_path": ".github/workflows/openofc-m4o-fantasy-proposal-support.yml"
+    },
+    {
+      "blob_sha": "e4bcbd3dddb333fd0fc7a21fcf693f6d8017c4e4",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "9f16eeb1956064b272ecd5ea15e1ae6de58e51a47d0242f787df8f498d6a19c6",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 990,
+      "source_path": ".github/workflows/openofc-m4p-sealed-support-matrix.yml"
+    },
+    {
+      "blob_sha": "018d881d0a28a46b01810b74591f03bc5d83381d",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "5813af7dc4cee8c20ebb0dbbbcf4d37b4ba4df29a23e7d44ff7b56afe668592c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1017,
+      "source_path": ".github/workflows/openofc-m4q-sealed-policy-bootstrap.yml"
+    },
+    {
+      "blob_sha": "72476366956e010f99315b5cdd5f668cd53683a8",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "dd0fcd475f4d396fe3f264502cc5f97db0fe4ecde811e1b27010fa69c8bf6e56",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 921,
+      "source_path": ".github/workflows/openofc-m4r-generalized-selfplay.yml"
+    },
+    {
+      "blob_sha": "fb403f0929092fded3b13b50b3375c5402a20628",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "3483c017363cb345521159b9b995d8f252bb71abb3c29baa223bf21ac96040f1",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 933,
+      "source_path": ".github/workflows/openofc-m4s-multiseed.yml"
+    },
+    {
+      "blob_sha": "08e20b10597b79a724365852ce04d6685b2358dc",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "963b42f6443a220f5fa31fe38bc479efa88dedf665f763b7f28ba38441cd4e14",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 746,
+      "source_path": ".github/workflows/openofc-m4t-adaptive-scale.yml"
+    },
+    {
+      "blob_sha": "ebd1d8ab032f3c7b43cd4fab3a3b0ff4b04d7b5e",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "e916ba212dc11c2eb7be7293bdbc775ee7787855b8069b767f5799d3c2c406ef",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 940,
+      "source_path": ".github/workflows/openofc-m4u-continuation-boundary.yml"
+    },
+    {
+      "blob_sha": "8db6ae210ce02464a30fb22e5759945c5c572b1f",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "e073b39636aee98c4720a09a3aecc59352ae7c418016fc65ed242f653b017eef",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 925,
+      "source_path": ".github/workflows/openofc-m4v-continuation-targets.yml"
+    },
+    {
+      "blob_sha": "63c0b0d0e471b2f3f379ad5f8b295cc84494bfcd",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "c60a6244ddae2dd870c5882be2736815749e66be8d3728c243b1299fccbaa375",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 883,
+      "source_path": ".github/workflows/openofc-m4w-outcome-model.yml"
+    },
+    {
+      "blob_sha": "1b315eb4ae6cd2d0cd2676ba7184e70722afe6e9",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "e80b95af5010dc23677fa9f3f8ad2d0b52e9748721dc23c1633e82c94f35ce46",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 895,
+      "source_path": ".github/workflows/openofc-m4x-robust-support.yml"
+    },
+    {
+      "blob_sha": "5145afaf6843a886af0f6b44001aa3f0817d1de2",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "4f07383fca052354d41d96afd3c8fb324f8d3660b08c3d336483c410450a3bfc",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 896,
+      "source_path": ".github/workflows/openofc-m4y-bellman-trace.yml"
+    },
+    {
+      "blob_sha": "0e8ef9b6a814a2f5022ad7a37b0bc2040b9d1b40",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "bf032733c1b549bc919769549b3084d7e9580431afff320162ae77429fc9ce1e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 886,
+      "source_path": ".github/workflows/openofc-m4z-outer-bellman.yml"
+    },
+    {
+      "blob_sha": "bf9c6d8a18e824ff80f2223c594822ebbf206cb9",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "6035a3bf3ae5a5b33b19b2609cfd5254e74d6a543a8eb8251176b6101bd113ee",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 2104,
+      "source_path": ".github/workflows/openofc-m5a-component-adapters.yml"
+    },
+    {
+      "blob_sha": "0080929b642958827f86801a5fbe4e163cdd37f4",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "103df52c92c44b8007365bf9cdd4461e56e8284e185b6a1bfb92a37b4f4fae20",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1136,
+      "source_path": ".github/workflows/openofc-m5a-normal-fantasy-oracle.yml"
+    },
+    {
+      "blob_sha": "ff87aa843f206190970b66428da30334b49241ff",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "11bb1495b2cdc94ad582bb6bc906086005ba47d28c1d7cc2c1514e5bf362d09e",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1192,
+      "source_path": ".github/workflows/openofc-m5b-fantasy-selfplay.yml"
+    },
+    {
+      "blob_sha": "8887a76b8c85342c22a64340ee37e2fe973fcfb3",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "d2e7b2f86b57006056b9db3c42dc5134ad2e31cc45c4e3a60c67aad3173c6ec0",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1285,
+      "source_path": ".github/workflows/openofc-m5c-normal-route-certification.yml"
+    },
+    {
+      "blob_sha": "8b17bf6fe2b4ca8a3b197c7b5d0e511ec62906a3",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "2ed020578f578d556bb847ba5dd5b548dd6c244fb9bf6e0721e8ef2755a9c748",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1210,
+      "source_path": ".github/workflows/openofc-m5c-route-certification.yml"
+    },
+    {
+      "blob_sha": "26fc9c0c9960428b9799cf9353396438c920fcad",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "e465ec60b1dfcf7757ca119b8fdc42f89b1b653424446466f50cb064722ed775",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1266,
+      "source_path": ".github/workflows/openofc-m5d-dynamic-certified-bellman.yml"
+    },
+    {
+      "blob_sha": "ad310976d88767174262bfe3fbc79e9447161641",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "43b69debac13ec149f72cfddb7b218c5aebff8ef4823bf869b0dab82b3b6ad2c",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1297,
+      "source_path": ".github/workflows/openofc-m5e-fantasy-route-certification.yml"
+    },
+    {
+      "blob_sha": "7492232532c07031d32e9a9836bd3a4273e380f2",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "6ac909126f5c03e2aeef6463cba34202f80fc7becdcee1098ac5cff27ae9ba8f",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1260,
+      "source_path": ".github/workflows/openofc-m5f-fantasy-heldout-evidence.yml"
+    },
+    {
+      "blob_sha": "5a599bcb2ffb2c356fe8e2b214973a9f4e0062ca",
+      "disposition_reason": "M4/M5 staging CI provenance",
+      "file_sha256": "2c96357be3d4b5845589f956053d244da6af5b3ee7a96c9442d008100a7dff96",
+      "git_mode": "100644",
+      "git_type": "blob",
+      "migration_disposition": "migrate",
+      "role": "workflow",
+      "size": 1236,
+      "source_path": ".github/workflows/openofc-m5g-full-registry-factory.yml"
+    }
+  ],
+  "schema": "deepofc-openofc-solver-inventory-v1",
+  "source_commit": "c21c3c4f1017c83df07eb22230318a8131bf40d1",
+  "source_repo": "pmartins87/myoh_private",
+  "source_subtree": "tools/openofc_solver",
+  "source_tree_sha": "12b7e162991c2d1e317275f5a0d2fcbd5a1dc23c",
+  "summary": {
+    "disposition_counts": {
+      "historical": 64,
+      "migrate": 123
+    },
+    "files_payload_sha256": "a0e75d22e17d90b98881d324b2721f7c20276a3b9df83a2a7147f24cd9c53e18",
+    "role_counts": {
+      "benchmark": 19,
+      "contract": 39,
+      "helper": 10,
+      "source": 64,
+      "test": 55
+    },
+    "solver_subtree_file_count": 187,
+    "workflow_count": 38
+  }
+}
