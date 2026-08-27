@@ -1,0 +1,77 @@
+name: OpenOFC M5K Normal-Fantasy pilot
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - tools/openofc_solver/M5K_NORMAL_FANTASY_SCREENING_CONTRACT.md
+      - tools/openofc_solver/m5a_normal_fantasy_oracle.py
+      - tools/openofc_solver/m5b_adaptive_normal_oracles.py
+      - tools/openofc_solver/m5h_normal_heldout_evidence.py
+      - tools/openofc_solver/m5h_reference_evaluator_manifest.py
+      - tools/openofc_solver/m5k_normal_fantasy_screening.py
+      - tools/openofc_solver/run_m5k_normal_fantasy_pilot.py
+      - tools/openofc_solver/normal_fantasy_cfr.py
+      - tools/openofc_solver/normal_fantasy_kernel.py
+      - tools/openofc_solver/normal_fantasy_policy_distillation.py
+      - tools/openofc_solver/normal_fantasy_symmetry.py
+      - tools/openofc_solver/normal_fantasy_terminal.py
+      - .github/workflows/openofc-m5k-normal-fantasy-pilot.yml
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Recheck M5K/M5H firewall before spending pilot work
+        run: |
+          PYTHONPATH=tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_m5k_normal_fantasy_screening.py \
+              tools/openofc_solver/test_m5h_normal_heldout_evidence.py \
+              tools/openofc_solver/test_m5c_route_certification.py
+      - name: Run M5K two-route paired held-out pilot
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5k_normal_fantasy_pilot.py
+      - name: Validate pilot authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5k_normal_fantasy_pilot.json').read_text(encoding='utf-8'))
+          assert data['authority'] == 'NORMAL_FANTASY_SCREENING_PILOT_NOT_CERTIFICATION'
+          assert data['continuation_regime'] == 'ZERO_VECTOR_CURRENT_HAND_ONLY_PILOT'
+          assert data['summary']['routes_screened'] == 2
+          assert data['summary']['ready_for_real_bellman'] == 0
+          assert data['summary']['certification_claimed'] is False
+          assert len(data['heldout_seeds']) == 4
+          for route in data['routes']:
+              assert route['promotion_allowed'] is False
+              assert route['screening']['certification_eligible'] is False
+              assert route['m5h_report']['evidence_kind'] == 'HELD_OUT_SCREENING_ONLY'
+              assert route['m5h_report']['promotion_blocked'] is True
+              assert route['m5c_evidence']['evidence_kind'] == 'HELD_OUT_SCREENING_ONLY'
+          print('OPENOFC_M5K_PILOT_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5k-normal-fantasy-pilot
+          path: artifacts/m5k_normal_fantasy_pilot.json
+          if-no-files-found: error
+          retention-days: 14
