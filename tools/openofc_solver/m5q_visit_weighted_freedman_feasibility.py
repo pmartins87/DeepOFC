@@ -4,7 +4,7 @@ from __future__ import annotations
 
 Unlike the earlier all-coordinate worst-case-PQV screen, this module assigns each
 infoset the exact predictable External Sampling visit probability for a frozen
-profile.  It still uses scalar coordinate bounds, a global action-coordinate
+profile. It still uses scalar coordinate bounds, a global action-coordinate
 union bound, the Delta_u magnitude envelope and zero sampled positive regret.
 It therefore isolates how much looseness is removed by structural visitation
 alone without claiming a training-trajectory certificate.
@@ -12,6 +12,7 @@ alone without claiming a training-trajectory certificate.
 
 from dataclasses import dataclass
 import math
+from typing import Sequence
 
 from deepofc.hu_two_round import HUTwoRoundSubgame, StrategyProfile
 from m5q_predictable_visit_variance import external_sampling_infoset_visit_probabilities
@@ -45,6 +46,82 @@ def _radius(
     return linear + math.sqrt(linear * linear + 2.0 * variance * log_union_term)
 
 
+def _visit_surface(
+    game: HUTwoRoundSubgame,
+    profile: StrategyProfile,
+) -> tuple[float, ...]:
+    visits: list[float] = []
+    for traverser in (0, 1):
+        visits.extend(
+            external_sampling_infoset_visit_probabilities(game, profile, traverser).values()
+        )
+    if not visits or any((not math.isfinite(p) or p < 0.0 or p > 1.0) for p in visits):
+        raise RuntimeError("visit-weighted Freedman received an invalid visit surface")
+    return tuple(float(p) for p in visits)
+
+
+def concentration_only_from_visits(
+    visits: Sequence[float],
+    *,
+    iterations: int,
+    utility_range: float,
+    familywise_failure_probability: float,
+    action_coordinates: int,
+) -> float:
+    alpha = float(familywise_failure_probability)
+    if not 0.0 < alpha < 1.0:
+        raise ValueError("familywise failure probability must be in (0,1)")
+    if action_coordinates <= 0:
+        raise ValueError("action_coordinates must be positive")
+    log_term = math.log(float(action_coordinates) / alpha)
+    total_radius = sum(
+        _radius(
+            iterations=iterations,
+            visit_probability=float(probability),
+            utility_range=utility_range,
+            log_union_term=log_term,
+        )
+        for probability in visits
+    )
+    return 0.5 * total_radius / float(iterations)
+
+
+def required_iterations_from_visits(
+    visits: Sequence[float],
+    *,
+    utility_range: float,
+    familywise_failure_probability: float,
+    action_coordinates: int,
+    target_exploitability: float,
+) -> int:
+    target = float(target_exploitability)
+    if target <= 0.0 or not math.isfinite(target):
+        raise ValueError("target exploitability must be finite and positive")
+
+    def passes(iterations: int) -> bool:
+        return concentration_only_from_visits(
+            visits,
+            iterations=iterations,
+            utility_range=utility_range,
+            familywise_failure_probability=familywise_failure_probability,
+            action_coordinates=action_coordinates,
+        ) <= target
+
+    hi = 1
+    while not passes(hi):
+        hi *= 2
+        if hi > 10**30:
+            raise RuntimeError("visit-weighted Freedman search exceeded 1e30 iterations")
+    lo = 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if passes(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+
+
 @dataclass(frozen=True)
 class VisitWeightedFreedmanResult:
     family_id: str
@@ -74,26 +151,15 @@ def concentration_only_exploitability(
     utility_range: float,
     familywise_failure_probability: float,
 ) -> float:
-    alpha = float(familywise_failure_probability)
-    if not 0.0 < alpha < 1.0:
-        raise ValueError("familywise failure probability must be in (0,1)")
+    visits = _visit_surface(game, profile)
     coordinates = sum(len(actions) for actions in game.info_actions.values())
-    if coordinates <= 0:
-        raise RuntimeError("visit-weighted Freedman found no action coordinates")
-    log_term = math.log(float(coordinates) / alpha)
-    total_radius = 0.0
-    for traverser in (0, 1):
-        visits = external_sampling_infoset_visit_probabilities(game, profile, traverser)
-        total_radius += sum(
-            _radius(
-                iterations=iterations,
-                visit_probability=probability,
-                utility_range=utility_range,
-                log_union_term=log_term,
-            )
-            for probability in visits.values()
-        )
-    return 0.5 * total_radius / float(iterations)
+    return concentration_only_from_visits(
+        visits,
+        iterations=iterations,
+        utility_range=utility_range,
+        familywise_failure_probability=familywise_failure_probability,
+        action_coordinates=coordinates,
+    )
 
 
 def required_iterations_for_target(
@@ -104,32 +170,15 @@ def required_iterations_for_target(
     familywise_failure_probability: float,
     target_exploitability: float,
 ) -> int:
-    target = float(target_exploitability)
-    if target <= 0.0 or not math.isfinite(target):
-        raise ValueError("target exploitability must be finite and positive")
-
-    def passes(iterations: int) -> bool:
-        return concentration_only_exploitability(
-            game,
-            profile,
-            iterations=iterations,
-            utility_range=utility_range,
-            familywise_failure_probability=familywise_failure_probability,
-        ) <= target
-
-    hi = 1
-    while not passes(hi):
-        hi *= 2
-        if hi > 10**30:
-            raise RuntimeError("visit-weighted Freedman search exceeded 1e30 iterations")
-    lo = 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if passes(mid):
-            hi = mid
-        else:
-            lo = mid + 1
-    return lo
+    visits = _visit_surface(game, profile)
+    coordinates = sum(len(actions) for actions in game.info_actions.values())
+    return required_iterations_from_visits(
+        visits,
+        utility_range=utility_range,
+        familywise_failure_probability=familywise_failure_probability,
+        action_coordinates=coordinates,
+        target_exploitability=target_exploitability,
+    )
 
 
 def evaluate_profile(
@@ -143,36 +192,33 @@ def evaluate_profile(
     target_exploitability: float,
     probe_iterations: int,
 ) -> VisitWeightedFreedmanResult:
-    visits = []
-    for traverser in (0, 1):
-        visits.extend(
-            external_sampling_infoset_visit_probabilities(game, profile, traverser).values()
-        )
+    visits = _visit_surface(game, profile)
     positive = [float(p) for p in visits if p > 0.0]
     if not positive:
         raise RuntimeError("visit-weighted Freedman found no positive visits")
+    coordinates = sum(len(actions) for actions in game.info_actions.values())
     return VisitWeightedFreedmanResult(
         family_id=str(family_id),
         profile_id=str(profile_id),
         infosets=len(visits),
-        action_coordinates=sum(len(actions) for actions in game.info_actions.values()),
+        action_coordinates=coordinates,
         positive_visit_infosets=len(positive),
         utility_range=float(utility_range),
         familywise_failure_probability=float(familywise_failure_probability),
         target_exploitability=float(target_exploitability),
         probe_iterations=int(probe_iterations),
-        concentration_only_exploitability_at_probe=concentration_only_exploitability(
-            game,
-            profile,
+        concentration_only_exploitability_at_probe=concentration_only_from_visits(
+            visits,
             iterations=probe_iterations,
             utility_range=utility_range,
             familywise_failure_probability=familywise_failure_probability,
+            action_coordinates=coordinates,
         ),
-        required_iterations_for_target_concentration_only=required_iterations_for_target(
-            game,
-            profile,
+        required_iterations_for_target_concentration_only=required_iterations_from_visits(
+            visits,
             utility_range=utility_range,
             familywise_failure_probability=familywise_failure_probability,
+            action_coordinates=coordinates,
             target_exploitability=target_exploitability,
         ),
         maximum_visit_probability=max(positive),
