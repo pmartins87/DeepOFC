@@ -4,12 +4,12 @@ Status: **BYTE_COPY_PASS**
 
 Frozen source: `pmartins87/myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1`
 
-- G1 inventory payload SHA-256: `a0e75d22e17d90b98881d324b2721f7c20276a3b9df83a2a7147f24cd9c53e18`
-- migrated files: **123**
+- G1 v2 inventory payload SHA-256: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`
+- migrated files: **126**
 - all source/target bytes identical: **true**
-- provenance-records SHA-256: `b06d189712d76f6943b168b37623ca85501941f6024a2f760e9e8a67db7ba109`
-- provenance object SHA-256 (before embedding self-reference field): `473053506acd653008de846f1f80c88351535b1c1d0ab6d667dad9fac794dabe`
-- roles: `{"benchmark": 1, "contract": 35, "helper": 1, "source": 48, "test": 38}`
+- provenance-records SHA-256: `fc985fb4d28018a1f9db6cc545323b61a4150a64505b8ccc9f9e653dec29fdca`
+- provenance object SHA-256 (before embedding self-reference field): `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`
+- roles: `{"benchmark": 2, "contract": 35, "helper": 1, "source": 50, "test": 38}`
 
 The migration preserves the exact relative path `tools/openofc_solver/...` to avoid mixing namespace/import refactors with ownership transfer.
 
