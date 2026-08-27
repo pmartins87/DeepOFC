@@ -237,12 +237,22 @@ def classify_suit(rgb: tuple[float, float, float], bank: dict):
     return (best[0] if accepted else None), best[1], margin
 
 
-def classify_patch(image: Image.Image, rect: list[int], angle: float, bank: dict):
+def classify_patch(
+    image: Image.Image,
+    rect: list[int],
+    angle: float,
+    bank: dict,
+    *,
+    resample: Image.Resampling = Image.Resampling.BILINEAR,
+):
     left, top, right, bottom = map(int, rect)
     crop = image.crop((left, top, right + 1, bottom + 1)).convert("RGB")
     rotated = crop.rotate(
         -float(angle),
-        resample=Image.Resampling.BICUBIC,
+        # The v2 frozen bank was calibrated with inverse-mapped bilinear
+        # interpolation.  BICUBIC here silently changed suit medians enough to
+        # reject several source exemplars at the conservative margin gate.
+        resample=resample,
         expand=True,
         fillcolor=(255, 255, 255),
     )
@@ -287,7 +297,10 @@ def main() -> None:
     if bank.get("runtime_authorized") is not False:
         raise SystemExit("replay probe bank unexpectedly claims runtime authority")
     slots = geometry["fan_slots_left_to_right"]
-    angles = bank["extraction"]["deskew_angles_degrees"]
+    angles = bank.get("deskew", {}).get("angles_degrees")
+    if angles is None:
+        # Backward compatibility with the v1 replay-bank schema.
+        angles = bank["extraction"]["deskew_angles_degrees"]
 
     report = {
         "schema_version": 1,
