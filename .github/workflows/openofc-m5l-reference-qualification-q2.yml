@@ -52,8 +52,25 @@ jobs:
           assert q1['summary']['reference_manifest_emitted'] is False
 
           plan = Path('docs/M5L_Q2_HELDOUT_BENCHMARK_PLAN_2026-08-27.md').read_text(encoding='utf-8')
-          for required in ('hidden-discard', 'joker', '16,384', '2026083101', '2026083137'):
-              assert required in plan
+          for required in (
+              'HUTwoRoundHiddenDiscardSubgame',
+              'HUTwoRoundJokerSubgame',
+              'uniform',
+              'hash-biased-mixed',
+              '16,384 terminal episodes',
+              'epsilon: **0.6**',
+          ):
+              assert required in plan, required
+
+          driver = Path('tools/openofc_solver/run_m5l_two_round_q2.py').read_text(encoding='utf-8')
+          for required in (
+              'RESPONSE_BUDGET = 16_384',
+              'RESPONSE_SEEDS = (2026083101, 2026083137)',
+              '"hidden-discard"',
+              '"joker"',
+              'PROFILE_RULES = ("uniform", "hash-biased-mixed")',
+          ):
+              assert required in driver, required
           print('OPENOFC_M5L_Q2_PRECONDITION=PASS')
           PY
       - name: Recheck two-round response mechanics
