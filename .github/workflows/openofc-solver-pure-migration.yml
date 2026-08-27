@@ -1,0 +1,117 @@
+name: OpenOFC strategic solver pure migration
+
+on:
+  push:
+    branches:
+      - migration/openofc-solver-code-c21c3c4
+    paths:
+      - tools/migration/materialize_openofc_solver_migration.py
+      - .github/workflows/openofc-solver-pure-migration.yml
+      - docs/migration/openofc_solver_inventory_c21c3c4.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - name: Checkout DeepOFC migration branch
+        uses: actions/checkout@v4
+        with:
+          path: deepofc
+          fetch-depth: 0
+
+      - name: Checkout exact frozen OpenOFC strategic source
+        uses: actions/checkout@v4
+        with:
+          repository: pmartins87/myoh_private
+          ref: c21c3c4f1017c83df07eb22230318a8131bf40d1
+          path: myoh
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Materialize selected files byte-for-byte
+        run: |
+          python deepofc/tools/migration/materialize_openofc_solver_migration.py \
+            --source-root myoh \
+            --target-root deepofc \
+            --inventory deepofc/docs/migration/openofc_solver_inventory_c21c3c4.json \
+            --provenance-output deepofc/docs/migration/openofc_solver_provenance_c21c3c4.json \
+            --summary-output deepofc/docs/migration/OPENOFC_SOLVER_MIGRATION_C21C3C4.md
+
+      - name: Validate provenance contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('deepofc/docs/migration/openofc_solver_provenance_c21c3c4.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
+          assert data['migration_count'] == 119
+          assert data['all_byte_identical'] is True
+          assert all(r['source_sha256'] == r['target_sha256'] for r in data['records'])
+          assert all(r['source_blob_sha1'] == r['target_blob_sha1'] for r in data['records'])
+          print('OPENOFC_SOLVER_PROVENANCE=PASS')
+          print(data['records_sha256'])
+          PY
+
+      - name: Compile migrated Python tree
+        run: python -m compileall -q deepofc/tools/openofc_solver
+
+      - name: Run M5 certification/registry core tests
+        working-directory: deepofc/tools/openofc_solver
+        run: |
+          set -euo pipefail
+          for test in \
+            test_m5c_route_certification.py \
+            test_m5d_dynamic_certified_bellman.py \
+            test_m5e_fantasy_route_certification.py \
+            test_m5f_fantasy_heldout_evidence.py \
+            test_m5g_full_registry_factory.py; do
+            echo "=== $test ==="
+            test -f "$test"
+            python "$test"
+          done
+
+      - name: Run migrated M5 test surface
+        working-directory: deepofc
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          inv = json.loads(Path('docs/migration/openofc_solver_inventory_c21c3c4.json').read_text(encoding='utf-8'))
+          tests = []
+          for item in inv['files']:
+              path = item['source_path']
+              name = Path(path).name
+              if item.get('migration_disposition') == 'migrate' and name.startswith('test_m5') and name.endswith('.py'):
+                  tests.append(name)
+          tests = sorted(set(tests))
+          root = Path('tools/openofc_solver')
+          print(f'M5_MIGRATED_TEST_COUNT={len(tests)}')
+          for name in tests:
+              print(f'=== {name} ===', flush=True)
+              subprocess.run([sys.executable, name], cwd=root, check=True)
+          print('OPENOFC_MIGRATED_M5_TEST_SURFACE=PASS')
+          PY
+
+      - name: Persist pure migration on branch
+        working-directory: deepofc
+        run: |
+          git config user.name "DeepOFC migration automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/openofc_solver docs/migration/openofc_solver_provenance_c21c3c4.json docs/migration/OPENOFC_SOLVER_MIGRATION_C21C3C4.md
+          if git diff --cached --quiet; then
+            echo "Pure migration already materialized"
+            exit 0
+          fi
+          git commit -m "DeepOFC: materialize byte-identical OpenOFC strategic solver [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
