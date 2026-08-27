@@ -1,126 +1,202 @@
 # DeepOFC solver migration plan
 
 Date: 2026-08-27
-Status: G1 inventory PASS; G2/G3 pure migration next
+Status: **G1–G4 PASS; G5/G6 PR/merge pending**
 
 ## Goal
 
-Move the recent M4/M5 strategic development from its temporary staging location in `pmartins87/myoh_private/tools/openofc_solver` into the intended authoritative solver repository `pmartins87/DeepOFC`, while preserving provenance and proving behavioral equivalence.
+Move the recent M4/M5 strategic development from its temporary staging location in `pmartins87/myoh_private/tools/openofc_solver` into the intended authoritative solver repository `pmartins87/DeepOFC`, while preserving provenance and proving behavioral equivalence before authority transfer.
 
 ## Frozen source
 
 - repository: `pmartins87/myoh_private`
 - branch: `openofc-m4v-continuation-transport`
 - commit: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
-- tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
+- solver tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
 
-No later source revision may silently enter this migration. Later changes must be recorded as separate deltas.
+No later source revision may silently enter this migration. Later strategic changes must be recorded as separate deltas in DeepOFC after authority transfer.
 
-The exact frozen tree contains architecture through M5G. The fact that the frozen HEAD subject says M5C must not be used to truncate the migration set.
+## Gate results
 
-## G1 — inventory — PASS
+### G1 — inventory / dependency closure
 
-Generated artifacts:
+#### G1 v1 — superseded after fail-closed detection
+
+The first inventory implementation computed the dependency closure for the M4U–M5G roots and then added matching tests for selected modules. It failed to recompute dependencies introduced by those newly selected tests.
+
+The first behavioral-equivalence run `33070445519` exposed this correctly:
+
+- 19/20 old-vs-new probes matched;
+- frozen-source `test_engine.py` PASS;
+- migrated-target `test_engine.py` failed with `ModuleNotFoundError: teacher_search`;
+- all other executable comparisons were identical.
+
+Interpretation: **inventory closure defect, not solver semantic divergence**. The migration remained fail-closed and no authority was transferred.
+
+#### G1 v2 — PASS
+
+The inventory algorithm was corrected to a fixed point over:
+
+1. current M4U–M5G implementation/test roots;
+2. selected Python → all project-local imports;
+3. migrated implementation/helper module → matching test when present;
+4. dependencies introduced by those newly selected tests;
+5. repeat until the selected set stops changing;
+6. include all current M4/M5 contracts;
+7. keep unrelated staging history explicitly classified as historical.
+
+Workflow run `33070689091`: **PASS**.
+
+Authoritative v2 inventory:
+
+- schema: `deepofc-openofc-solver-inventory-v2`;
+- solver-subtree files: **187**;
+- migrate: **126**;
+- historical: **61**;
+- related M4/M5 workflows: **38**;
+- role counts: benchmark 19, contract 39, helper 10, source 64, test 55;
+- files payload SHA-256: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`;
+- `teacher_search.py` explicitly selected by the corrected closure.
+
+Artifacts:
 
 - `docs/migration/openofc_solver_inventory_c21c3c4.json`
 - `docs/migration/OPENOFC_SOLVER_INVENTORY_C21C3C4.md`
 - generator: `tools/migration/build_openofc_solver_inventory.py`
-- workflow: `.github/workflows/openofc-solver-inventory.yml`
-- workflow run `33059295351`: PASS
-- materialized inventory commit: `92d43f141c1a55f65c801749503619105479c70c`
 
-Frozen inventory result:
+**G1 result: PASS.**
 
-- 152 solver-subtree files;
-- 69 current-root transitive dependency-closure files;
-- 119 files classified `migrate` after current M4/M5 contracts and tests of migrated dependencies are included;
-- 33 classified `historical`;
-- 38 related M4/M5 workflows recorded;
-- source-files payload SHA-256: `89a546aef6f367226cbaf9c6a54d886488519d88b0f1c7d07415db13df382e84`.
+### G2 — provenance map / pure copy
 
-The machine-readable inventory records source path, Git blob SHA, file SHA-256, size, role, local imports, migration disposition and reason.
+The corrected migration copies all **126** selected files byte-for-byte and preserves their exact relative path beneath `tools/openofc_solver/`. No import rename, namespace change, solver refactor or semantic edit is allowed in this gate.
 
-## G2 — destination layout
+For every migrated file the provenance record binds:
 
-For the **pure migration gate**, preserve the source relative layout exactly:
+`source repository + source commit + source path + source Git blob + source SHA-256 -> target path + target Git blob + target SHA-256`
 
-`tools/openofc_solver/...` → `tools/openofc_solver/...`
+Corrected pure-migration workflow run `33070802793`: **PASS**.
 
-This is deliberate. The staging source uses flat local imports and changing namespaces during migration would mix semantic/refactor risk with ownership transfer.
+- all 126 source/target byte identities: true;
+- materialized solver commit: `0c0ae8d77c8ca35c344f59c1515f6712b2ca1a2a`;
+- provenance canonical SHA-256: `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`;
+- inventory payload bound inside provenance: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`.
 
-After pure migration + equivalence PASS, a later dedicated refactor may move code into a cleaner package namespace with its own tests and provenance.
+Generated `__pycache__`/`.pyc` files are deleted before persistence and are not migration evidence.
 
-OpenHoldem-specific runtime integration remains in `pmartins87/myoh_private`; the migrated set is the mathematical/strategic subtree selected by the G1 inventory.
+Artifacts:
 
-## G3 — provenance-preserving pure copy
+- `docs/migration/openofc_solver_provenance_c21c3c4.json`
+- `docs/migration/OPENOFC_SOLVER_MIGRATION_C21C3C4.md`
+- materializer: `tools/migration/materialize_openofc_solver_migration.py`
 
-For every inventory entry marked `migrate`, create a target file with identical bytes at the same relative `tools/openofc_solver/...` path.
+**G2 result: PASS.**
 
-Generate a machine-readable provenance map with:
+### G3 — independent DeepOFC strategic tests
 
-`source repository + source commit + source path + source blob SHA + source SHA256 -> target path + target SHA256`
+The corrected pure-migration workflow independently validated the migrated DeepOFC tree:
 
-Pure-copy acceptance criterion:
+- Python compileall: PASS;
+- M5C/M5D/M5E/M5F/M5G core tests: PASS;
+- complete selected M5 migrated test surface: PASS;
+- `test_engine.py` regression that exposed the G1 v1 closure defect: PASS;
+- source/target provenance assertions: PASS;
+- generated bytecode hygiene: PASS.
 
-- every migrated target SHA-256 equals its source SHA-256 exactly;
-- no semantic transformation is allowed;
-- missing or extra files fail the gate;
-- historical files are not silently copied.
+Workflow run: `33070802793`.
 
-Associated M4/M5 CI should be recreated in DeepOFC only where required to validate the migrated strategic tree; workflow provenance from G1 remains available for audit.
+**G3 result: PASS.**
 
-## G4 — equivalence gate
+### G4 — deterministic old-vs-new behavioral equivalence
 
-Before transferring authority, compare frozen old and migrated new implementations on deterministic golden cases covering at least:
+A separate workflow checks out both repositories independently:
 
-- continuation-state serialization and fingerprints;
-- kernel classification;
-- continuation-aware payoff/evaluation primitives;
-- M5A fixed-policy adapters;
-- M5B current-V probe behavior under frozen seeds and budgets where practical;
-- M5C evidence canonicalization and fail-closed certificate behavior;
-- M5D exact-V route/certification behavior;
-- M5E Fantasy certification bridge behavior;
-- M5F Fantasy evidence canonicalization/metrics;
-- M5G 50-state registry identity/completeness fail-closed behavior.
+- frozen source: `myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1`;
+- migrated target: `DeepOFC` migration branch.
 
-Exact deterministic paths must match exactly. Any statistical path must use a predeclared common-seed comparison protocol.
+The comparison environment is controlled with:
 
-A first mechanical equivalence layer is identical source/target SHA-256 for every pure-copied file. Behavioral equivalence remains a separate required layer.
+- Python `3.11.16`;
+- NumPy `2.4.6`;
+- `PYTHONHASHSEED=0`;
+- single-thread OpenMP/OpenBLAS/MKL/NumExpr settings;
+- controlled temp directories;
+- Python bytecode writes disabled.
 
-## G5 — independent CI
+Each predeclared test must independently exit zero on source and target **and** produce byte-identical normalized stdout/stderr.
 
-DeepOFC must be able to run the migrated strategic tests without depending on an OpenHoldem checkout.
+Suite coverage:
 
-At minimum:
+- engine/reference evaluation;
+- HU continuation;
+- M4U continuation boundary;
+- M4V targets;
+- M4W outcome model;
+- M4X robust support;
+- M4Y Bellman trace;
+- M4Z outer Bellman;
+- M5A component + Normal/Fantasy adapters;
+- M5B Fantasy self-play probe;
+- M5C general + Normal route certification;
+- M5D dynamic certified Bellman;
+- M5E Fantasy route certification;
+- M5F Fantasy held-out evidence;
+- M5G full registry factory;
+- Normal×Fantasy kernel;
+- Fantasy×Fantasy kernel and payoff.
 
-1. execute the migrated unit/contract tests selected by the G1 inventory;
-2. execute deterministic migration golden/equivalence checks;
-3. fail closed on any missing dependency, source-hash divergence or route/certificate semantic difference.
+Workflow run `33070910873`: **PASS**.
 
-Cross-repository checks may remain as additional evidence, but passing only in `myoh_private` is insufficient after authority transfer.
+- source PASS: **20/20**;
+- target PASS: **20/20**;
+- normalized transcript equality: **20/20**;
+- equivalence report SHA-256: `935162877ad8f7821fa106ba7cd2f5bfc588a60f2273c34443eb805926e93664`;
+- gate-start target commit: `dd5839c364e7a9d18b97ab580c1ad38d9814ac9f`;
+- persisted equivalence evidence commit: `d45a9b77df8d75c1feaf45c8354ea152cd311355`.
 
-## G6 — authority transfer
+Artifacts:
 
-Only after inventory, provenance, pure-copy hash equality, behavioral equivalence and independent CI pass:
+- `docs/migration/openofc_solver_equivalence_c21c3c4.json`
+- `docs/migration/OPENOFC_SOLVER_EQUIVALENCE_C21C3C4.md`
+- runner: `tools/migration/run_openofc_solver_equivalence.py`
+- workflow: `.github/workflows/openofc-solver-equivalence.yml`
 
-1. update `docs/VERSION_MANIFEST.md` so M4/M5 strategic authority points to DeepOFC;
-2. update `docs/CURRENT_STATE.md` and `docs/HANDOFF.md`;
+**G4 result: PASS.**
+
+### G5 — PR-level DeepOFC CI
+
+Next action:
+
+1. open a PR from `migration/openofc-solver-code-c21c3c4` to `main`;
+2. require the repository's canonical PR CI to pass against the complete migration change;
+3. inspect any merge conflicts or unexpected changed files before authority transfer.
+
+**G5 result: PENDING PR CI.**
+
+### G6 — authority transfer
+
+Only after G5 PASS:
+
+1. merge the migration/equivalence PR into `DeepOFC/main`;
+2. interpret `docs/VERSION_MANIFEST.md` on main as closing the temporary strategic staging exception;
 3. freeze `myoh_private@c21c3c4...` as historical strategic provenance;
-4. continue new strategic development in DeepOFC;
-5. let runtime consume explicit versioned/exported policy artifacts instead of becoming the only owner of strategic source.
+4. perform future strategic development in DeepOFC;
+5. export explicitly versioned policy artifacts to the runtime repository rather than developing solver authority there.
 
-## Strategic work after/beside migration
+**G6 result: PENDING MERGE.**
 
-Migration does not create strategic evidence. The real strategy gate remains:
+## Strategic meaning of migration completion
 
-1. independent held-out Normal×Normal evidence;
-2. independent held-out Normal×Fantasy evidence;
-3. Fantasy×Fantasy support-gap + deviation + held-out model/action-value evidence;
-4. separately justified thresholds;
-5. 50/50 state-local real-certified exact-V routes;
-6. M5G real-ready registry;
-7. first REAL dynamic M4Z Bellman trace.
+These gates establish that the migrated DeepOFC solver tree is the same strategic implementation as the frozen source for the declared migration surface.
+
+They do **not** establish that the strategies are optimal, exploitability-bounded or production-ready.
+
+The exact frozen tree contains architecture through M5G, but M5G is a 50-state registry/certification factory. A REAL Bellman surface still requires:
+
+- 2 Normal × Normal real-certified exact-V routes;
+- 16 Normal × Fantasy real-certified exact-V routes;
+- 32 Fantasy × Fantasy real-certified exact-V routes.
+
+After G6, the next substantive strategic work is independent held-out evidence and a defensible threshold protocol, followed by state-local certification and only then the first REAL dynamic M4Z Bellman trace.
 
 ## Non-goals
 
@@ -129,26 +205,27 @@ The migration must not simultaneously:
 - redesign M5C–M5G;
 - tune strategic thresholds;
 - change game/Joker semantics;
-- improve exploitability;
 - perform broad solver refactors;
-- rename imports/namespaces for style.
+- claim strategic certification from migration identity.
 
-Those changes belong in later, separately validated commits.
+Those changes belong in later, separately validated DeepOFC commits.
 
 ## Failure rule
 
-If hash or behavioral equivalence fails, the frozen staging source remains authoritative for the affected component until the divergence is explained and the migration gate passes.
+If any remaining PR-level equivalence/CI check fails, the frozen staging source remains fallback authority for the affected component until the divergence is explained. Do not waive a migration gate merely to complete repository consolidation.
 
-## Completion record
+## Completion record checklist
 
-The final migration result must record:
-
-- frozen source commit/tree;
-- inventory hash;
-- provenance-map hash;
-- target commit;
-- validation/CI runs;
-- pure-copy SHA equality result;
-- behavioral equivalence results;
-- any later approved transformations;
-- final authority decision.
+- [x] frozen source commit recorded;
+- [x] source solver tree recorded;
+- [x] corrected fixed-point inventory generated;
+- [x] inventory payload hash recorded;
+- [x] source→target provenance map generated;
+- [x] 126/126 byte identity proven;
+- [x] independent migrated strategic tests PASS;
+- [x] 20/20 deterministic old-vs-new behavioral equivalence PASS;
+- [x] equivalence report hash recorded;
+- [ ] PR-level canonical DeepOFC CI PASS;
+- [ ] migration PR merged;
+- [ ] final main merge commit recorded;
+- [ ] strategic authority formally closed onto DeepOFC main.
