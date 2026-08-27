@@ -45,6 +45,12 @@ def _meta(count: int) -> HUContinuationState:
     raise ValueError("microprobe supports only F14 and F17")
 
 
+def _action_sort_key(action) -> tuple[object, ...]:
+    """Stable ordering for engine.Action, which intentionally has no key()."""
+    discard = -1 if action.discard_index is None else int(action.discard_index)
+    return (tuple(action.placements), discard)
+
+
 def _deterministic_terminal(count: int) -> NormalFantasyState:
     plan = sample_normal_fantasy_plan(random.Random(SEEDS[count]), count)
     state = NormalFantasyState(current_meta=_meta(count), plan=plan)
@@ -52,7 +58,7 @@ def _deterministic_terminal(count: int) -> NormalFantasyState:
         actions = legal_normal_actions(state)
         if not actions:
             raise RuntimeError("microprobe reached a nonterminal state without legal actions")
-        action = sorted(actions, key=lambda candidate: candidate.key())[0]
+        action = sorted(actions, key=_action_sort_key)[0]
         state = child_normal_state(state, action)
     return state
 
