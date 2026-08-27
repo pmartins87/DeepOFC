@@ -1,0 +1,72 @@
+name: OpenOFC M5Q external-sampling unbiasedness
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - deepofc/hu_two_round.py
+      - deepofc/hu_two_round_cfr.py
+      - deepofc/hu_two_round_joker.py
+      - deepofc/hu_two_round_mccfr.py
+      - tools/openofc_solver/M5Q_EXTERNAL_SAMPLING_UNBIASEDNESS_CONTRACT.md
+      - tools/openofc_solver/m5q_external_sampling_unbiasedness.py
+      - tools/openofc_solver/run_m5q_external_sampling_unbiasedness.py
+      - tools/openofc_solver/test_m5q_external_sampling_unbiasedness.py
+      - .github/workflows/openofc-m5q-external-sampling-unbiasedness.yml
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5Q instrumentation mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_external_sampling_unbiasedness.py
+      - name: Run frozen M5Q sampled-regret unbiasedness pilot
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_external_sampling_unbiasedness.py
+      - name: Validate M5Q authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('artifacts/m5q_external_sampling_unbiasedness.json').read_text(encoding='utf-8'))
+          assert data['schema'] == 'openofc-m5q-sampled-regret-unbiasedness-pilot-v1'
+          assert data['authority'] == 'EXTERNAL_SAMPLING_UNBIASEDNESS_PILOT_NOT_CERTIFICATION'
+          assert data['diagnostic_authority'] == 'EXTERNAL_SAMPLING_REGRET_UNBIASEDNESS_DIAGNOSTIC_NOT_CERTIFICATION'
+          assert data['game_family'] == 'joker'
+          assert data['probes_per_profile'] == 4096
+          assert data['projection_count'] == 8
+          assert data['standard_error_multiplier'] == 6.0
+          assert data['summary']['all_profile_probability_surfaces_equal'] is True
+          assert data['summary']['all_projections_pass'] is True
+          assert data['summary']['certification_eligible'] is False
+          assert data['summary']['concentration_certificate_emitted'] is False
+          assert data['summary']['real_routes_certified'] == 0
+          assert all(row['certification_eligible'] is False for row in data['rows'])
+          print('OPENOFC_M5Q_UNBIASEDNESS_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-external-sampling-unbiasedness
+          path: artifacts/m5q_external_sampling_unbiasedness.json
+          if-no-files-found: error
+          retention-days: 14
