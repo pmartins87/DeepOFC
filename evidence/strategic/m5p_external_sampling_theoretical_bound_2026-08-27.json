@@ -1,0 +1,68 @@
+{
+  "authority": "CLASSICAL_EXTERNAL_SAMPLING_BOUND_FEASIBILITY_PILOT_NOT_CERTIFICATION",
+  "joint_confidence": 0.95,
+  "overall_failure_probability": 0.05,
+  "probe_iterations": 1000000,
+  "rows": [
+    {
+      "bound_authority": "CLASSICAL_EXTERNAL_SAMPLING_HIGH_PROBABILITY_BOUND_FEASIBILITY_ONLY",
+      "exploitability_coefficient_per_unit_utility_range": 38269.165768766885,
+      "family_id": "joker",
+      "joint_confidence": 0.95,
+      "per_player_failure_probability": 0.025,
+      "player0_structure": {"infosets": 4892, "largest_prefix_group": 270, "m_value": 301.4270353022821, "own_action_sequences": 163, "player": 0, "prefix_groups": 19},
+      "player1_structure": {"infosets": 4892, "largest_prefix_group": 270, "m_value": 301.4270353022821, "own_action_sequences": 163, "player": 1, "prefix_groups": 19},
+      "probe_iterations": 1000000,
+      "production_certification_eligible": false,
+      "raw_206_probe_exploitability_upper_bound": 7883.448148365978,
+      "required_iterations": {
+        "project_raw_206": {"0.05": 24859501883189984, "0.15": 2762166875909999, "0.25": 994380075327600, "1.0": 62148754707975},
+        "unit": {"0.05": 585811619455, "0.15": 65090179940, "0.25": 23432464779, "1.0": 1464529049}
+      },
+      "unit_range_probe_exploitability_upper_bound": 38.26916576876689
+    },
+    {
+      "bound_authority": "CLASSICAL_EXTERNAL_SAMPLING_HIGH_PROBABILITY_BOUND_FEASIBILITY_ONLY",
+      "exploitability_coefficient_per_unit_utility_range": 257687.3748895559,
+      "family_id": "hidden-discard",
+      "joint_confidence": 0.95,
+      "per_player_failure_probability": 0.025,
+      "player0_structure": {"infosets": 33252, "largest_prefix_group": 790, "m_value": 1188.9767044688751, "own_action_sequences": 475, "player": 0, "prefix_groups": 43},
+      "player1_structure": {"infosets": 33252, "largest_prefix_group": 790, "m_value": 1188.9767044688751, "own_action_sequences": 475, "player": 1, "prefix_groups": 43},
+      "probe_iterations": 1000000,
+      "production_certification_eligible": false,
+      "raw_206_probe_exploitability_upper_bound": 53083.59922724852,
+      "required_iterations": {
+        "project_raw_206": {"0.05": 1127147402767655808, "0.15": 125238600307517328, "0.25": 45085896110706232, "1.0": 2817868506919140},
+        "unit": {"0.05": 26561113270989, "0.15": 2951234807888, "0.25": 1062444530840, "1.0": 66402783178}
+      },
+      "unit_range_probe_exploitability_upper_bound": 257.6873748895559
+    }
+  ],
+  "schema": "openofc-m5p-external-sampling-theorem-feasibility-pilot-v1",
+  "sha256": "e0b730ff5c021a6810b2712a21ad0936a5dd305f6ea7c5fb61253443b2830930",
+  "source_manifest": {
+    "files": [
+      {"path": "deepofc/hu_two_round.py", "sha256": "a876c8fdfecc78c2670847a3c8b23f4a3ce4395845eae32a3bd7fd9082c657c3"},
+      {"path": "deepofc/hu_two_round_hidden_discard.py", "sha256": "10ecfea1a9d80a6140b81fd00ec38b361ffad7a02cf0b91f664c2ef97ccd2467"},
+      {"path": "deepofc/hu_two_round_joker.py", "sha256": "c0c3c8f91b957058cba21be932723e430289925bc2600afbf1deaf18704d3c84"},
+      {"path": "deepofc/scoring.py", "sha256": "03750680fd4e5fcc434d84394907c458833b9b198d60b49eea13c05fd13431c2"},
+      {"path": "tools/openofc_solver/M5P_EXTERNAL_SAMPLING_THEORETICAL_BOUND_CONTRACT.md", "sha256": "983290ee19b46bd979b1ed58aa72d549eff92fa6156efbf1f23376d0ee091813"},
+      {"path": "tools/openofc_solver/m5p_external_sampling_theoretical_bound.py", "sha256": "52aec8c6d980f83b7bc4e185794352c0d5ae9ee8e6ab5d2b2102fde065eb77e8"},
+      {"path": "tools/openofc_solver/run_m5p_external_sampling_theoretical_bound.py", "sha256": "c7c1338be356b8b43b0248c13c898e434b1e0d4fa0146439ba70d8e14f08f661"},
+      {"path": "tools/openofc_solver/test_m5p_external_sampling_theoretical_bound.py", "sha256": "0bacc54abdc7638ac4c905a7673098232b75ef77b9038182246fdfecd120f969"}
+    ],
+    "sha256": "0bca5dd37e8856d2f88ee29c61ae17ee19591c0651ab51114511a3f296609679"
+  },
+  "summary": {
+    "data_dependent_bound_tested": false,
+    "families": ["joker", "hidden-discard"],
+    "max_raw_206_iterations_for_0_15": 125238600307517328,
+    "max_unit_range_iterations_for_0_15": 2951234807888,
+    "min_unit_range_iterations_for_0_15": 65090179940,
+    "production_certification_eligible": false,
+    "rows": 2
+  },
+  "targets": [1.0, 0.25, 0.15, 0.05],
+  "utility_ranges": [1.0, 206.0]
+}
