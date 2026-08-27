@@ -1,75 +1,121 @@
 # DeepOFC version and provenance manifest
 
-Manifest version: `2026-08-27.2`
-Status: `TRANSITIONAL_CONSOLIDATION`
+Manifest version: `2026-08-27.3`
+Status: `STRATEGIC_MIGRATION_EQUIVALENCE_PASS`
 
-This file answers a simple question with immutable references: **which repository/ref currently owns each part of the project?**
-
-The manifest remains transitional until the M4/M5 solver staging tree has been migrated from `myoh_private` into `DeepOFC` and equivalence-certified.
+This file answers a simple question with immutable references: **which repository/ref owns each part of the project, and what evidence supports that authority?**
 
 ## Canonical repositories
 
-| Component | Repository | Intended canonical branch | Current authority |
+| Component | Repository | Canonical branch/ref | Authority |
 |---|---|---|---|
 | Project governance / roadmap / handoff | `pmartins87/DeepOFC` | `main` | DeepOFC |
-| Rules / model / scoring / simulator / reference solver | `pmartins87/DeepOFC` | `main` | DeepOFC |
-| M4/M5 strategic staging | `pmartins87/myoh_private` | `openofc-m4v-continuation-transport` | temporary exception until migration/equivalence PASS |
+| Rules / model / scoring / simulator / strategic solver | `pmartins87/DeepOFC` | `main` after the migration/equivalence change is merged | DeepOFC strategic authority transfer is evidenced and ready |
+| Frozen M4/M5 strategic provenance | `pmartins87/myoh_private` | `c21c3c4f1017c83df07eb22230318a8131bf40d1` | historical immutable provenance |
 | OpenHoldem runtime integration | `pmartins87/myoh_private` | `deepofc` plus explicitly named experiment branches | myoh_private |
 | Runtime field package | `pmartins87/myoh_private` | must be source-bound | unresolved as one canonical latest package |
+
+The migration/equivalence branch is `migration/openofc-solver-code-c21c3c4`. This manifest is part of that authority-transfer change: once present on `DeepOFC/main`, the former temporary M4/M5 strategic staging exception is closed.
 
 ## Frozen strategic source
 
 - repository: `pmartins87/myoh_private`
 - branch: `openofc-m4v-continuation-transport`
-- frozen commit: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
-- frozen tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
-- HEAD message: `OpenOFC M5C: add staging certification gate`
+- commit: `c21c3c4f1017c83df07eb22230318a8131bf40d1`
+- solver tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
+- HEAD subject: `OpenOFC M5C: add staging certification gate`
+- M5G anchor: `a7befe2a47b456d4f08a240cd7968e6ec38cb150`
 
-**Important:** the HEAD message does not identify the architectural frontier. The exact tree at that commit contains M5D, M5E, M5F and M5G implementations/contracts/tests that were committed earlier and then followed by additional M5C documentation/workflow commits.
+The exact frozen tree contains architecture through **M5G**. The HEAD subject is not the architectural frontier.
 
-## Strategic architecture references
+## Strategic architecture anchors
 
-### M5B — train at current V
+### M5B
 
-- anchor commit: `008307c972582df978a7ee7db6717bf8cc1fa1db`
-- message: `OpenOFC M5B: add train-at-current-V normal kernel probes`
+- commit: `008307c972582df978a7ee7db6717bf8cc1fa1db`
 - principal file: `tools/openofc_solver/m5b_adaptive_normal_oracles.py`
-- authority remains probe/not-certified until held-out strategic criteria pass.
+- interpretation: train-at-current-V policy-improvement probe; not real-certified policy.
 
-### M5C — route certification firewall
+### M5C
 
 - contract: `tools/openofc_solver/M5C_ROUTE_CERTIFICATION_CONTRACT.md`
-- dedicated workflow: `.github/workflows/openofc-m5c-route-certification.yml`
-- dedicated successful run: `33044932517`
-- meaning: firewall implementation PASS; strategic routes themselves remain uncertified.
+- successful dedicated run: `33044932517`
+- interpretation: certification-firewall implementation PASS only.
 
-### M5D — dynamic exact-V certification
+### M5D–M5G
 
-- contract: `tools/openofc_solver/M5D_DYNAMIC_CERTIFIED_BELLMAN_CONTRACT.md`
-- implementation: `tools/openofc_solver/m5d_dynamic_certified_bellman.py`
-- meaning: per-iterate Bellman routing remains fail-closed unless routes are certified for the actual continuation vector.
+The frozen tree contains:
 
-### M5E — Fantasy route certification
+- M5D dynamic exact-V certified Bellman orchestration;
+- M5E Fantasy×Fantasy certification bridge;
+- M5F Fantasy×Fantasy held-out evidence producer;
+- M5G full 50-state registry factory.
 
-- contract: `tools/openofc_solver/M5E_FANTASY_ROUTE_CERTIFICATION_CONTRACT.md`
-- implementation: `tools/openofc_solver/m5e_fantasy_route_certification.py`
-- meaning: Fantasy×Fantasy routes require their additional support-gap/model-error evidence; synthetic evidence cannot promote a real route.
+M5G requires already certified routes and cannot manufacture real evidence, choose production thresholds or certify the complete game by itself.
 
-### M5F — Fantasy held-out evidence producer
+## Corrected strategic migration identity
 
-- contract: `tools/openofc_solver/M5F_FANTASY_HELDOUT_EVIDENCE_CONTRACT.md`
-- implementation: `tools/openofc_solver/m5f_fantasy_heldout_evidence.py`
-- meaning: combines the required Fantasy evidence components but does not by itself make evidence production-ready.
+### G1 v1 — superseded
 
-### M5G — full authoritative registry factory
+The first inventory selection was not dependency-closed after matching tests were added. The first behavioral-equivalence run `33070445519` passed **19/20** probes and exposed the missing `test_engine.py -> teacher_search.py` dependency on the target side. Frozen source behavior remained green. This is recorded as an inventory-policy defect, not a semantic divergence.
 
-- anchor commit: `a7befe2a47b456d4f08a240cd7968e6ec38cb150`
-- message: `OpenOFC M5G: add full authoritative registry factory`
-- contract: `tools/openofc_solver/M5G_FULL_REGISTRY_FACTORY_CONTRACT.md`
-- implementation: `tools/openofc_solver/m5g_full_registry_factory.py`
-- meaning: final architectural firewall assembling the complete 50-state registry from already real-certified exact-V routes. It does not create strategic evidence or tune thresholds.
+### G1 v2 — fixed-point inventory
+
+Workflow run `33070689091`: **PASS**.
+
+Frozen inventory:
+
+- schema: `deepofc-openofc-solver-inventory-v2`;
+- solver-subtree files: **187**;
+- migrate: **126**;
+- historical: **61**;
+- related M4/M5 workflows: **38**;
+- roles: benchmark 19, contract 39, helper 10, source 64, test 55;
+- files payload SHA-256: `06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007`.
+
+Selection is a fixed point over local imports and matching tests. `teacher_search.py` is explicitly inside the corrected selected set.
+
+### G2/G3 — pure migration
+
+Corrected pure migration run `33070802793`: **PASS**.
+
+- migrated files: **126**;
+- all source/target files byte-identical: **true**;
+- provenance canonical SHA-256: `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`;
+- materialized solver commit: `0c0ae8d77c8ca35c344f59c1515f6712b2ca1a2a`;
+- generated Python bytecode is removed before persistence and is not migration evidence.
+
+Primary artifacts:
+
+- `docs/migration/openofc_solver_provenance_c21c3c4.json`
+- `docs/migration/OPENOFC_SOLVER_MIGRATION_C21C3C4.md`
+
+### G4 — old-vs-new behavioral equivalence
+
+Workflow run `33070910873`: **PASS**.
+
+- suite: `openofc-migration-equivalence-2026-08-27-v1`;
+- Python: `3.11.16`;
+- NumPy: `2.4.6`;
+- `PYTHONHASHSEED=0` and single-thread numerical-library controls;
+- tests: **20**;
+- frozen source PASS: **20/20**;
+- migrated target PASS: **20/20**;
+- normalized stdout/stderr equality: **20/20**;
+- equivalence report SHA-256: `935162877ad8f7821fa106ba7cd2f5bfc588a60f2273c34443eb805926e93664`;
+- gate-start target commit: `dd5839c364e7a9d18b97ab580c1ad38d9814ac9f`;
+- persisted equivalence evidence commit: `d45a9b77df8d75c1feaf45c8354ea152cd311355`.
+
+Primary artifacts:
+
+- `docs/migration/openofc_solver_equivalence_c21c3c4.json`
+- `docs/migration/OPENOFC_SOLVER_EQUIVALENCE_C21C3C4.md`
+
+The 20-probe suite covers engine behavior, HU continuation, M4U–M4Z, M5A–M5G and Normal×Fantasy/Fantasy×Fantasy kernel/payoff paths.
 
 ## Strategic certification identity rule
+
+Migration equivalence establishes source identity/behavior across repositories. It does **not** establish strategic optimality.
 
 A complete real Bellman surface still requires **50 state-local real-certified exact-V routes**:
 
@@ -77,27 +123,17 @@ A complete real Bellman surface still requires **50 state-local real-certified e
 - 16 Normal × Fantasy;
 - 32 Fantasy × Fantasy.
 
-Architecture through M5G does not waive these requirements. A REAL dynamic M4Z trace remains blocked until the complete real-ready registry exists.
+Required evidence includes held-out seeds/samples, value standard error, unilateral-deviation gain, and for Fantasy × Fantasy the exact-teacher support gap plus held-out M4W model/action-value error.
 
-## DeepOFC governance references
+The next strategic authority after repository transfer is therefore the **evidence/certification protocol**, not an unconditional production policy.
 
-### Consolidation baseline
+## OpenHoldem runtime references
 
-- pre-consolidation main: `b3bd48245749e9b9128d90d433c063b2b6444f08`
-- consolidation PR: `#11`
-- consolidation main commit: `a90cf7a3713c1a1e5fd402a4cbd29a38c00ebaf7`
+### Canonical integration baseline
 
-### G1 frozen solver inventory
-
-- branch: `migration/openofc-solver-inventory-c21c3c4`
-- generated inventory commit: `92d43f141c1a55f65c801749503619105479c70c`
-- workflow run: `33059295351` — PASS
-- machine-readable inventory: `docs/migration/openofc_solver_inventory_c21c3c4.json`
-- human summary: `docs/migration/OPENOFC_SOLVER_INVENTORY_C21C3C4.md`
-- source-files payload SHA-256: `89a546aef6f367226cbaf9c6a54d886488519d88b0f1c7d07415db13df382e84`
-- result: 152 staging files inventoried; 119 marked `migrate`; 33 preserved as `historical`; 38 related M4/M5 workflows recorded.
-
-This is a provenance/ownership gate only. Strategic authority stays in the frozen staging source until migration + equivalence PASS.
+- repository: `pmartins87/myoh_private`
+- branch: `deepofc`
+- observed consolidation head: `705362437d1eb2fef582f48f9c64966b3795b76f`
 
 ### Runtime-continuity reference checkpoint
 
@@ -107,30 +143,9 @@ This is a provenance/ownership gate only. Strategic authority stays in the froze
 - status document: `docs/V54_STAGE1_STATUS.md`
 - field gate: `docs/V54_FIELD_GATE.md`
 
-## OpenHoldem runtime references
+### Preserved runtime experiment lineage
 
-### Canonical integration baseline
-
-- repository: `pmartins87/myoh_private`
-- branch: `deepofc`
-- head observed at consolidation: `705362437d1eb2fef582f48f9c64966b3795b76f`
-
-### Preserved later runtime lineage
-
-The repository preserves later runtime branches/tooling, including v5.4/v5.43/v5.44 lineage and later v5.8.x-labelled source tooling. Those sources are durable evidence, but their labels alone do not define one canonical field package.
-
-Examples of preserved runtime experiment branches include:
-
-- `openofc-v54-runtime-continuity`
-- `openofc-v542b-partial-reconnect`
-- `openofc-v542c-dealer-recovery`
-- `openofc-v543-confirm-gate`
-- `openofc-v543-field-resilience`
-- `openofc-v543-fieldfix-tablemap-contract5`
-- `openofc-v543-generic-fantasy`
-- `openofc-v543-joker-execution-gate`
-- `openofc-v543-joker-pixel-gate*`
-- `openofc-v544-field-recovery` at observed head `382bb569dc787808042c6ac51a833d4c03c8f752`
+`myoh_private` contains later `openofc-v54*`, `openofc-v542*`, `openofc-v543*`, `openofc-v544*` and later v5.8.x-labelled experimental/runtime work. Branch names and chat labels remain evidence labels, not canonical field-package identities by themselves.
 
 ## Field-build identity rule
 
@@ -146,25 +161,13 @@ A field package is canonical only when one immutable manifest binds at least:
 - applicable runtime safety-gate status;
 - date and provenance.
 
-Until such a manifest exists, chat labels such as `v5.8.0` are useful test-session names but **not canonical source/package versions**.
-
-## Migration authority rule
-
-During solver migration:
-
-1. frozen source remains `myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1`;
-2. the checked-in G1 inventory is the authoritative source-set/provenance input;
-3. migrated files must carry an old-path/source-blob/source-SHA256 → target-path/target-SHA256 map;
-4. pure migration must make no semantic changes;
-5. old and new implementations must produce matching deterministic golden behavior on the migration gate;
-6. only after equivalence PASS may this manifest switch M4/M5 authority to `pmartins87/DeepOFC`.
-
 ## Update discipline
 
 Update this manifest whenever any of the following changes:
 
 - canonical solver head;
 - production-candidate policy;
+- route-certification/evidence authority;
 - runtime source head used for a package;
 - tablemap/recognizer identity;
 - milestone certification authority;

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - migration/openofc-solver-inventory-c21c3c4
+      - migration/openofc-solver-code-c21c3c4
     paths:
       - tools/migration/build_openofc_solver_inventory.py
       - .github/workflows/openofc-solver-inventory.yml
@@ -47,9 +48,12 @@ jobs:
           from pathlib import Path
           p = Path('deepofc/docs/migration/openofc_solver_inventory_c21c3c4.json')
           data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['schema'] == 'deepofc-openofc-solver-inventory-v2'
           assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
           assert data['summary']['solver_subtree_file_count'] > 0
+          assert data['policy']['dependency_closure_fixed_point'] is True
           assert data['observations']['m5g_present'] is True
+          assert data['observations']['teacher_search_selected'] is True
           print(json.dumps(data['summary'], indent=2, sort_keys=True))
           PY
 
@@ -63,5 +67,5 @@ jobs:
             echo "Inventory already up to date"
             exit 0
           fi
-          git commit -m "DeepOFC: materialize frozen OpenOFC solver inventory [skip ci]"
+          git commit -m "DeepOFC: materialize corrected fixed-point solver inventory [skip ci]"
           git push origin HEAD:${GITHUB_REF_NAME}
