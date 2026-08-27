@@ -46,7 +46,7 @@ The project should **stop spending compute on the explicit-exploration + global-
 
 This does not mean exploration is strategically bad. It means that using a worst-terminal-history global sampling floor inside this theorem is computationally unusable even under the deliberately favorable zero-variance assumption and even at 100% uniform exploration.
 
-The next certification research gate should therefore target a mechanism that does not divide by a single global minimum terminal-history probability. The leading direction is a support-free/data-dependent martingale or confidence-sequence construction, validated first on exact reduced games before any claim is transferred to the full solver.
+The next certification research gate is the **support-free martingale prerequisite audit**: before importing any confidence-sequence formula, establish on exact reduced games which sampled regret quantities are unbiased, what their per-iteration increment envelope is, how predictable variance can be computed or upper-bounded, and whether the required reach-weighted average strategy exists with the exact semantics required by the regret-to-exploitability theorem. Only after those prerequisites are machine-checked may a Freedman/empirical-Bernstein/confidence-sequence certificate be instantiated.
 
 ## Authority firewall
 
@@ -54,4 +54,5 @@ The next certification research gate should therefore target a mechanism that do
 - no training-policy change is authorized by this result;
 - no empirical variance is being treated as a certificate;
 - no post-hoc epsilon is selected;
+- no support-free concentration theorem is assumed merely because the global-delta route failed;
 - REAL route count remains `0/50` until a route passes the complete final certification contract.
