@@ -35,6 +35,14 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Use frozen strategic Python runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install frozen strategic test dependency
+        run: python -m pip install numpy
+
       - name: Materialize selected files byte-for-byte
         run: |
           python deepofc/tools/migration/materialize_openofc_solver_migration.py \
