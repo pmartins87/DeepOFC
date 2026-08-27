@@ -1,0 +1,70 @@
+name: OpenOFC M5M Normal-Normal pilot
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - tools/openofc_solver/run_m5m_normal_normal_pilot.py
+      - tools/openofc_solver/m5m_generalized_response_screening.py
+      - tools/openofc_solver/M5M_GENERALIZED_RESPONSE_SCREENING_CONTRACT.md
+      - tools/openofc_solver/test_m5m_generalized_response_screening.py
+      - .github/workflows/openofc-m5m-normal-normal-pilot.yml
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Recheck M5M firewall before pilot work
+        run: |
+          PYTHONPATH=tools/openofc_solver \
+            python tools/openofc_solver/test_m5m_generalized_response_screening.py
+      - name: Run M5M two-state generalized-response pilot
+        run: |
+          PYTHONPATH=tools/openofc_solver \
+            python tools/openofc_solver/run_m5m_normal_normal_pilot.py
+      - name: Validate pilot remains screening-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path('artifacts/m5m_normal_normal_pilot.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['authority'] == 'GENERALIZED_PAIRED_RESPONSE_PILOT_NOT_CERTIFICATION'
+          assert data['summary']['routes_screened'] == 2
+          assert data['summary']['states'] == ['B0:P0F0:P1F0', 'B1:P0F0:P1F0']
+          assert data['summary']['ready_for_real_bellman'] == 0
+          assert data['summary']['certification_claimed'] is False
+          assert len(data['heldout_seeds']) == 4
+          for row in data['routes']:
+              screen = row['m5m_screening']
+              assert screen['authority'] == 'GENERALIZED_PAIRED_RESPONSE_SCREENING_ONLY'
+              assert screen['certification_eligible'] is False
+              assert len(screen['paired_seed_metrics']) == 4
+              assert row['promotion_allowed'] is False
+              assert row['m5c_evidence']['evidence_kind'] == 'HELD_OUT_SCREENING_ONLY'
+              assert row['m5h_report']['promotion_blocked'] is True
+          print('OPENOFC_M5M_PILOT_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5m-normal-normal-pilot
+          path: artifacts/m5m_normal_normal_pilot.json
+          if-no-files-found: error
+          retention-days: 14
