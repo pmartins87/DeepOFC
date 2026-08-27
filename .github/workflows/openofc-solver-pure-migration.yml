@@ -60,8 +60,8 @@ jobs:
           p = Path('deepofc/docs/migration/openofc_solver_provenance_c21c3c4.json')
           data = json.loads(p.read_text(encoding='utf-8'))
           assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
-          assert data['inventory_files_payload_sha256'] == 'a0e75d22e17d90b98881d324b2721f7c20276a3b9df83a2a7147f24cd9c53e18'
-          assert data['migration_count'] == 123
+          assert data['inventory_files_payload_sha256'] == '06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007'
+          assert data['migration_count'] == 126
           assert data['all_byte_identical'] is True
           assert all(r['source_sha256'] == r['target_sha256'] for r in data['records'])
           assert all(r['source_blob_sha1'] == r['target_blob_sha1'] for r in data['records'])
@@ -112,6 +112,10 @@ jobs:
           print('OPENOFC_MIGRATED_M5_TEST_SURFACE=PASS')
           PY
 
+      - name: Run engine regression that exposed G1 v1 closure gap
+        working-directory: deepofc/tools/openofc_solver
+        run: python test_engine.py
+
       - name: Remove generated Python bytecode
         run: |
           find deepofc/tools/openofc_solver -type d -name __pycache__ -prune -exec rm -rf {} +
@@ -131,5 +135,5 @@ jobs:
             echo "Pure migration already materialized"
             exit 0
           fi
-          git commit -m "DeepOFC: materialize byte-identical OpenOFC strategic solver [skip ci]"
+          git commit -m "DeepOFC: materialize corrected byte-identical solver closure [skip ci]"
           git push origin HEAD:${GITHUB_REF_NAME}
