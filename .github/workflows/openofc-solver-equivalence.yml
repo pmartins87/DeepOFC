@@ -55,12 +55,17 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('docs/migration/openofc_solver_provenance_c21c3c4.json')
-          data = json.loads(p.read_text(encoding='utf-8'))
-          assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
-          assert data['migration_count'] == 123
-          assert data['all_byte_identical'] is True
-          print('OPENOFC_SOLVER_EQUIVALENCE_PRECONDITION=PASS')
+          provenance = json.loads(Path('docs/migration/openofc_solver_provenance_c21c3c4.json').read_text(encoding='utf-8'))
+          inventory = json.loads(Path('docs/migration/openofc_solver_inventory_c21c3c4.json').read_text(encoding='utf-8'))
+          expected = sum(1 for row in inventory['files'] if row.get('migration_disposition') == 'migrate')
+          assert inventory['schema'] == 'deepofc-openofc-solver-inventory-v2'
+          assert inventory['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
+          assert expected == 126
+          assert provenance['source_commit'] == inventory['source_commit']
+          assert provenance['inventory_files_payload_sha256'] == inventory['summary']['files_payload_sha256']
+          assert provenance['migration_count'] == expected
+          assert provenance['all_byte_identical'] is True
+          print(f'OPENOFC_SOLVER_EQUIVALENCE_PRECONDITION=PASS count={expected}')
           PY
           if git ls-files 'tools/openofc_solver/**' | grep -E '(^|/)__pycache__/|\.pyc$'; then
             echo 'tracked generated Python bytecode found in solver migration tree' >&2
