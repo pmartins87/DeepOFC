@@ -16,8 +16,8 @@ from pathlib import Path
 SCHEMA = "deepofc-openofc-solver-provenance-map-v1"
 EXPECTED_SOURCE_REPO = "pmartins87/myoh_private"
 EXPECTED_SOURCE_COMMIT = "c21c3c4f1017c83df07eb22230318a8131bf40d1"
-EXPECTED_FILES_PAYLOAD_SHA256 = "a0e75d22e17d90b98881d324b2721f7c20276a3b9df83a2a7147f24cd9c53e18"
-EXPECTED_MIGRATE_COUNT = 123
+EXPECTED_FILES_PAYLOAD_SHA256 = "06df84fa80c6bf869125ec858551b84c00895b4230c07079aa0b20eaa8b8c007"
+EXPECTED_MIGRATE_COUNT = 126
 PREFIX = "tools/openofc_solver/"
 
 
@@ -145,7 +145,7 @@ def main() -> None:
     for rec in records:
         role = str(rec.get("role"))
         roles[role] = roles.get(role, 0) + 1
-    summary = f"""# OpenOFC strategic solver pure migration — c21c3c4\n\nStatus: **BYTE_COPY_PASS**\n\nFrozen source: `{EXPECTED_SOURCE_REPO}@{EXPECTED_SOURCE_COMMIT}`\n\n- G1 inventory payload SHA-256: `{EXPECTED_FILES_PAYLOAD_SHA256}`\n- migrated files: **{len(records)}**\n- all source/target bytes identical: **true**\n- provenance-records SHA-256: `{records_sha}`\n- provenance object SHA-256 (before embedding self-reference field): `{provenance_sha}`\n- roles: `{json.dumps(dict(sorted(roles.items())), sort_keys=True)}`\n\nThe migration preserves the exact relative path `tools/openofc_solver/...` to avoid mixing namespace/import refactors with ownership transfer.\n\nThis result proves byte identity only. Strategic authority remains temporary until independent DeepOFC tests and deterministic old-vs-new behavioral equivalence also pass.\n"""
+    summary = f"""# OpenOFC strategic solver pure migration — c21c3c4\n\nStatus: **BYTE_COPY_PASS**\n\nFrozen source: `{EXPECTED_SOURCE_REPO}@{EXPECTED_SOURCE_COMMIT}`\n\n- G1 v2 inventory payload SHA-256: `{EXPECTED_FILES_PAYLOAD_SHA256}`\n- migrated files: **{len(records)}**\n- all source/target bytes identical: **true**\n- provenance-records SHA-256: `{records_sha}`\n- provenance object SHA-256 (before embedding self-reference field): `{provenance_sha}`\n- roles: `{json.dumps(dict(sorted(roles.items())), sort_keys=True)}`\n\nThe migration preserves the exact relative path `tools/openofc_solver/...` to avoid mixing namespace/import refactors with ownership transfer.\n\nThis result proves byte identity only. Strategic authority remains temporary until independent DeepOFC tests and deterministic old-vs-new behavioral equivalence also pass.\n"""
     args.summary_output.write_text(summary, encoding="utf-8")
 
     print(f"OPENOFC_SOLVER_MIGRATION_COUNT={len(records)}")
