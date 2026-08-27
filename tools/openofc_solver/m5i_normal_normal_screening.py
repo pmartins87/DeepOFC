@@ -385,6 +385,10 @@ def screen_normal_normal_candidate(
         raise ValueError("M5I screening provenance must be non-empty")
 
     checked, continuation_sha = continuation_fingerprint(continuation_values)
+    if candidate.snapshot.training_continuation_sha256 != continuation_sha:
+        raise ValueError(
+            "M5I candidate snapshot is stale for the screened continuation vector"
+        )
     responses: dict[int, LearnedResponsePolicy] = {}
     training_reports: list[DeviatorTrainingReport] = []
     for player in (0, 1):
