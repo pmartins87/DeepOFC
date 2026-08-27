@@ -1,0 +1,31 @@
+{
+  "schema": "openofc-m5n-normal-fantasy-terminal-runtime-evidence-v1",
+  "authority": "RUNTIME_DIAGNOSIS_NOT_STRATEGIC_EVIDENCE",
+  "date": "2026-08-27",
+  "source_workflow_run": 33117461944,
+  "source_head_sha": "d9521ade7ce3f0f5f8f7de4df8bfb00dfede0519",
+  "prior_f17_calibration_timeout_run": 33114482820,
+  "prior_two_route_pilot_timeout_run": 33089463461,
+  "microprobe": {
+    "fantasy_14": {
+      "exact_terminal_evaluation_seconds": 1.9647992930000129,
+      "payload_sha256": "abbea5f2f971b23cd0ce58891e751e7ddc7cd81c743e715fd89e304b8b9bf4d3",
+      "artifact_id": 9665071739,
+      "cache_hits": 0,
+      "cache_misses": 1
+    },
+    "fantasy_17": {
+      "exact_terminal_evaluation_seconds": 66.61757329099999,
+      "payload_sha256": "82ab9d2f59660bbdd381ebc93028124cba1eb96a157e69a2a77fddf37c1ac47b",
+      "artifact_id": 9665105572,
+      "cache_hits": 0,
+      "cache_misses": 1
+    },
+    "f17_to_f14_exact_terminal_cost_ratio": 33.90550341733303
+  },
+  "finding": "A cold exact M4H one-pass terminal evaluation for the deterministic F17 world is about 33.9x slower than the companion F14 world. This materially explains why the F17 phase-timed calibration can exceed workflow limits and identifies exact Fantasy frontier construction/evaluation as a primary runtime target.",
+  "next_action": "Do not rerun the full strategic F17 pilot unchanged. Instrument phase boundaries, then reduce repeated exact frontier work through cache reuse/decomposition or use only a separately certified terminal approximation envelope with exact fallback.",
+  "strategic_evidence": false,
+  "production_certification_eligible": false,
+  "real_routes_certified": 0
+}
