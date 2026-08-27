@@ -1,0 +1,73 @@
+name: OpenOFC M5R frozen-policy exact BR reference
+
+on:
+  push:
+    branches:
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_FROZEN_POLICY_BR_CERTIFICATION_CONTRACT.md
+      - tools/openofc_solver/m5r_frozen_policy_br_reference.py
+      - tools/openofc_solver/run_m5r_frozen_policy_br_reference.py
+      - tools/openofc_solver/test_m5r_frozen_policy_br_reference.py
+      - .github/workflows/openofc-m5r-frozen-policy-br-reference.yml
+  workflow_dispatch:
+
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5R exact-reference mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_frozen_policy_br_reference.py
+      - name: Run frozen exact-reference gate
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_frozen_policy_br_reference.py
+      - name: Validate authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5r_frozen_policy_br_reference.json').read_text(encoding='utf-8'))
+          validation = data['validation']
+          manifest = data['reference_evaluator_manifest']
+          decision = data['decision']
+          assert validation['validation_status'] == 'PASS'
+          assert validation['maximum_crosscheck_abs_error'] <= 1e-12
+          assert len(validation['rows']) == 2
+          by_id = {row['family_id']: row for row in validation['rows']}
+          assert abs(by_id['joker']['exploitability'] - 1.125) <= 1e-12
+          assert abs(by_id['hidden-discard']['exploitability'] - 2.099206349206348) <= 1e-12
+          assert manifest['certification_eligible'] is True
+          assert manifest['guaranteed_missed_deviation_upper_bound'] == 0.0
+          assert manifest['production_route_certification_eligible'] is False
+          assert manifest['real_routes_certified'] == 0
+          assert decision['reduced_game_reference_architecture_validated'] is True
+          assert decision['full_game_scalable_evaluator_validated'] is False
+          assert decision['m5b_candidate_promoted'] is False
+          assert decision['production_route_certification_eligible'] is False
+          assert decision['real_routes_certified'] == 0
+          assert decision['next_blocker'] == 'SCALABLE_EVALUATOR_WITH_INDEPENDENT_MISSED_DEVIATION_UPPER_BOUND_MISSING'
+          print('OPENOFC_M5R_FROZEN_POLICY_EXACT_BR_REFERENCE=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-frozen-policy-exact-br-reference
+          path: artifacts/m5r_frozen_policy_br_reference.json
+          if-no-files-found: error
+          retention-days: 30
