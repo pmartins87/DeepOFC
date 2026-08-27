@@ -124,7 +124,7 @@
       {"path": "tools/openofc_solver/M5O_REGRET_CERTIFICATE_FEASIBILITY_CONTRACT.md", "sha256": "5c5ec76256cbd4e5f471cb6b23e5918bbdff5722d9da756d5a98b6a9290c2b7a"},
       {"path": "tools/openofc_solver/m5o_regret_certificate.py", "sha256": "6436d8e4694d62469e70f21a286cc1daac9f3bc7bb92dbb8cb1c121e6a23e42d"},
       {"path": "tools/openofc_solver/run_m5o_regret_certificate_pilot.py", "sha256": "851fb98b6f38398e87984161fc3c17b89c93a119fd7921009f5767d2176782be"},
-      {"path": "tools/openofc_solver/test_m5o_regret_certificate.py", "sha256": "e85f9e98a995dbabc2dd7930f4b8fcf5e267305fa2ee00ac"}
+      {"path": "tools/openofc_solver/test_m5o_regret_certificate.py", "sha256": "e85f9e98a995dbabc2dd7930f4b8fc3a782fc89c551fbcf5e267305fa2ee00ac"}
     ],
     "sha256": "27ccd23e7f8b2cf480f1d0f1e6b777f1c8c142128b416ccfb7c0ea0c431d44d8"
   },
