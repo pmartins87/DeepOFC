@@ -52,7 +52,8 @@ jobs:
           p = Path('deepofc/docs/migration/openofc_solver_provenance_c21c3c4.json')
           data = json.loads(p.read_text(encoding='utf-8'))
           assert data['source_commit'] == 'c21c3c4f1017c83df07eb22230318a8131bf40d1'
-          assert data['migration_count'] == 119
+          assert data['inventory_files_payload_sha256'] == 'a0e75d22e17d90b98881d324b2721f7c20276a3b9df83a2a7147f24cd9c53e18'
+          assert data['migration_count'] == 123
           assert data['all_byte_identical'] is True
           assert all(r['source_sha256'] == r['target_sha256'] for r in data['records'])
           assert all(r['source_blob_sha1'] == r['target_blob_sha1'] for r in data['records'])
