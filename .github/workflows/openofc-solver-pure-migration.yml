@@ -112,6 +112,15 @@ jobs:
           print('OPENOFC_MIGRATED_M5_TEST_SURFACE=PASS')
           PY
 
+      - name: Remove generated Python bytecode
+        run: |
+          find deepofc/tools/openofc_solver -type d -name __pycache__ -prune -exec rm -rf {} +
+          if find deepofc/tools/openofc_solver -type f -name '*.pyc' -print -quit | grep -q .; then
+            echo 'generated .pyc survived cleanup' >&2
+            exit 1
+          fi
+          echo 'OPENOFC_SOLVER_BYTECODE_CLEANUP=PASS'
+
       - name: Persist pure migration on branch
         working-directory: deepofc
         run: |
