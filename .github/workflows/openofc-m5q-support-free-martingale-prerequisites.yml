@@ -1,0 +1,64 @@
+name: OpenOFC M5Q support-free martingale prerequisites
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_SUPPORT_FREE_MARTINGALE_PREREQUISITES_CONTRACT.md
+      - tools/openofc_solver/m5q_support_free_martingale_prerequisites.py
+      - tools/openofc_solver/run_m5q_support_free_martingale_prerequisites.py
+      - tools/openofc_solver/test_m5q_support_free_martingale_prerequisites.py
+      - .github/workflows/openofc-m5q-support-free-martingale-prerequisites.yml
+  workflow_dispatch:
+
+jobs:
+  prerequisites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run prerequisite mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_support_free_martingale_prerequisites.py
+      - name: Run frozen prerequisite audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_support_free_martingale_prerequisites.py
+      - name: Validate fail-closed authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_support_free_martingale_prerequisites.json').read_text(encoding='utf-8'))
+          report = data['report']
+          assert report['authority'] == 'SUPPORT_FREE_MARTINGALE_PREREQUISITE_AUDIT_NOT_CERTIFICATION'
+          assert report['bounded_increment_prerequisite_pass'] is True
+          assert report['theorem_compatible_reach_weighted_average_available'] is False
+          assert report['predictable_variance_accounting_available'] is False
+          assert report['support_free_certificate_prerequisites_complete'] is False
+          assert report['next_blocker'] == 'THEOREM_COMPATIBLE_REACH_WEIGHTED_AVERAGE_MISSING'
+          assert data['decision']['instantiate_support_free_concentration_bound_now'] is False
+          assert report['production_certification_eligible'] is False
+          assert report['real_routes_certified'] == 0
+          print('OPENOFC_M5Q_SUPPORT_FREE_PREREQUISITES_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-support-free-martingale-prerequisites
+          path: artifacts/m5q_support_free_martingale_prerequisites.json
+          if-no-files-found: error
+          retention-days: 14
