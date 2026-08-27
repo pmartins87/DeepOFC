@@ -30,7 +30,14 @@ The candidate must be a frozen `NormalNormalFixedPolicyOracle`:
   actions only;
 - model SHA-256 must match its policy snapshot;
 - all action probabilities come from that frozen model;
-- the exact 50-state continuation vector is SHA-bound to the screening report.
+- the policy snapshot's `training_continuation_sha256` must equal the exact
+  continuation-vector SHA being screened;
+- the exact 50-state continuation vector is also SHA-bound to the screening
+  report.
+
+A candidate trained at a stale or different continuation vector is rejected
+before response training. Merely recording the current vector in the report is
+not sufficient exact-V evidence.
 
 M5I does not retrain or mutate the candidate during screening.
 
