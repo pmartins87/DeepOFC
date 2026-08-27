@@ -1,0 +1,69 @@
+name: OpenOFC M5Q Freedman union feasibility
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_FREEDMAN_UNION_FEASIBILITY_CONTRACT.md
+      - tools/openofc_solver/m5q_freedman_union_feasibility.py
+      - tools/openofc_solver/run_m5q_freedman_union_feasibility.py
+      - tools/openofc_solver/test_m5q_freedman_union_feasibility.py
+      - .github/workflows/openofc-m5q-freedman-union-feasibility.yml
+  workflow_dispatch:
+
+jobs:
+  feasibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run Freedman union mechanics tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_freedman_union_feasibility.py
+      - name: Run frozen Freedman union feasibility screen
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_freedman_union_feasibility.py
+      - name: Validate authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_freedman_union_feasibility.json').read_text(encoding='utf-8'))
+          report = data['report']
+          summary = data['summary']
+          assert report['authority'] == 'COORDINATE_FREEDMAN_UNION_FEASIBILITY_NOT_CERTIFICATION'
+          assert report['coordinate_concentration_kind'] == 'ONE_SIDED_FREEDMAN_PLUS_UNION_BOUND'
+          assert report['sampled_positive_regret_term_assumed_zero_for_feasibility'] is True
+          assert len(report['families']) == 2
+          assert summary['coordinate_union_architecture_fully_evaluated'] is True
+          assert summary['sampled_positive_regret_term_assumed_zero'] is True
+          assert summary['actual_predictable_variance_measured'] is False
+          assert summary['worst_case_variance_envelope_only'] is True
+          assert summary['production_certification_eligible'] is False
+          assert summary['real_routes_certified'] == 0
+          for family in report['families']:
+              assert family['required_iterations_for_target_concentration_only'] > 0
+              assert family['concentration_only_exploitability_at_probe'] > 0
+          print('OPENOFC_M5Q_FREEDMAN_UNION_FEASIBILITY=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-freedman-union-feasibility
+          path: artifacts/m5q_freedman_union_feasibility.json
+          if-no-files-found: error
+          retention-days: 14
