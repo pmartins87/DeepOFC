@@ -1,0 +1,23 @@
+# M5L Q2 activation record
+
+Status: `COMPLETE / HELDOUT_CALIBRATION_ONLY / QUALIFICATION_ATTEMPT_TERMINATED`
+
+Q1 completed and was durably recorded before Q2 activation, satisfying the precommitted activation rule in `M5L_Q2_HELDOUT_BENCHMARK_PLAN_2026-08-27.md`.
+
+- Q1 run: `33086051886` — PASS mechanics, negative evaluator-qualification result
+- Q1 artifact SHA-256: `60339a21eae6e67f90a2a3703ccf9bc34af1b0cec84ce4d8b39c14c9571a5f95`
+- Q1 durable evidence: `evidence/strategic/m5l_three_round_q1_2026-08-27.json`
+- Q2 driver SHA at activation: `013af07602d3782dbc7dca11d79acdac275aebd3`
+- Q2 workflow: `.github/workflows/openofc-m5l-reference-qualification-q2.yml`
+
+The first Q2 workflow invocation (`33098874703`) failed in the preflight before any Q2 computation because the validator searched the human precommit document for literal driver seed IDs that were frozen in the driver rather than written in the document. No Q2 result was observed. The validator was corrected to bind human-plan declarations to the plan and seed/family/profile constants to the already-precommitted driver.
+
+Corrected authoritative Q2 run: `33098966144` — **PASS**. The preflight, two-round response mechanics, held-out calibration, authority firewall and artifact persistence all passed.
+
+- Q2 payload SHA-256: `43ff5da07713afadcee85e93fe17562fe95b1147ec68d8ce02029e758cdaf568`
+- exact durable evidence: `evidence/strategic/m5l_two_round_q2_2026-08-27.json`
+- final interpretation: `docs/M5L_REFERENCE_QUALIFICATION_Q2_2026-08-27.md`
+
+The frozen experiment covered `hidden-discard` and `joker`, `uniform` and `hash-biased-mixed`, both players, two response seeds and 16,384 response episodes per row. The learned-response residual envelope was materially family-dependent and remained large on `hidden-discard`; under the precommitted M5L rule, this terminates the current evaluator's qualification attempt before Q3/Q4.
+
+Q2 emits no certification-eligible reference manifest and promotes no route. REAL route count remains `0/50`.

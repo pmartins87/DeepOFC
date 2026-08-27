@@ -1,0 +1,156 @@
+{
+  "authority": "QUALIFICATION_DIAGNOSTIC_NOT_CERTIFICATION",
+  "base_seed": 2026082751,
+  "budgets": [
+    64,
+    256,
+    1024
+  ],
+  "candidate_profile": "UNIFORM",
+  "epsilon": 0.6,
+  "qualification_stage": "Q0_PIPELINE_SMOKE",
+  "rows": [
+    {
+      "approximate_pure_response_value": 2.3763503086419746,
+      "budget": 64,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 156,
+      "learner_terminal_evaluations": 64,
+      "player": 0,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.0007611166948019633,
+      "responding_infosets_fallback": 204806,
+      "responding_infosets_learned": 156,
+      "training_seed": 2727872249757178811,
+      "underestimation_residual": 8.042438271604942
+    },
+    {
+      "approximate_pure_response_value": 4.657600308641975,
+      "budget": 256,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 543,
+      "learner_terminal_evaluations": 256,
+      "player": 0,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.002649271572291449,
+      "responding_infosets_fallback": 204419,
+      "responding_infosets_learned": 543,
+      "training_seed": 2727872249757178811,
+      "underestimation_residual": 5.761188271604942
+    },
+    {
+      "approximate_pure_response_value": 7.070505401234567,
+      "budget": 1024,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 1811,
+      "learner_terminal_evaluations": 1024,
+      "player": 0,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.008835784194143305,
+      "responding_infosets_fallback": 203151,
+      "responding_infosets_learned": 1811,
+      "training_seed": 2727872249757178811,
+      "underestimation_residual": 3.3482831790123493
+    },
+    {
+      "approximate_pure_response_value": 1.5896990740740737,
+      "budget": 64,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 149,
+      "learner_terminal_evaluations": 64,
+      "player": 1,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.0007269640225993111,
+      "responding_infosets_fallback": 204813,
+      "responding_infosets_learned": 149,
+      "training_seed": 8737000079403547527,
+      "underestimation_residual": 8.829089506172842
+    },
+    {
+      "approximate_pure_response_value": 4.355806327160494,
+      "budget": 256,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 543,
+      "learner_terminal_evaluations": 256,
+      "player": 1,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.002649271572291449,
+      "responding_infosets_fallback": 204419,
+      "responding_infosets_learned": 543,
+      "training_seed": 8737000079403547527,
+      "underestimation_residual": 6.062982253086423
+    },
+    {
+      "approximate_pure_response_value": 5.3903838734567895,
+      "budget": 1024,
+      "exact_best_response_infosets": 204962,
+      "exact_best_response_terminal_histories": 1312200,
+      "exact_best_response_value": 10.418788580246916,
+      "exact_replay_terminals": 3240,
+      "exact_replay_value": 10.418788580246913,
+      "learner_infosets_seen": 1816,
+      "learner_terminal_evaluations": 1024,
+      "player": 1,
+      "pure_replay_terminals": 3240,
+      "responding_infoset_coverage": 0.008860178960002341,
+      "responding_infosets_fallback": 203146,
+      "responding_infosets_learned": 1816,
+      "training_seed": 8737000079403547527,
+      "underestimation_residual": 5.028404706790127
+    }
+  ],
+  "schema": "openofc-m5l-three-round-q0-v1",
+  "sha256": "d721bffa7f49b1483385222c4a25c0240b02896a42cd6a664050b009ad58b5c0",
+  "source_manifest": {
+    "files": [
+      {
+        "path": "deepofc/hu_three_round_br.py",
+        "sha256": "81be5522878ab23e23d11c8e5574fd9109125f7657bc412220358db1e26e2500"
+      },
+      {
+        "path": "deepofc/hu_three_round_sequential.py",
+        "sha256": "1a501d308c05801346bf75c17ef64b22454c7e44942db983699e9bfcf1ed8d9f"
+      },
+      {
+        "path": "tools/openofc_solver/M5L_REFERENCE_EVALUATOR_QUALIFICATION_CONTRACT.md",
+        "sha256": "78de98dc55fd343b162d75ce0e1833dffe689c094f703a668cc23d69095f23b4"
+      },
+      {
+        "path": "tools/openofc_solver/run_m5l_three_round_q0.py",
+        "sha256": "b56cc858c47e90e9c6ab5e0722f5cd4eaad643350a0c26d8b12ce8d3d2efec8a"
+      }
+    ],
+    "sha256": "9ec6b7199558af5d923253929a21faaf672e9ac87119c5260ce9c5d9bda442c4"
+  },
+  "summary": {
+    "certification_eligible": false,
+    "max_underestimation_residual": 8.829089506172842,
+    "min_underestimation_residual": 3.3482831790123493,
+    "players": [
+      0,
+      1
+    ],
+    "reference_manifest_emitted": false,
+    "rows": 6
+  }
+}

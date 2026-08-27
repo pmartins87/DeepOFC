@@ -9,8 +9,9 @@ only independent held-out evidence, explicit externally supplied thresholds and
 SHA-bound provenance can produce a READY_CERTIFIED route.
 
 No strategic threshold is hard-coded here.  Missing metrics fail closed.
-Synthetic/test evidence can exercise the logic but can never be registered into
-a REAL M4Z Bellman registry.
+Synthetic/test evidence and real screening-only lower-bound evidence may exercise
+or diagnose the route but can never be registered into a REAL M4Z Bellman
+registry.
 """
 
 from dataclasses import dataclass
@@ -41,6 +42,7 @@ STATUS_READY = "READY_CERTIFIED"
 STATUS_BLOCKED = "BLOCKED"
 STATUS_TEST_ONLY = "READY_TEST_ONLY"
 EVIDENCE_HELDOUT = "HELD_OUT"
+EVIDENCE_SCREENING = "HELD_OUT_SCREENING_ONLY"
 EVIDENCE_TEST = "SYNTHETIC_TEST_ONLY"
 SUPPORTED_KERNELS = (
     KERNEL_NORMAL_NORMAL,
@@ -224,7 +226,11 @@ class HeldoutRouteEvidence:
         _require_sha(
             self.continuation_evidence_sha256, "continuation_evidence_sha256"
         )
-        if self.evidence_kind not in (EVIDENCE_HELDOUT, EVIDENCE_TEST):
+        if self.evidence_kind not in (
+            EVIDENCE_HELDOUT,
+            EVIDENCE_SCREENING,
+            EVIDENCE_TEST,
+        ):
             raise ValueError("unsupported M5C evidence kind")
         if self.heldout_samples <= 0:
             raise ValueError("M5C evidence requires positive held-out samples")
@@ -346,7 +352,9 @@ def certify_route(
 ) -> RouteCertificate:
     budget = thresholds.for_kernel(evidence.kernel_kind)
     failures: list[str] = []
-    if evidence.evidence_kind != EVIDENCE_HELDOUT:
+    if evidence.evidence_kind == EVIDENCE_SCREENING:
+        failures.append("EVIDENCE_SCREENING_LOWER_BOUND_NOT_CERTIFYING")
+    elif evidence.evidence_kind != EVIDENCE_HELDOUT:
         failures.append("EVIDENCE_NOT_INDEPENDENT_HELDOUT")
     if len(evidence.heldout_seed_ids) < budget.min_heldout_seeds:
         failures.append("INSUFFICIENT_HELDOUT_SEEDS")
@@ -400,7 +408,7 @@ def register_certified_route(
     oracle: OneHandOracle,
     certificate: RouteCertificate,
 ) -> None:
-    """Promote exactly one route; test-only or blocked certificates are refused."""
+    """Promote exactly one route; non-certifying certificates are refused."""
 
     if not certificate.ready_for_real_bellman:
         raise RuntimeError("M5C certificate is not eligible for REAL Bellman routing")

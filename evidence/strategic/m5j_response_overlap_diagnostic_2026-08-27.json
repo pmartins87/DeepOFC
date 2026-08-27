@@ -1,0 +1,32 @@
+{
+  "authority": "RESPONSE_OVERLAP_DIAGNOSTIC_NOT_CERTIFICATION",
+  "candidate_budget": 256,
+  "heldout_samples_per_seed": 128,
+  "heldout_seeds": [
+    {"seed": 2026082711, "seed_id": "m5j-heldout-01:2026082711"},
+    {"seed": 2026082729, "seed_id": "m5j-heldout-02:2026082729"},
+    {"seed": 2026082747, "seed_id": "m5j-heldout-03:2026082747"},
+    {"seed": 2026082763, "seed_id": "m5j-heldout-04:2026082763"}
+  ],
+  "response_budgets": [256, 1024],
+  "rows": [
+    {"candidate_snapshot_sha256":"fa4c9c54c88abfa13d71bdad9e1793df35535426c65428c754d0721ba0068a67","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2560,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2560,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":0,"response_budget":256,"sample_missing_key_sha256":"4cf3c9b89a858ffffe9996cb835a57f6f8f6304b07706fdd3eb5df0d44505cbe","state":"B0:P0F0:P1F0","training_infosets":1280,"training_total_visits":1280},
+    {"candidate_snapshot_sha256":"fa4c9c54c88abfa13d71bdad9e1793df35535426c65428c754d0721ba0068a67","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2559,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2559,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":1,"response_budget":256,"sample_missing_key_sha256":"ee75d5d7078b8526537096e085cbe32d3285f9d0dae431ee1f102b4b31a31382","state":"B0:P0F0:P1F0","training_infosets":1280,"training_total_visits":1280},
+    {"candidate_snapshot_sha256":"fa4c9c54c88abfa13d71bdad9e1793df35535426c65428c754d0721ba0068a67","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2560,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2560,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":0,"response_budget":1024,"sample_missing_key_sha256":"4cf3c9b89a858ffffe9996cb835a57f6f8f6304b07706fdd3eb5df0d44505cbe","state":"B0:P0F0:P1F0","training_infosets":5120,"training_total_visits":5120},
+    {"candidate_snapshot_sha256":"fa4c9c54c88abfa13d71bdad9e1793df35535426c65428c754d0721ba0068a67","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2559,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2559,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":1,"response_budget":1024,"sample_missing_key_sha256":"ee75d5d7078b8526537096e085cbe32d3285f9d0dae431ee1f102b4b31a31382","state":"B0:P0F0:P1F0","training_infosets":5117,"training_total_visits":5120},
+    {"candidate_snapshot_sha256":"a8709b3b87daaa43a00fb714959793f487c61b7055b562b5acc94ccb240be1d6","heldout_fallback_visits":2559,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":1,"heldout_unique_fallback_infosets":2558,"heldout_unique_hit_rate":0.00039077764751856197,"heldout_unique_response_infosets":2559,"heldout_unique_trained_hits":1,"heldout_visit_hit_rate":0.000390625,"persistent_player":0,"response_budget":256,"sample_missing_key_sha256":"3c25683fd8c8522eb700427f632e47c87a78ba78b513f14caeee878b46400834","state":"B1:P0F0:P1F0","training_infosets":1280,"training_total_visits":1280},
+    {"candidate_snapshot_sha256":"a8709b3b87daaa43a00fb714959793f487c61b7055b562b5acc94ccb240be1d6","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2560,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2560,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":1,"response_budget":256,"sample_missing_key_sha256":"c1986ad59ccbafc12007cd3ef016c39262fa1ddd76eeecc2fd5c9c10d7ea9c92","state":"B1:P0F0:P1F0","training_infosets":1280,"training_total_visits":1280},
+    {"candidate_snapshot_sha256":"a8709b3b87daaa43a00fb714959793f487c61b7055b562b5acc94ccb240be1d6","heldout_fallback_visits":2558,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":2,"heldout_unique_fallback_infosets":2557,"heldout_unique_hit_rate":0.0007815552950371239,"heldout_unique_response_infosets":2559,"heldout_unique_trained_hits":2,"heldout_visit_hit_rate":0.00078125,"persistent_player":0,"response_budget":1024,"sample_missing_key_sha256":"3c25683fd8c8522eb700427f632e47c87a78ba78b513f14caeee878b46400834","state":"B1:P0F0:P1F0","training_infosets":5117,"training_total_visits":5120},
+    {"candidate_snapshot_sha256":"a8709b3b87daaa43a00fb714959793f487c61b7055b562b5acc94ccb240be1d6","heldout_fallback_visits":2560,"heldout_response_decision_visits":2560,"heldout_trained_hit_visits":0,"heldout_unique_fallback_infosets":2560,"heldout_unique_hit_rate":0.0,"heldout_unique_response_infosets":2560,"heldout_unique_trained_hits":0,"heldout_visit_hit_rate":0.0,"persistent_player":1,"response_budget":1024,"sample_missing_key_sha256":"c1986ad59ccbafc12007cd3ef016c39262fa1ddd76eeecc2fd5c9c10d7ea9c92","state":"B1:P0F0:P1F0","training_infosets":5120,"training_total_visits":5120}
+  ],
+  "schema": "openofc-m5j-response-overlap-diagnostic-v1",
+  "sha256": "2764b7ee8e9c7a556bd936a16c75007efee27655ee4126d2927f359051c88c1d",
+  "summary": {
+    "certification_eligible": false,
+    "max_unique_hit_rate": 0.0007815552950371239,
+    "max_visit_hit_rate": 0.00078125,
+    "min_unique_hit_rate": 0.0,
+    "min_visit_hit_rate": 0.0,
+    "rows": 8
+  }
+}

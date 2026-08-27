@@ -1,0 +1,40 @@
+{
+  "authority": "TWO_ROUND_RESPONSE_MECHANICS_SMOKE_NOT_Q2_NOT_CERTIFICATION",
+  "benchmark": "BASE_TWO_ROUND_MECHANICS_ONLY_EXCLUDED_FROM_Q2_HELDOUT",
+  "budget": 256,
+  "epsilon": 0.6,
+  "source_run": 33090565771,
+  "rows": [
+    {
+      "player": 0,
+      "exact_best_response_value": 2.0992063492063466,
+      "exact_replay_value": 2.099206349206393,
+      "approximate_response_value": -0.12847222222222168,
+      "underestimation_residual": 2.2276785714285685,
+      "responding_infosets": 39902,
+      "responding_infosets_learned": 318,
+      "responding_infosets_fallback": 39584,
+      "responding_infoset_coverage": 0.007969525337075836
+    },
+    {
+      "player": 1,
+      "exact_best_response_value": 2.0992063492063466,
+      "exact_replay_value": 2.09920634920639,
+      "approximate_response_value": -0.12499999999999958,
+      "underestimation_residual": 2.224206349206346,
+      "responding_infosets": 39902,
+      "responding_infosets_learned": 313,
+      "responding_infosets_fallback": 39589,
+      "responding_infoset_coverage": 0.007844218334920555
+    }
+  ],
+  "schema": "openofc-m5l-two-round-response-smoke-v1",
+  "sha256": "15d0c3e09cc466e618b5b5c0eacea4bedc291a87650a52c8d350024aa7513269",
+  "summary": {
+    "rows": 2,
+    "max_underestimation_residual": 2.2276785714285685,
+    "players": [0, 1],
+    "certification_eligible": false,
+    "q2_evidence": false
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "authority": "SCREENING_PILOT_NOT_CERTIFICATION",
+  "candidate_config": {
+    "base_seed": 2026082701,
+    "epsilon": 0.6,
+    "evaluation_samples": 64,
+    "fit_epochs": 2,
+    "huber_delta": 1.0,
+    "l2": 1e-06,
+    "learning_rate": 0.08,
+    "model_buckets": 4096,
+    "replay_capacity": 20000,
+    "schema": "openofc-m5b-adaptive-normal-config-v1",
+    "training_iterations": 256
+  },
+  "candidate_source_manifest": {
+    "files": [
+      {
+        "path": "tools/openofc_solver/m5a_normal_normal_oracle.py",
+        "sha256": "8fb9d156b186f8c53abdc51a001aa8e9cf0b4f38c6978e5945a52d2a49d83e3d"
+      },
+      {
+        "path": "tools/openofc_solver/m5b_adaptive_normal_oracles.py",
+        "sha256": "98c92c29bda1dd9752e9262856c8d31ef2ffcc11e6ee334caa07ae260b16909b"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_advantage_model.py",
+        "sha256": "48cd1b74b1c46a96ce915b0d31ef757b4ee0f38b0a7ee155c3b0253610a763c8"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_continuation_cfr.py",
+        "sha256": "e0a2db832e66c98ab04c1fe5b16e1c9c520376546a530bba492133ac8e61d575"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_policy_distillation.py",
+        "sha256": "f5f59877af323484ad742a2a55eb3b84398b17969b2406ecd88f8acfdeab4dc6"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_suit_symmetry.py",
+        "sha256": "79b31fb78286949b2902e3271f476a60ab6980d76c60b01b7c82e776315674b8"
+      }
+    ],
+    "sha256": "33fa0fed62e182b2f84429897fc1838420e6b5a1b149b06a54806d8afe3be9a1"
+  },
+  "heldout_seeds": [
+    {
+      "seed": 2026082711,
+      "seed_id": "m5i-pilot-heldout-01:2026082711"
+    },
+    {
+      "seed": 2026082729,
+      "seed_id": "m5i-pilot-heldout-02:2026082729"
+    },
+    {
+      "seed": 2026082747,
+      "seed_id": "m5i-pilot-heldout-03:2026082747"
+    },
+    {
+      "seed": 2026082763,
+      "seed_id": "m5i-pilot-heldout-04:2026082763"
+    }
+  ],
+  "reference_evaluator_manifest": {
+    "authority": "SHA_BOUND_REFERENCE_EVALUATOR_AUTHORITY_MANIFEST",
+    "capability": "SCREENING_LOWER_BOUND_ONLY",
+    "evaluator_id": "m5i-normal-normal-learned-response-screen-v1",
+    "implementation_sha256": "793a5dc1abce4dbd56c9b3d59be547c023e84753d879c17151b5a755ccc42ff2",
+    "method_class": "LEARNED_RESPONSE_LOWER_BOUND",
+    "reference_authority": "LEARNED_RESPONSE_LOWER_BOUND_SCREENING_ONLY",
+    "schema": "openofc-m5h-reference-evaluator-manifest-v1",
+    "sha256": "7451128b2c9c39ddbbe15fb0f98c967c5762ca6dc208d73e1c50720b22b6c782",
+    "validated_kernel_kinds": [
+      "NORMAL_NORMAL"
+    ],
+    "validation_evidence_sha256": "96a0c95cd91db3988c91bb2731f23f002cc4a9a65f13bfabfbdacd059691a746",
+    "validation_provenance": "M5I screening implementation contract/tests; this evidence validates screening mechanics only and carries no low-exploitability authority"
+  },
+  "routes": [
+    {
+      "m5c_evidence": {
+        "continuation_evidence_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "evidence_kind": "HELD_OUT_SCREENING_ONLY",
+        "heldout_samples": 256,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "implementation_sha256": "33fa0fed62e182b2f84429897fc1838420e6b5a1b149b06a54806d8afe3be9a1",
+        "kernel_kind": "NORMAL_NORMAL",
+        "max_unilateral_deviation": 1.15625,
+        "model_q_error": null,
+        "oracle_id": "m5a-normal-normal-fixed-policy:57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "provenance": "M5B materialization=f5da82946e18f5ad65e11fab07b2736af8e8800d0b5ab74884c074207e6986bb | M5I screening=5c145fec526e862944d8f2593d5a54f06c1966b01ff4f90b931049d0519fb44b | pilot=openofc-m5i-normal-normal-two-state-pilot-v1 | NORMAL_ROUTE_HELDOUT_EVIDENCE_PRODUCER_NOT_CERTIFIER report=255c7a5ef5d533b9786d3c8d00f141dc90846a3e87652f8afa73106145f03802 reference_manifest=7451128b2c9c39ddbbe15fb0f98c967c5762ca6dc208d73e1c50720b22b6c782 evaluator=m5i-normal-normal-learned-response-screen-v1 capability=SCREENING_LOWER_BOUND_ONLY",
+        "schema": "openofc-m5c-heldout-route-evidence-v1",
+        "sha256": "dfc4f7810388d174f99dfcf7de951dd8719d8cab3d4c489fd26c6c850095b563",
+        "state": {
+          "button": 0,
+          "p0_fantasy_cards": 0,
+          "p1_fantasy_cards": 0
+        },
+        "support_gap": null,
+        "value_standard_error": 0.4473125316560699
+      },
+      "m5h_report": {
+        "authority": "NORMAL_ROUTE_HELDOUT_EVIDENCE_PRODUCER_NOT_CERTIFIER",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "evidence_kind": "HELD_OUT_SCREENING_ONLY",
+        "heldout_samples": 256,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "implementation_sha256": "33fa0fed62e182b2f84429897fc1838420e6b5a1b149b06a54806d8afe3be9a1",
+        "kernel_kind": "NORMAL_NORMAL",
+        "max_unilateral_deviation": 1.15625,
+        "mean_profile_p0_value": 0.27734375,
+        "oracle_id": "m5a-normal-normal-fixed-policy:57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "p0_max_deviation_gain": 0.765625,
+        "p1_max_deviation_gain": 1.15625,
+        "promotion_blocked": true,
+        "provenance": "M5B materialization=f5da82946e18f5ad65e11fab07b2736af8e8800d0b5ab74884c074207e6986bb | M5I screening=5c145fec526e862944d8f2593d5a54f06c1966b01ff4f90b931049d0519fb44b | pilot=openofc-m5i-normal-normal-two-state-pilot-v1",
+        "reference_authority": "LEARNED_RESPONSE_LOWER_BOUND_SCREENING_ONLY",
+        "reference_capability": "SCREENING_LOWER_BOUND_ONLY",
+        "reference_evaluator_id": "m5i-normal-normal-learned-response-screen-v1",
+        "reference_evaluator_implementation_sha256": "793a5dc1abce4dbd56c9b3d59be547c023e84753d879c17151b5a755ccc42ff2",
+        "reference_evaluator_manifest_sha256": "7451128b2c9c39ddbbe15fb0f98c967c5762ca6dc208d73e1c50720b22b6c782",
+        "reference_method_class": "LEARNED_RESPONSE_LOWER_BOUND",
+        "reference_validation_evidence_sha256": "96a0c95cd91db3988c91bb2731f23f002cc4a9a65f13bfabfbdacd059691a746",
+        "samples_per_seed": 64,
+        "schema": "openofc-m5h-normal-heldout-report-v2",
+        "seed_metrics": [
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": 0.53125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-01:2026082711"
+          },
+          {
+            "p0_deviation_gain": 0.765625,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -1.015625,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-02:2026082729"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.25,
+            "profile_p0_value": 0.546875,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-03:2026082747"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 1.15625,
+            "profile_p0_value": 1.046875,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-04:2026082763"
+          }
+        ],
+        "sha256": "255c7a5ef5d533b9786d3c8d00f141dc90846a3e87652f8afa73106145f03802",
+        "state": "B0:P0F0:P1F0",
+        "training_seed_ids": [
+          "m5b-nn-model:16402759101050603214",
+          "m5b-nn-replay:8099107666144172376",
+          "m5b-nn-solver:6708636887159326011",
+          "m5i-response-train-p0:1216745898657818883",
+          "m5i-response-train-p1:5904538980856472625"
+        ],
+        "value_standard_error": 0.4473125316560699
+      },
+      "materialization": {
+        "action_examples": 237492,
+        "authority": "TRAIN_AT_CURRENT_V_NORMAL_NORMAL_PROBE_NOT_CERTIFIED",
+        "config_sha256": "2e5510434068d9612e896f9083c04f069d761fb381bcd335a4e573b665e7d382",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "distilled_nodes": 4107,
+        "evaluation_seed_id": "m5b-nn-eval:7349654517459447041",
+        "fixed_oracle_id": "m5a-normal-normal-fixed-policy:57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "kernel_kind": "NORMAL_NORMAL",
+        "mean_huber_loss": 0.08593313352267025,
+        "model_seed_id": "m5b-nn-model:16402759101050603214",
+        "policy_snapshot_sha256": "57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "replay_seed_id": "m5b-nn-replay:8099107666144172376",
+        "schema": "openofc-m5b-adaptive-normal-materialization-v1",
+        "sha256": "f5da82946e18f5ad65e11fab07b2736af8e8800d0b5ab74884c074207e6986bb",
+        "solver_infosets": 5119,
+        "solver_seed_id": "m5b-nn-solver:6708636887159326011",
+        "state": "B0:P0F0:P1F0",
+        "training_iterations": 256
+      },
+      "promotion_allowed": false,
+      "promotion_block_reason": "HELD_OUT_SCREENING_ONLY is non-certifying by M5C contract",
+      "screening": {
+        "authority": "LEARNED_RESPONSE_LOWER_BOUND_SCREENING_ONLY",
+        "candidate_model_sha256": "99a1f8287be849dc5fc62178c333d03b138fccf8a40422fbbd41913857af1c24",
+        "candidate_oracle_id": "m5a-normal-normal-fixed-policy:57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "candidate_snapshot_sha256": "57c06c2de269b4f3bf219109daa54be740e57265141bb38fbc5f78e0b3a64fdc",
+        "certification_eligible": false,
+        "config_sha256": "27e4be9dfbd8c751b623442f399d503667319397ffcf91a4126314893e1c3736",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "heldout_samples_per_seed": 64,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "max_observed_deviation_gain": 1.15625,
+        "max_p0_deviation_gain": 0.765625,
+        "max_p1_deviation_gain": 1.15625,
+        "provenance": "M5I pilot state=B0:P0F0:P1F0 candidate_materialization=f5da82946e18f5ad65e11fab07b2736af8e8800d0b5ab74884c074207e6986bb",
+        "response_training": [
+          {
+            "infosets": 1280,
+            "iterations": 256,
+            "persistent_player": 0,
+            "total_visits": 1280,
+            "training_seed_id": "m5i-response-train-p0:1216745898657818883"
+          },
+          {
+            "infosets": 1280,
+            "iterations": 256,
+            "persistent_player": 1,
+            "total_visits": 1280,
+            "training_seed_id": "m5i-response-train-p1:5904538980856472625"
+          }
+        ],
+        "schema": "openofc-m5i-normal-normal-screening-v1",
+        "seed_metrics": [
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": 0.53125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-01:2026082711"
+          },
+          {
+            "p0_deviation_gain": 0.765625,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -1.015625,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-02:2026082729"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.25,
+            "profile_p0_value": 0.546875,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-03:2026082747"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 1.15625,
+            "profile_p0_value": 1.046875,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-04:2026082763"
+          }
+        ],
+        "sha256": "5c145fec526e862944d8f2593d5a54f06c1966b01ff4f90b931049d0519fb44b",
+        "state": "B0:P0F0:P1F0"
+      },
+      "state": "B0:P0F0:P1F0"
+    },
+    {
+      "m5c_evidence": {
+        "continuation_evidence_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "evidence_kind": "HELD_OUT_SCREENING_ONLY",
+        "heldout_samples": 256,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "implementation_sha256": "33fa0fed62e182b2f84429897fc1838420e6b5a1b149b06a54806d8afe3be9a1",
+        "kernel_kind": "NORMAL_NORMAL",
+        "max_unilateral_deviation": 1.296875,
+        "model_q_error": null,
+        "oracle_id": "m5a-normal-normal-fixed-policy:d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "provenance": "M5B materialization=ce096c2eb92227d677e16c57b1499694ec294ae8fa9f651a8d4017b6184cdeef | M5I screening=b65156d786cfa7285cf1d43e773741af990460f3af7b454d1ddbf556b4280f1e | pilot=openofc-m5i-normal-normal-two-state-pilot-v1 | NORMAL_ROUTE_HELDOUT_EVIDENCE_PRODUCER_NOT_CERTIFIER report=8609d3fea077cb21b46346d8ca36429513c322820e13e0c5d3ee38765decede4 reference_manifest=7451128b2c9c39ddbbe15fb0f98c967c5762ca6dc208d73e1c50720b22b6c782 evaluator=m5i-normal-normal-learned-response-screen-v1 capability=SCREENING_LOWER_BOUND_ONLY",
+        "schema": "openofc-m5c-heldout-route-evidence-v1",
+        "sha256": "9b22e2a857acb133c0b00e4fab8287f7c03ed6661ea8bfa4f4a7d4bb10ac0d0c",
+        "state": {
+          "button": 1,
+          "p0_fantasy_cards": 0,
+          "p1_fantasy_cards": 0
+        },
+        "support_gap": null,
+        "value_standard_error": 0.2511772412270202
+      },
+      "m5h_report": {
+        "authority": "NORMAL_ROUTE_HELDOUT_EVIDENCE_PRODUCER_NOT_CERTIFIER",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "evidence_kind": "HELD_OUT_SCREENING_ONLY",
+        "heldout_samples": 256,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "implementation_sha256": "33fa0fed62e182b2f84429897fc1838420e6b5a1b149b06a54806d8afe3be9a1",
+        "kernel_kind": "NORMAL_NORMAL",
+        "max_unilateral_deviation": 1.296875,
+        "mean_profile_p0_value": -0.3046875,
+        "oracle_id": "m5a-normal-normal-fixed-policy:d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "p0_max_deviation_gain": 1.296875,
+        "p1_max_deviation_gain": 0.78125,
+        "promotion_blocked": true,
+        "provenance": "M5B materialization=ce096c2eb92227d677e16c57b1499694ec294ae8fa9f651a8d4017b6184cdeef | M5I screening=b65156d786cfa7285cf1d43e773741af990460f3af7b454d1ddbf556b4280f1e | pilot=openofc-m5i-normal-normal-two-state-pilot-v1",
+        "reference_authority": "LEARNED_RESPONSE_LOWER_BOUND_SCREENING_ONLY",
+        "reference_capability": "SCREENING_LOWER_BOUND_ONLY",
+        "reference_evaluator_id": "m5i-normal-normal-learned-response-screen-v1",
+        "reference_evaluator_implementation_sha256": "793a5dc1abce4dbd56c9b3d59be547c023e84753d879c17151b5a755ccc42ff2",
+        "reference_evaluator_manifest_sha256": "7451128b2c9c39ddbbe15fb0f98c967c5762ca6dc208d73e1c50720b22b6c782",
+        "reference_method_class": "LEARNED_RESPONSE_LOWER_BOUND",
+        "reference_validation_evidence_sha256": "96a0c95cd91db3988c91bb2731f23f002cc4a9a65f13bfabfbdacd059691a746",
+        "samples_per_seed": 64,
+        "schema": "openofc-m5h-normal-heldout-report-v2",
+        "seed_metrics": [
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.78125,
+            "profile_p0_value": 0.28125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-01:2026082711"
+          },
+          {
+            "p0_deviation_gain": 1.296875,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -0.359375,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-02:2026082729"
+          },
+          {
+            "p0_deviation_gain": 0.59375,
+            "p1_deviation_gain": 0.296875,
+            "profile_p0_value": -0.9375,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-03:2026082747"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -0.203125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-04:2026082763"
+          }
+        ],
+        "sha256": "8609d3fea077cb21b46346d8ca36429513c322820e13e0c5d3ee38765decede4",
+        "state": "B1:P0F0:P1F0",
+        "training_seed_ids": [
+          "m5b-nn-model:10471611513349285284",
+          "m5b-nn-replay:15018280164288378303",
+          "m5b-nn-solver:2933403504778677801",
+          "m5i-response-train-p0:11313812605184168722",
+          "m5i-response-train-p1:17465109251777047108"
+        ],
+        "value_standard_error": 0.2511772412270202
+      },
+      "materialization": {
+        "action_examples": 230868,
+        "authority": "TRAIN_AT_CURRENT_V_NORMAL_NORMAL_PROBE_NOT_CERTIFIED",
+        "config_sha256": "2e5510434068d9612e896f9083c04f069d761fb381bcd335a4e573b665e7d382",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "distilled_nodes": 4033,
+        "evaluation_seed_id": "m5b-nn-eval:16978291075528422820",
+        "fixed_oracle_id": "m5a-normal-normal-fixed-policy:d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "kernel_kind": "NORMAL_NORMAL",
+        "mean_huber_loss": 0.08843354778870728,
+        "model_seed_id": "m5b-nn-model:10471611513349285284",
+        "policy_snapshot_sha256": "d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "replay_seed_id": "m5b-nn-replay:15018280164288378303",
+        "schema": "openofc-m5b-adaptive-normal-materialization-v1",
+        "sha256": "ce096c2eb92227d677e16c57b1499694ec294ae8fa9f651a8d4017b6184cdeef",
+        "solver_infosets": 5119,
+        "solver_seed_id": "m5b-nn-solver:2933403504778677801",
+        "state": "B1:P0F0:P1F0",
+        "training_iterations": 256
+      },
+      "promotion_allowed": false,
+      "promotion_block_reason": "HELD_OUT_SCREENING_ONLY is non-certifying by M5C contract",
+      "screening": {
+        "authority": "LEARNED_RESPONSE_LOWER_BOUND_SCREENING_ONLY",
+        "candidate_model_sha256": "a94eec3b44c9e2b9fc05c0b67c920aecec32686b5144cec5cd011dc9aa513202",
+        "candidate_oracle_id": "m5a-normal-normal-fixed-policy:d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "candidate_snapshot_sha256": "d93262f311686dca82996bcf9810367dbd5e5f00ff7ca160f4bf288d57db668f",
+        "certification_eligible": false,
+        "config_sha256": "27e4be9dfbd8c751b623442f399d503667319397ffcf91a4126314893e1c3736",
+        "continuation_sha256": "a6616b15fa39010e8f89865ed022c757a7107b1b22f208279913b8ab3cd905b9",
+        "heldout_samples_per_seed": 64,
+        "heldout_seed_ids": [
+          "m5i-pilot-heldout-01:2026082711",
+          "m5i-pilot-heldout-02:2026082729",
+          "m5i-pilot-heldout-03:2026082747",
+          "m5i-pilot-heldout-04:2026082763"
+        ],
+        "max_observed_deviation_gain": 1.296875,
+        "max_p0_deviation_gain": 1.296875,
+        "max_p1_deviation_gain": 0.78125,
+        "provenance": "M5I pilot state=B1:P0F0:P1F0 candidate_materialization=ce096c2eb92227d677e16c57b1499694ec294ae8fa9f651a8d4017b6184cdeef",
+        "response_training": [
+          {
+            "infosets": 1280,
+            "iterations": 256,
+            "persistent_player": 0,
+            "total_visits": 1280,
+            "training_seed_id": "m5i-response-train-p0:11313812605184168722"
+          },
+          {
+            "infosets": 1280,
+            "iterations": 256,
+            "persistent_player": 1,
+            "total_visits": 1280,
+            "training_seed_id": "m5i-response-train-p1:17465109251777047108"
+          }
+        ],
+        "schema": "openofc-m5i-normal-normal-screening-v1",
+        "seed_metrics": [
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.78125,
+            "profile_p0_value": 0.28125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-01:2026082711"
+          },
+          {
+            "p0_deviation_gain": 1.296875,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -0.359375,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-02:2026082729"
+          },
+          {
+            "p0_deviation_gain": 0.59375,
+            "p1_deviation_gain": 0.296875,
+            "profile_p0_value": -0.9375,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-03:2026082747"
+          },
+          {
+            "p0_deviation_gain": 0.0,
+            "p1_deviation_gain": 0.0,
+            "profile_p0_value": -0.203125,
+            "samples": 64,
+            "seed_id": "m5i-pilot-heldout-04:2026082763"
+          }
+        ],
+        "sha256": "b65156d786cfa7285cf1d43e773741af990460f3af7b454d1ddbf556b4280f1e",
+        "state": "B1:P0F0:P1F0"
+      },
+      "state": "B1:P0F0:P1F0"
+    }
+  ],
+  "schema": "openofc-m5i-normal-normal-two-state-pilot-v1",
+  "screen_config": {
+    "base_seed": 2026082702,
+    "epsilon": 0.6,
+    "heldout_samples_per_seed": 64,
+    "response_training_iterations": 256
+  },
+  "screen_source_manifest": {
+    "files": [
+      {
+        "path": "tools/openofc_solver/m5i_normal_normal_screening.py",
+        "sha256": "6e3898556915aeb5244e3e03ab438aa494230068616b7a248d13a8c7cb1adce8"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_cfr.py",
+        "sha256": "c9cf99fe5edb5b4219db1b080622672197776fe6b609ecd12cd575fae9ec0af5"
+      },
+      {
+        "path": "tools/openofc_solver/strategic_suit_symmetry.py",
+        "sha256": "79b31fb78286949b2902e3271f476a60ab6980d76c60b01b7c82e776315674b8"
+      }
+    ],
+    "sha256": "793a5dc1abce4dbd56c9b3d59be547c023e84753d879c17151b5a755ccc42ff2"
+  },
+  "screen_validation_source_manifest": {
+    "files": [
+      {
+        "path": ".github/workflows/openofc-m5h-normal-heldout-evidence.yml",
+        "sha256": "382cfe8b1e26a3336bbf0ead477e5fd4719641052354e44e1d1e6b6c8cb1952a"
+      },
+      {
+        "path": "tools/openofc_solver/M5I_NORMAL_NORMAL_SCREENING_CONTRACT.md",
+        "sha256": "8c4e326216574da9953cd65dc3fe58b626d294b75c9d431cd6ba5c5de090138f"
+      },
+      {
+        "path": "tools/openofc_solver/test_m5b_adaptive_normal_oracles.py",
+        "sha256": "fde04e06d9b75268eec13fe95921701d15d54cfa71e422da2172151010f314c9"
+      },
+      {
+        "path": "tools/openofc_solver/test_m5i_normal_normal_screening.py",
+        "sha256": "0969f1b3dd7f83e2cfd761bcd194ddfd0236d397a7dcd5557ffd75fb2727ddb5"
+      }
+    ],
+    "sha256": "96a0c95cd91db3988c91bb2731f23f002cc4a9a65f13bfabfbdacd059691a746"
+  },
+  "sha256": "b9ea9a555b2bc5ab9aee52476006ed035877b10e1a8830d6cd630673d464098c",
+  "summary": {
+    "certification_claimed": false,
+    "max_observed_deviation_gain": 1.296875,
+    "ready_for_real_bellman": 0,
+    "routes_screened": 2,
+    "states": [
+      "B0:P0F0:P1F0",
+      "B1:P0F0:P1F0"
+    ]
+  }
+}

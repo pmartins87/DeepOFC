@@ -1,19 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import replace
-
 from hu_continuation import (
     KERNEL_FANTASY_FANTASY,
     KERNEL_NORMAL_FANTASY,
     KERNEL_NORMAL_NORMAL,
     all_states,
     hand_kernel_kind,
-    zero_continuation_values,
 )
 from fantasy_fantasy_payoff import continuation_fingerprint
 from m4z_outer_bellman import OneHandOracleResult, OracleRegistry
 from m5c_route_certification import (
     EVIDENCE_HELDOUT,
+    EVIDENCE_SCREENING,
     EVIDENCE_TEST,
     STATUS_BLOCKED,
     STATUS_READY,
@@ -125,7 +123,6 @@ def test_synthetic_evidence_can_never_become_real_route() -> None:
         evidence(KERNEL_NORMAL_NORMAL, evidence_kind=EVIDENCE_TEST),
         thresholds(),
     )
-    # Synthetic evidence is explicitly distinguishable even if every number is small.
     assert cert.status in (STATUS_BLOCKED, STATUS_TEST_ONLY)
     assert not cert.ready_for_real_bellman
 
@@ -148,6 +145,26 @@ def test_synthetic_evidence_can_never_become_real_route() -> None:
         pass
     else:
         raise AssertionError("synthetic M5C evidence reached a REAL Bellman route")
+
+
+def test_screening_lower_bound_can_never_become_real_route() -> None:
+    cert = certify_route(
+        evidence(KERNEL_NORMAL_NORMAL, evidence_kind=EVIDENCE_SCREENING),
+        thresholds(),
+    )
+    assert cert.status == STATUS_BLOCKED
+    assert not cert.ready_for_real_bellman
+    assert "EVIDENCE_SCREENING_LOWER_BOUND_NOT_CERTIFYING" in cert.failures
+
+    class DummyOracle:
+        oracle_id = cert.oracle_id
+
+    try:
+        register_certified_route(OracleRegistry(), DummyOracle(), cert)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("screening-only M5C evidence reached a REAL Bellman route")
 
 
 def test_fantasy_evidence_requires_support_and_model_error() -> None:
@@ -200,6 +217,7 @@ def main() -> None:
     test_one_failed_strategic_metric_blocks_route()
     test_insufficient_heldout_provenance_blocks_route()
     test_synthetic_evidence_can_never_become_real_route()
+    test_screening_lower_bound_can_never_become_real_route()
     test_fantasy_evidence_requires_support_and_model_error()
     test_certificate_is_bound_to_oracle_identity()
     test_summary_requires_exact_50_state_surface()
