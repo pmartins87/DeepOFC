@@ -12,7 +12,7 @@ from collections import Counter, deque
 from pathlib import Path
 from typing import Iterable
 
-SCHEMA = "deepofc-openofc-solver-inventory-v1"
+SCHEMA = "deepofc-openofc-solver-inventory-v2"
 STAGING_PREFIX = "tools/openofc_solver/"
 WORKFLOW_PREFIX = ".github/workflows/"
 
@@ -26,7 +26,6 @@ def git_ls_tree(source_root: Path, commit: str, prefixes: Iterable[str]) -> dict
     out = subprocess.check_output(cmd, text=True, encoding="utf-8")
     result: dict[str, dict[str, object]] = {}
     for line in out.splitlines():
-        # <mode> <type> <object> <size>\t<file>
         meta, path = line.split("\t", 1)
         mode, obj_type, blob_sha, size = meta.split()
         result[path] = {
@@ -92,6 +91,60 @@ def is_current_code_root(path: str) -> bool:
     return False
 
 
+def dependency_closure(start: Iterable[str], records: dict[str, dict[str, object]]) -> set[str]:
+    closure = set(start)
+    q = deque(sorted(closure))
+    while q:
+        p = q.popleft()
+        for dep in records[p]["local_imports"]:  # type: ignore[index]
+            if dep not in closure:
+                closure.add(dep)
+                q.append(dep)
+    return closure
+
+
+def fixed_point_migration_set(
+    initial_closure: set[str], solver_paths: list[str], records: dict[str, dict[str, object]]
+) -> set[str]:
+    """Close migration over selected tests and their imports until stable.
+
+    G1 v1 added tests for migrated modules after computing the dependency closure.
+    Behavioral equivalence exposed the consequence: a newly selected test could
+    import a helper/source module that never entered the migration set. v2 makes
+    selection a fixed point: selected Python -> local imports, and every selected
+    module -> its matching test, repeatedly until no new files appear.
+    """
+    selected = set(initial_closure)
+    selected.update(p for p in solver_paths if p.endswith(".md") and is_current_contract(p))
+
+    while True:
+        before = set(selected)
+
+        # Any local dependency of any selected Python file is part of the migration.
+        selected |= dependency_closure(
+            (p for p in selected if p.endswith(".py")), records
+        )
+
+        # Preserve the direct test for every migrated implementation/helper module.
+        migrated_module_stems = {
+            Path(p).stem
+            for p in selected
+            if p.endswith(".py") and not Path(p).name.startswith("test_")
+        }
+        for p in solver_paths:
+            name = Path(p).name
+            if name.startswith("test_") and p.endswith(".py") and Path(p).stem[5:] in migrated_module_stems:
+                selected.add(p)
+
+        # The newly selected tests may themselves pull further local dependencies.
+        selected |= dependency_closure(
+            (p for p in selected if p.endswith(".py")), records
+        )
+
+        if selected == before:
+            return selected
+
+
 def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
     meta = git_ls_tree(source_root, commit, ["tools/openofc_solver", ".github/workflows"])
     solver_paths = sorted(p for p in meta if p.startswith(STAGING_PREFIX))
@@ -122,31 +175,23 @@ def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
         )
         records[p] = rec
 
-    # Dependency closure begins at the continuation/Bellman M4U..M5G implementation/test roots.
     roots = sorted(p for p in solver_paths if is_current_code_root(p))
-    closure: set[str] = set(roots)
-    q = deque(roots)
-    while q:
-        p = q.popleft()
-        for dep in records[p]["local_imports"]:  # type: ignore[index]
-            if dep not in closure:
-                closure.add(dep)
-                q.append(dep)
+    initial_closure = dependency_closure(roots, records)
+    selected = fixed_point_migration_set(initial_closure, solver_paths, records)
 
-    # Keep all M4/M5 contracts with the migrated strategic lineage. Keep tests for any migrated
-    # module even when the test itself was not a direct current root.
-    migrated_module_stems = {Path(p).stem for p in closure if p.endswith(".py") and not Path(p).name.startswith("test_")}
     for p in solver_paths:
-        name = Path(p).name
-        if p in closure or (p.endswith(".md") and is_current_contract(p)):
+        if p in initial_closure:
             disposition = "migrate"
-            reason = "current M4/M5 lineage or transitive local dependency"
-        elif name.startswith("test_") and Path(p).stem[5:] in migrated_module_stems:
+            reason = "current M4/M5 lineage or initial transitive local dependency"
+        elif p.endswith(".md") and is_current_contract(p):
             disposition = "migrate"
-            reason = "test for a migrated dependency module"
+            reason = "current M4/M5 contract"
+        elif p in selected:
+            disposition = "migrate"
+            reason = "fixed-point dependency/test closure of migrated strategic tree"
         else:
             disposition = "historical"
-            reason = "preserved staging history; not in current M4U-M5G dependency closure"
+            reason = "preserved staging history; not in fixed-point M4U-M5G migration closure"
         records[p]["migration_disposition"] = disposition
         records[p]["disposition_reason"] = reason
 
@@ -169,6 +214,7 @@ def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
     role_counts = Counter(str(x["role"]) for x in file_list)
     disposition_counts = Counter(str(x["migration_disposition"]) for x in file_list)
     files_digest = sha256_bytes(json.dumps(file_list, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+    final_python_count = sum(1 for p in selected if p.endswith(".py"))
 
     payload: dict[str, object] = {
         "schema": SCHEMA,
@@ -182,9 +228,14 @@ def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
         ).strip(),
         "policy": {
             "roots": roots,
-            "dependency_closure_count": len(closure),
+            "initial_root_dependency_closure_count": len(initial_closure),
+            "final_python_dependency_test_closure_count": final_python_count,
+            "dependency_closure_fixed_point": True,
             "all_m4_m5_contracts_migrate": True,
+            "tests_for_migrated_modules_migrate": True,
+            "selected_test_dependencies_migrate": True,
             "nonclosure_files_default": "historical",
+            "v2_correction_reason": "old-vs-new equivalence exposed test_engine.py -> teacher_search.py missing from v1 post-test dependency closure",
         },
         "summary": {
             "solver_subtree_file_count": len(file_list),
@@ -198,6 +249,7 @@ def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
             "m5e_present": "tools/openofc_solver/m5e_fantasy_route_certification.py" in records,
             "m5f_present": "tools/openofc_solver/m5f_fantasy_heldout_evidence.py" in records,
             "m5g_present": "tools/openofc_solver/m5g_full_registry_factory.py" in records,
+            "teacher_search_selected": "tools/openofc_solver/teacher_search.py" in selected,
             "strategic_quality_note": "M5D-M5G architecture/source presence does not imply real route evidence or production certification.",
         },
         "files": file_list,
@@ -205,7 +257,7 @@ def build(source_root: Path, commit: str) -> tuple[dict[str, object], str]:
     }
 
     summary = payload["summary"]  # type: ignore[assignment]
-    md = f"""# OpenOFC solver staging inventory — c21c3c4\n\nFrozen source: `pmartins87/myoh_private@{commit}`\n\nThis inventory is generated by `tools/migration/build_openofc_solver_inventory.py`. It is an ownership/provenance artifact, not a strategic certification.\n\n## Counts\n\n- solver-subtree files: **{summary['solver_subtree_file_count']}**\n- current-root dependency closure: **{len(closure)}** Python/source-test files before associated contracts/tests are added\n- disposition migrate: **{disposition_counts.get('migrate', 0)}**\n- disposition historical: **{disposition_counts.get('historical', 0)}**\n- related M4/M5 workflows: **{len(workflows)}**\n- files payload SHA-256: `{files_digest}`\n\nRole counts: `{json.dumps(dict(sorted(role_counts.items())), sort_keys=True)}`\n\n## Material finding\n\nThe exact frozen tree contains implemented/tested **M5D, M5E, M5F and M5G** source/contracts in addition to M5C. This corrects the first consolidation checkpoint, which described the architectural staging frontier too narrowly as M5C. Their presence does **not** mean strategic promotion has passed: M5G explicitly requires 50/50 real-certified exact-V routes, and the next work remains real held-out evidence plus defensible thresholds before a real dynamic Bellman trace.\n\n## Migration rule\n\nFiles marked `migrate` are current M4/M5 lineage, direct transitive local dependencies, associated M4/M5 contracts, or tests of migrated dependency modules. Other preserved files are marked `historical` for review rather than silently copied into the new canonical solver namespace.\n\nThe machine-readable inventory contains every source path, Git blob SHA, SHA-256, size, role, local imports, disposition and disposition reason.\n"""
+    md = f"""# OpenOFC solver staging inventory — c21c3c4\n\nFrozen source: `pmartins87/myoh_private@{commit}`\n\nSchema: `{SCHEMA}`\n\nThis inventory is generated by `tools/migration/build_openofc_solver_inventory.py`. It is an ownership/provenance artifact, not a strategic certification.\n\n## Counts\n\n- solver-subtree files: **{summary['solver_subtree_file_count']}**\n- initial M4U–M5G root dependency closure: **{len(initial_closure)}**\n- final fixed-point selected Python/test closure: **{final_python_count}**\n- disposition migrate: **{disposition_counts.get('migrate', 0)}**\n- disposition historical: **{disposition_counts.get('historical', 0)}**\n- related M4/M5 workflows: **{len(workflows)}**\n- files payload SHA-256: `{files_digest}`\n\nRole counts: `{json.dumps(dict(sorted(role_counts.items())), sort_keys=True)}`\n\n## G1 v2 correction\n\nThe first behavioral old-vs-new gate passed 19/20 probes and exposed one inventory-closure bug: migrated `test_engine.py` imports `teacher_search.py`, while G1 v1 added tests after dependency closure and therefore failed to close dependencies introduced by those tests. v2 uses a fixed-point rule over **selected Python -> local imports** and **migrated module -> matching test** until the set is stable. This is a provenance correction, not a solver semantic change.\n\n## Material finding\n\nThe exact frozen tree contains implemented/tested **M5D, M5E, M5F and M5G** source/contracts in addition to M5C. Their presence does **not** mean strategic promotion has passed: M5G explicitly requires 50/50 real-certified exact-V routes, and the next strategic work remains real held-out evidence plus defensible thresholds before a real dynamic Bellman trace.\n\n## Migration rule\n\nFiles marked `migrate` are the fixed-point closure of current M4/M5 lineage, its local dependencies, associated M4/M5 contracts, matching tests, and dependencies introduced by those selected tests. Other preserved files remain `historical` for audit rather than being silently copied.\n"""
     return payload, md
 
 
