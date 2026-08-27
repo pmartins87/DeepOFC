@@ -69,6 +69,7 @@ class _ConstantTerminalEvaluator:
     def evaluate(self, state, continuation_values):
         result = type("ConstantTerminalResult", (), {})()
         result.utility_for_normal = self.value
+        result.used_exact = True
         return result
 
 
