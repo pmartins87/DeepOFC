@@ -34,13 +34,17 @@ This materially changes the runtime diagnosis. F17 is not merely a slightly larg
 
 This microprobe does not prove that every F17 world is 33.91x slower, and it is not strategic evidence. It does prove that a concrete deterministic F17 terminal world has a very large cold exact-evaluation cost relative to its F14 companion under the current implementation.
 
+## Follow-up instrumentation
+
+The F17 phase-timed calibration is now schema `openofc-m5n-normal-fantasy-runtime-calibration-f17-v2` and flushes `start` / `done` markers around candidate materialization, challenger materialization and paired screening. A future timeout will therefore identify the first unfinished phase even if no JSON artifact is emitted.
+
 ## Decision
 
 Do not rerun the full F17 strategic pilot unchanged.
 
 The next runtime work is:
 
-1. preserve flushed phase markers in the F17 calibration so future timeouts are attributable;
+1. use the heartbeat calibration to identify which complete M5B/M5N phase dominates;
 2. audit M4H one-pass frontier cache keys and reuse opportunities across repeated terminal calls;
 3. determine whether expensive F17 work can be decomposed or memoized without changing exact semantics;
 4. if an approximation is considered, use only a separately held-out, SHA-bound certified envelope with exact fallback. An approximate terminal model cannot silently replace M4H authority.
