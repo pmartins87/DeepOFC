@@ -48,6 +48,8 @@ This does not mean exploration is strategically bad. It means that using a worst
 
 The next certification research gate is the **support-free martingale prerequisite audit**: before importing any confidence-sequence formula, establish on exact reduced games which sampled regret quantities are unbiased, what their per-iteration increment envelope is, how predictable variance can be computed or upper-bounded, and whether the required reach-weighted average strategy exists with the exact semantics required by the regret-to-exploitability theorem. Only after those prerequisites are machine-checked may a Freedman/empirical-Bernstein/confidence-sequence certificate be instantiated.
 
+The dedicated prerequisite workflow is `33118314904`.
+
 ## Authority firewall
 
 - no M4Z state is certified by this result;
