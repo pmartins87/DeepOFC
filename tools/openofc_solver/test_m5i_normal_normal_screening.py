@@ -40,8 +40,7 @@ SCREEN_IMPL_SHA = "b" * 64
 SCREEN_VALIDATION_SHA = "c" * 64
 
 
-def candidate() -> NormalNormalFixedPolicyOracle:
-    values = zero_continuation_values()
+def candidate_for_values(values) -> NormalNormalFixedPolicyOracle:
     model = SparseActionAdvantageModel(buckets=8, seed=77)
     snapshot = freeze_policy_snapshot(
         model,
@@ -54,6 +53,10 @@ def candidate() -> NormalNormalFixedPolicyOracle:
         samples=2,
         base_seed=123,
     )
+
+
+def candidate() -> NormalNormalFixedPolicyOracle:
+    return candidate_for_values(zero_continuation_values())
 
 
 def tiny_config() -> NormalNormalScreeningConfig:
@@ -192,6 +195,22 @@ def test_wrong_kernel_is_rejected() -> None:
             heldout_seeds(),
             tiny_config(),
             provenance="wrong kernel",
+        )
+
+
+def test_candidate_snapshot_must_match_screened_continuation_vector() -> None:
+    state = HUContinuationState(0, 0, 0)
+    trained_values = zero_continuation_values()
+    screened_values = dict(trained_values)
+    screened_values[HUContinuationState(1, 0, 0)] = 0.25
+    with pytest.raises(ValueError, match="candidate snapshot is stale"):
+        screen_normal_normal_candidate(
+            candidate_for_values(trained_values),
+            state,
+            screened_values,
+            heldout_seeds(),
+            tiny_config(),
+            provenance="stale exact-V candidate regression",
         )
 
 
