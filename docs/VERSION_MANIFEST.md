@@ -1,7 +1,7 @@
 # DeepOFC version and provenance manifest
 
-Manifest version: `2026-08-27.3`
-Status: `STRATEGIC_MIGRATION_EQUIVALENCE_PASS`
+Manifest version: `2026-08-27.4`
+Status: `STRATEGIC_AUTHORITY_TRANSFER_COMPLETE`
 
 This file answers a simple question with immutable references: **which repository/ref owns each part of the project, and what evidence supports that authority?**
 
@@ -10,14 +10,14 @@ This file answers a simple question with immutable references: **which repositor
 | Component | Repository | Canonical branch/ref | Authority |
 |---|---|---|---|
 | Project governance / roadmap / handoff | `pmartins87/DeepOFC` | `main` | DeepOFC |
-| Rules / model / scoring / simulator / strategic solver | `pmartins87/DeepOFC` | `main` after the migration/equivalence change is merged | DeepOFC strategic authority transfer is evidenced and ready |
-| Frozen M4/M5 strategic provenance | `pmartins87/myoh_private` | `c21c3c4f1017c83df07eb22230318a8131bf40d1` | historical immutable provenance |
+| Rules / model / scoring / simulator / strategic solver | `pmartins87/DeepOFC` | `main` | DeepOFC |
+| Frozen M4/M5 strategic provenance | `pmartins87/myoh_private` | `c21c3c4f1017c83df07eb22230318a8131bf40d1` | historical immutable provenance only |
 | OpenHoldem runtime integration | `pmartins87/myoh_private` | `deepofc` plus explicitly named experiment branches | myoh_private |
 | Runtime field package | `pmartins87/myoh_private` | must be source-bound | unresolved as one canonical latest package |
 
-The migration/equivalence branch is `migration/openofc-solver-code-c21c3c4`. This manifest is part of that authority-transfer change: once present on `DeepOFC/main`, the former temporary M4/M5 strategic staging exception is closed.
+The former temporary M4/M5 strategic staging exception is **closed**. Strategic authority transferred to `DeepOFC/main` through PR #13, merged as `4842d01dc68b14bae5a083d8ae0138297d7a0783`, with post-merge canonical CI run `33074839933` PASS.
 
-## Frozen strategic source
+## Frozen strategic source provenance
 
 - repository: `pmartins87/myoh_private`
 - branch: `openofc-m4v-continuation-transport`
@@ -44,7 +44,7 @@ The exact frozen tree contains architecture through **M5G**. The HEAD subject is
 
 ### M5D–M5G
 
-The frozen tree contains:
+The migrated tree contains:
 
 - M5D dynamic exact-V certified Bellman orchestration;
 - M5E Fantasy×Fantasy certification bridge;
@@ -53,17 +53,15 @@ The frozen tree contains:
 
 M5G requires already certified routes and cannot manufacture real evidence, choose production thresholds or certify the complete game by itself.
 
-## Corrected strategic migration identity
+## Completed strategic migration identity
 
 ### G1 v1 — superseded
 
-The first inventory selection was not dependency-closed after matching tests were added. The first behavioral-equivalence run `33070445519` passed **19/20** probes and exposed the missing `test_engine.py -> teacher_search.py` dependency on the target side. Frozen source behavior remained green. This is recorded as an inventory-policy defect, not a semantic divergence.
+The first inventory selection was not dependency-closed after matching tests were added. Behavioral-equivalence run `33070445519` passed **19/20** probes and exposed the missing `test_engine.py -> teacher_search.py` dependency on the target side. Frozen source behavior remained green. This is recorded as an inventory-policy defect, not semantic divergence.
 
-### G1 v2 — fixed-point inventory
+### G1 v2 — fixed-point inventory — PASS
 
 Workflow run `33070689091`: **PASS**.
-
-Frozen inventory:
 
 - schema: `deepofc-openofc-solver-inventory-v2`;
 - solver-subtree files: **187**;
@@ -75,7 +73,7 @@ Frozen inventory:
 
 Selection is a fixed point over local imports and matching tests. `teacher_search.py` is explicitly inside the corrected selected set.
 
-### G2/G3 — pure migration
+### G2/G3 — pure migration / independent migrated tests — PASS
 
 Corrected pure migration run `33070802793`: **PASS**.
 
@@ -83,14 +81,15 @@ Corrected pure migration run `33070802793`: **PASS**.
 - all source/target files byte-identical: **true**;
 - provenance canonical SHA-256: `4041f7560f9a94b5e85b9c1c986f39e690bca5e3635328fad1bff1fdd1b11766`;
 - materialized solver commit: `0c0ae8d77c8ca35c344f59c1515f6712b2ca1a2a`;
-- generated Python bytecode is removed before persistence and is not migration evidence.
+- Python compile, M5 core tests, migrated M5 surface and `test_engine.py` regression: PASS;
+- generated Python bytecode removed before persistence.
 
 Primary artifacts:
 
 - `docs/migration/openofc_solver_provenance_c21c3c4.json`
 - `docs/migration/OPENOFC_SOLVER_MIGRATION_C21C3C4.md`
 
-### G4 — old-vs-new behavioral equivalence
+### G4 — old-vs-new behavioral equivalence — PASS
 
 Workflow run `33070910873`: **PASS**.
 
@@ -98,12 +97,10 @@ Workflow run `33070910873`: **PASS**.
 - Python: `3.11.16`;
 - NumPy: `2.4.6`;
 - `PYTHONHASHSEED=0` and single-thread numerical-library controls;
-- tests: **20**;
 - frozen source PASS: **20/20**;
 - migrated target PASS: **20/20**;
 - normalized stdout/stderr equality: **20/20**;
 - equivalence report SHA-256: `935162877ad8f7821fa106ba7cd2f5bfc588a60f2273c34443eb805926e93664`;
-- gate-start target commit: `dd5839c364e7a9d18b97ab580c1ad38d9814ac9f`;
 - persisted equivalence evidence commit: `d45a9b77df8d75c1feaf45c8354ea152cd311355`.
 
 Primary artifacts:
@@ -111,7 +108,26 @@ Primary artifacts:
 - `docs/migration/openofc_solver_equivalence_c21c3c4.json`
 - `docs/migration/OPENOFC_SOLVER_EQUIVALENCE_C21C3C4.md`
 
-The 20-probe suite covers engine behavior, HU continuation, M4U–M4Z, M5A–M5G and Normal×Fantasy/Fantasy×Fantasy kernel/payoff paths.
+### G5 — canonical DeepOFC PR CI — PASS
+
+PR #13 was opened from `migration/openofc-solver-code-c21c3c4` to `main`.
+
+The first PR-level CI run correctly failed because repository-level `requirements-dev.txt` did not yet declare NumPy, which newly migrated tests import. This was an integration dependency declaration defect. `numpy==2.4.6` was then added to match the proven migration/equivalence environment.
+
+- corrected PR head: `c364a3056349ba627f273265c7c7a742b2d72c99`;
+- canonical PR CI run: `33074562167` — **PASS**.
+
+### G6 — merge / authority transfer — PASS
+
+- PR: `#13`;
+- merge commit: `4842d01dc68b14bae5a083d8ae0138297d7a0783`;
+- post-merge `main` CI run: `33074839933` — **PASS**;
+- authority decision: `DeepOFC/main` owns active M4/M5 strategic source;
+- `myoh_private@c21c3c4...` is historical provenance only.
+
+Final transfer record:
+
+- `docs/migration/OPENOFC_SOLVER_AUTHORITY_TRANSFER_C21C3C4.md`
 
 ## Strategic certification identity rule
 
@@ -125,7 +141,7 @@ A complete real Bellman surface still requires **50 state-local real-certified e
 
 Required evidence includes held-out seeds/samples, value standard error, unilateral-deviation gain, and for Fantasy × Fantasy the exact-teacher support gap plus held-out M4W model/action-value error.
 
-The next strategic authority after repository transfer is therefore the **evidence/certification protocol**, not an unconditional production policy.
+The next strategic authority is therefore the **real evidence/certification protocol**, not an unconditional production policy.
 
 ## OpenHoldem runtime references
 
