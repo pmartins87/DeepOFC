@@ -1,0 +1,142 @@
+{
+  "authority": "REDUCED_GAME_REGRET_BOUND_PILOT_NOT_PRODUCTION_CERTIFICATION",
+  "family_checkpoints": {
+    "hidden-discard": [1],
+    "joker": [1, 2, 4, 8]
+  },
+  "rows": [
+    {
+      "bound_to_exact_nash_conv_ratio": 3.7626886145404606,
+      "certificate": {
+        "authority": "EXACT_FULL_TREE_CFR_REGRET_BOUND_FEASIBILITY_NOT_PRODUCTION_CERTIFICATION",
+        "bound_verified": true,
+        "exact_exploitability": 1.125,
+        "exact_nash_conv": 2.25,
+        "exploitability_upper_bound": 4.233024691358018,
+        "iterations": 1,
+        "nash_conv_bound_slack": 6.216049382716037,
+        "nash_conv_upper_bound": 8.466049382716037,
+        "player0": {"average_external_regret_upper_bound": 4.233024691358017, "infosets": 4892, "player": 0, "positive_max_cumulative_cf_regret_sum": 4.233024691358017},
+        "player1": {"average_external_regret_upper_bound": 4.233024691358019, "infosets": 4892, "player": 1, "positive_max_cumulative_cf_regret_sum": 4.233024691358019},
+        "schema": "openofc-m5o-two-round-regret-certificate-v1",
+        "sha256": "8cb8f9f69b79286de27ea432ce8997bdc15cdeb41ca4979d0d5281133c32b286",
+        "tolerance": 1e-09
+      },
+      "checkpoint": 1,
+      "family_id": "joker",
+      "production_certification_eligible": false
+    },
+    {
+      "bound_to_exact_nash_conv_ratio": 3.3619249418272723,
+      "certificate": {
+        "authority": "EXACT_FULL_TREE_CFR_REGRET_BOUND_FEASIBILITY_NOT_PRODUCTION_CERTIFICATION",
+        "bound_verified": true,
+        "exact_exploitability": 0.6589001690735535,
+        "exact_nash_conv": 1.317800338147107,
+        "exploitability_upper_bound": 2.2151729125825863,
+        "iterations": 2,
+        "nash_conv_bound_slack": 3.1125454870180658,
+        "nash_conv_upper_bound": 4.430345825165173,
+        "player0": {"average_external_regret_upper_bound": 2.215172912582585, "infosets": 4892, "player": 0, "positive_max_cumulative_cf_regret_sum": 4.43034582516517},
+        "player1": {"average_external_regret_upper_bound": 2.215172912582587, "infosets": 4892, "player": 1, "positive_max_cumulative_cf_regret_sum": 4.430345825165174},
+        "schema": "openofc-m5o-two-round-regret-certificate-v1",
+        "sha256": "a7e179e547f764e1581fe4673ef234b7fff3e9a2fc087d9a987977225b5a96cc",
+        "tolerance": 1e-09
+      },
+      "checkpoint": 2,
+      "family_id": "joker",
+      "production_certification_eligible": false
+    },
+    {
+      "bound_to_exact_nash_conv_ratio": 3.1461269308034785,
+      "certificate": {
+        "authority": "EXACT_FULL_TREE_CFR_REGRET_BOUND_FEASIBILITY_NOT_PRODUCTION_CERTIFICATION",
+        "bound_verified": true,
+        "exact_exploitability": 0.36257705012032826,
+        "exact_nash_conv": 0.7251541002406565,
+        "exploitability_upper_bound": 1.1407134218748474,
+        "iterations": 4,
+        "nash_conv_bound_slack": 1.5562727435090382,
+        "nash_conv_upper_bound": 2.2814268437496947,
+        "player0": {"average_external_regret_upper_bound": 1.1407134218748471, "infosets": 4892, "player": 0, "positive_max_cumulative_cf_regret_sum": 4.562853687499389},
+        "player1": {"average_external_regret_upper_bound": 1.1407134218748474, "infosets": 4892, "player": 1, "positive_max_cumulative_cf_regret_sum": 4.5628536874993895},
+        "schema": "openofc-m5o-two-round-regret-certificate-v1",
+        "sha256": "51d8a865f4068eaa1c65963e7547d1baf60e43ee81260a111c49d4aa24d3ad95",
+        "tolerance": 1e-09
+      },
+      "checkpoint": 4,
+      "family_id": "joker",
+      "production_certification_eligible": false
+    },
+    {
+      "bound_to_exact_nash_conv_ratio": 3.0913047482705127,
+      "certificate": {
+        "authority": "EXACT_FULL_TREE_CFR_REGRET_BOUND_FEASIBILITY_NOT_PRODUCTION_CERTIFICATION",
+        "bound_verified": true,
+        "exact_exploitability": 0.18604088485861042,
+        "exact_nash_conv": 0.37208176971722084,
+        "exploitability_upper_bound": 0.5751090707358701,
+        "iterations": 8,
+        "nash_conv_bound_slack": 0.7781363717545194,
+        "nash_conv_upper_bound": 1.1502181414717403,
+        "player0": {"average_external_regret_upper_bound": 0.5751090707358703, "infosets": 4892, "player": 0, "positive_max_cumulative_cf_regret_sum": 4.600872565886962},
+        "player1": {"average_external_regret_upper_bound": 0.57510907073587, "infosets": 4892, "player": 1, "positive_max_cumulative_cf_regret_sum": 4.60087256588696},
+        "schema": "openofc-m5o-two-round-regret-certificate-v1",
+        "sha256": "959901909bb8f25fea0ddb18882f620ae55d6b039e71577c9f460403b29e58ab",
+        "tolerance": 1e-09
+      },
+      "checkpoint": 8,
+      "family_id": "joker",
+      "production_certification_eligible": false
+    },
+    {
+      "bound_to_exact_nash_conv_ratio": 7.009136735979096,
+      "certificate": {
+        "authority": "EXACT_FULL_TREE_CFR_REGRET_BOUND_FEASIBILITY_NOT_PRODUCTION_CERTIFICATION",
+        "bound_verified": true,
+        "exact_exploitability": 2.099206349206348,
+        "exact_nash_conv": 4.198412698412696,
+        "exploitability_upper_bound": 14.713624338622777,
+        "iterations": 1,
+        "nash_conv_bound_slack": 25.22883597883286,
+        "nash_conv_upper_bound": 29.427248677245554,
+        "player0": {"average_external_regret_upper_bound": 14.713624338623053, "infosets": 33252, "player": 0, "positive_max_cumulative_cf_regret_sum": 14.713624338623053},
+        "player1": {"average_external_regret_upper_bound": 14.713624338622502, "infosets": 33252, "player": 1, "positive_max_cumulative_cf_regret_sum": 14.713624338622502},
+        "schema": "openofc-m5o-two-round-regret-certificate-v1",
+        "sha256": "6d448134d23b7a726d4042a34bf225bbd9acdce2913359e2592759311349a6ec",
+        "tolerance": 1e-09
+      },
+      "checkpoint": 1,
+      "family_id": "hidden-discard",
+      "production_certification_eligible": false
+    }
+  ],
+  "schema": "openofc-m5o-regret-certificate-pilot-v1",
+  "sha256": "d0a9803553a5c74e1a0019d906e52b7df9c78da89f949c0fe0d8d580bc5d4e68",
+  "solver_variant": "cfr",
+  "source_manifest": {
+    "files": [
+      {"path": "deepofc/hu_two_round.py", "sha256": "a876c8fdfecc78c2670847a3c8b23f4a3ce4395845eae32a3bd7fd9082c657c3"},
+      {"path": "deepofc/hu_two_round_br.py", "sha256": "079bb42af805d0fb78b367bd4d244beabe0d783e9eee55731a8cbdca702886c1"},
+      {"path": "deepofc/hu_two_round_cfr.py", "sha256": "e1d1fe65d68d47c07e2757124a3516fd6e53c8be8c05ac6f8458533064d9fba1"},
+      {"path": "deepofc/hu_two_round_hidden_discard.py", "sha256": "10ecfea1a9d80a6140b81fd00ec38b361ffad7a02cf0b91f664c2ef97ccd2467"},
+      {"path": "deepofc/hu_two_round_joker.py", "sha256": "c0c3c8f91b957058cba21be932723e430289925bc2600afbf1deaf18704d3c84"},
+      {"path": "tools/openofc_solver/M5O_REGRET_CERTIFICATE_FEASIBILITY_CONTRACT.md", "sha256": "5c5ec76256cbd4e5f471cb6b23e5918bbdff5722d9da756d5a98b6a9290c2b7a"},
+      {"path": "tools/openofc_solver/m5o_regret_certificate.py", "sha256": "6436d8e4694d62469e70f21a286cc1daac9f3bc7bb92dbb8cb1c121e6a23e42d"},
+      {"path": "tools/openofc_solver/run_m5o_regret_certificate_pilot.py", "sha256": "851fb98b6f38398e87984161fc3c17b89c93a119fd7921009f5767d2176782be"},
+      {"path": "tools/openofc_solver/test_m5o_regret_certificate.py", "sha256": "e85f9e98a995dbabc2dd7930f4b8fc3a782fc89c551fbcf5e267305fa2ee00ac"}
+    ],
+    "sha256": "27ccd23e7f8b2cf480f1d0f1e6b777f1c8c142128b416ccfb7c0ea0c431d44d8"
+  },
+  "summary": {
+    "all_bounds_verified": true,
+    "families": ["hidden-discard", "joker"],
+    "max_bound_slack": 25.22883597883286,
+    "max_bound_to_exact_ratio": 7.009136735979096,
+    "mccfr_transfer_claimed": false,
+    "min_bound_slack": 0.7781363717545194,
+    "min_bound_to_exact_ratio": 3.0913047482705127,
+    "production_certification_eligible": false,
+    "rows": 5
+  }
+}

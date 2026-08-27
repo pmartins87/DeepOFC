@@ -9,7 +9,7 @@ from .hu_two_round import HUTwoRoundSubgame, TwoRoundInfoSet
 from .hu_two_round_br import exact_nash_conv
 
 
-CFRVariant = Literal["cfr_plus", "dcfr"]
+CFRVariant = Literal["cfr", "cfr_plus", "dcfr"]
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,11 @@ class TwoRoundFullTreeCFR:
     Counterfactual regret weights therefore explicitly exclude the acting
     player's own earlier reach while retaining chance and opponent reach.
     Average-strategy weights use the player's own sequence reach.
+
+    ``variant='cfr'`` is the undiscounted, unclipped reference mode.  It keeps
+    ordinary cumulative counterfactual regrets and an unweighted standard CFR
+    average, which is the M5O reduced-game surface used for regret-certificate
+    accounting.  CFR+ and DCFR retain their existing update/averaging semantics.
     """
 
     def __init__(
@@ -40,7 +45,7 @@ class TwoRoundFullTreeCFR:
         dcfr_beta: float = 0.0,
         dcfr_gamma: float = 2.0,
     ) -> None:
-        if variant not in {"cfr_plus", "dcfr"}:
+        if variant not in {"cfr", "cfr_plus", "dcfr"}:
             raise ValueError(f"unsupported variant: {variant}")
         self.game = game
         self.variant = variant
@@ -283,11 +288,12 @@ class TwoRoundFullTreeCFR:
                     raise FloatingPointError("non-finite two-round regret")
                 values[action] = updated
 
-        average_weight = (
-            float(t)
-            if self.variant == "cfr_plus"
-            else float(t) ** self.dcfr_gamma
-        )
+        if self.variant == "cfr_plus":
+            average_weight = float(t)
+        elif self.variant == "dcfr":
+            average_weight = float(t) ** self.dcfr_gamma
+        else:
+            average_weight = 1.0
         for info, delta in average_delta.items():
             totals = self.strategy_sum[info]
             for action, increment in delta.items():
