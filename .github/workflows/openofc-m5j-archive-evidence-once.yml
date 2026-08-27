@@ -1,0 +1,62 @@
+name: OpenOFC M5J archive evidence once
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - .github/workflows/openofc-m5j-archive-evidence-once.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: strategy/m5h-normal-heldout-evidence
+          fetch-depth: 0
+      - name: Download M5J artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/m5j-archive
+          mkdir -p /tmp/m5j-archive
+          gh run download 33083102421 \
+            --repo pmartins87/DeepOFC \
+            --name openofc-m5j-normal-normal-budget-ladder \
+            --dir /tmp/m5j-archive
+          test -f /tmp/m5j-archive/m5j_normal_normal_budget_ladder.json
+      - name: Verify evidence identity
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          p = Path('/tmp/m5j-archive/m5j_normal_normal_budget_ladder.json')
+          raw = hashlib.sha256(p.read_bytes()).hexdigest()
+          assert raw == 'e61869801a0b89c60b572a50d3c0ee105b0093cff6ec29a30d22b19c56c88d01', raw
+          data = json.loads(p.read_text(encoding='utf-8'))
+          unsigned = dict(data)
+          expected = unsigned.pop('sha256')
+          actual = hashlib.sha256(json.dumps(unsigned, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+          assert expected == '533f17a7ed0394339c14c2c89d86e57ff85ff487dfd9622f021fd3f56e1fe181'
+          assert actual == expected
+          assert data['authority'] == 'BUDGET_LADDER_DIAGNOSTIC_NOT_CERTIFICATION'
+          assert data['summary']['ready_for_real_bellman'] == 0
+          print('OPENOFC_M5J_ARCHIVE_IDENTITY=PASS')
+          PY
+      - name: Persist exact evidence and remove one-shot workflow
+        run: |
+          mkdir -p evidence/strategic
+          cp /tmp/m5j-archive/m5j_normal_normal_budget_ladder.json \
+            evidence/strategic/m5j_normal_normal_budget_ladder_2026-08-27.json
+          git rm .github/workflows/openofc-m5j-archive-evidence-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add evidence/strategic/m5j_normal_normal_budget_ladder_2026-08-27.json
+          git commit -m 'OpenOFC M5J: preserve raw ladder evidence'
+          git push origin HEAD:strategy/m5h-normal-heldout-evidence
