@@ -1,0 +1,52 @@
+name: OpenOFC M5J response overlap diagnostic
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - tools/openofc_solver/run_m5j_response_overlap_diagnostic.py
+      - .github/workflows/openofc-m5j-response-overlap-diagnostic.yml
+  workflow_dispatch:
+
+jobs:
+  overlap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run response-overlap diagnostic
+        run: |
+          PYTHONPATH=tools/openofc_solver \
+            python tools/openofc_solver/run_m5j_response_overlap_diagnostic.py
+      - name: Validate diagnostic authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5j_response_overlap_diagnostic.json').read_text(encoding='utf-8'))
+          assert data['authority'] == 'RESPONSE_OVERLAP_DIAGNOSTIC_NOT_CERTIFICATION'
+          assert data['candidate_budget'] == 256
+          assert data['response_budgets'] == [256, 1024]
+          assert data['summary']['rows'] == 8
+          assert data['summary']['certification_eligible'] is False
+          for row in data['rows']:
+              assert 0.0 <= row['heldout_visit_hit_rate'] <= 1.0
+              assert 0.0 <= row['heldout_unique_hit_rate'] <= 1.0
+              assert row['heldout_trained_hit_visits'] + row['heldout_fallback_visits'] == row['heldout_response_decision_visits']
+          print('OPENOFC_M5J_RESPONSE_OVERLAP_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5j-response-overlap-diagnostic
+          path: artifacts/m5j_response_overlap_diagnostic.json
+          if-no-files-found: error
+          retention-days: 14
