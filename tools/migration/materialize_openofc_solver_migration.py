@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Materialize the frozen OpenOFC strategic subtree into DeepOFC byte-for-byte.
+
+This is intentionally a pure ownership migration. Files selected by the checked-in
+G1 inventory are copied to the exact same relative paths. Any content drift fails.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+SCHEMA = "deepofc-openofc-solver-provenance-map-v1"
+EXPECTED_SOURCE_REPO = "pmartins87/myoh_private"
+EXPECTED_SOURCE_COMMIT = "c21c3c4f1017c83df07eb22230318a8131bf40d1"
+EXPECTED_FILES_PAYLOAD_SHA256 = "89a546aef6f367226cbaf9c6a54d886488519d88b0f1c7d07415db13df382e84"
+EXPECTED_MIGRATE_COUNT = 119
+PREFIX = "tools/openofc_solver/"
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def git_blob_sha1(data: bytes) -> str:
+    payload = f"blob {len(data)}\0".encode("ascii") + data
+    return hashlib.sha1(payload).hexdigest()
+
+
+def canonical_sha256(payload: object) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return sha256_bytes(raw)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--source-root", type=Path, required=True)
+    ap.add_argument("--target-root", type=Path, required=True)
+    ap.add_argument("--inventory", type=Path, required=True)
+    ap.add_argument("--provenance-output", type=Path, required=True)
+    ap.add_argument("--summary-output", type=Path, required=True)
+    args = ap.parse_args()
+
+    source_root = args.source_root.resolve()
+    target_root = args.target_root.resolve()
+    inventory = json.loads(args.inventory.read_text(encoding="utf-8"))
+
+    if inventory.get("source_repo") != EXPECTED_SOURCE_REPO:
+        raise SystemExit(f"unexpected source_repo: {inventory.get('source_repo')!r}")
+    if inventory.get("source_commit") != EXPECTED_SOURCE_COMMIT:
+        raise SystemExit(f"unexpected source_commit: {inventory.get('source_commit')!r}")
+    if inventory.get("summary", {}).get("files_payload_sha256") != EXPECTED_FILES_PAYLOAD_SHA256:
+        raise SystemExit("inventory files payload SHA-256 does not match frozen G1 value")
+
+    selected = [f for f in inventory["files"] if f.get("migration_disposition") == "migrate"]
+    selected.sort(key=lambda f: f["source_path"])
+    if len(selected) != EXPECTED_MIGRATE_COUNT:
+        raise SystemExit(f"expected {EXPECTED_MIGRATE_COUNT} migrate files, found {len(selected)}")
+
+    selected_paths = {str(f["source_path"]) for f in selected}
+    if len(selected_paths) != len(selected):
+        raise SystemExit("duplicate source path in migration inventory")
+    if any(not p.startswith(PREFIX) for p in selected_paths):
+        raise SystemExit("migration selection contains path outside tools/openofc_solver")
+
+    target_dir = target_root / "tools" / "openofc_solver"
+    if target_dir.exists():
+        existing = {
+            str(p.relative_to(target_root)).replace("\\", "/")
+            for p in target_dir.rglob("*")
+            if p.is_file()
+        }
+        unexpected = sorted(existing - selected_paths)
+        if unexpected:
+            raise SystemExit(f"target contains files outside frozen migration set: {unexpected[:10]}")
+
+    records: list[dict[str, object]] = []
+    for item in selected:
+        source_path = str(item["source_path"])
+        src = source_root / source_path
+        if not src.is_file():
+            raise SystemExit(f"missing frozen source file: {source_path}")
+        raw = src.read_bytes()
+        source_sha256 = sha256_bytes(raw)
+        source_blob = git_blob_sha1(raw)
+        if source_sha256 != item["file_sha256"]:
+            raise SystemExit(f"source SHA-256 drift: {source_path}")
+        if source_blob != item["blob_sha"]:
+            raise SystemExit(f"source Git blob drift: {source_path}")
+
+        dst = target_root / source_path
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes(raw)
+        target_raw = dst.read_bytes()
+        target_sha256 = sha256_bytes(target_raw)
+        target_blob = git_blob_sha1(target_raw)
+        if target_raw != raw or target_sha256 != source_sha256 or target_blob != source_blob:
+            raise SystemExit(f"byte-for-byte migration mismatch: {source_path}")
+
+        records.append(
+            {
+                "source_repo": EXPECTED_SOURCE_REPO,
+                "source_commit": EXPECTED_SOURCE_COMMIT,
+                "source_path": source_path,
+                "source_blob_sha1": source_blob,
+                "source_sha256": source_sha256,
+                "target_path": source_path,
+                "target_blob_sha1": target_blob,
+                "target_sha256": target_sha256,
+                "size": len(raw),
+                "role": item.get("role"),
+                "byte_identical": True,
+            }
+        )
+
+    records_sha = canonical_sha256(records)
+    provenance: dict[str, object] = {
+        "schema": SCHEMA,
+        "authority": "PURE_MIGRATION_PROVENANCE_NOT_AUTHORITY_TRANSFER",
+        "source_repo": EXPECTED_SOURCE_REPO,
+        "source_commit": EXPECTED_SOURCE_COMMIT,
+        "inventory_files_payload_sha256": EXPECTED_FILES_PAYLOAD_SHA256,
+        "migration_count": len(records),
+        "all_byte_identical": all(bool(r["byte_identical"]) for r in records),
+        "records_sha256": records_sha,
+        "records": records,
+    }
+    provenance_sha = canonical_sha256(provenance)
+    provenance["canonical_sha256_without_this_field"] = provenance_sha
+
+    args.provenance_output.parent.mkdir(parents=True, exist_ok=True)
+    args.summary_output.parent.mkdir(parents=True, exist_ok=True)
+    args.provenance_output.write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    roles: dict[str, int] = {}
+    for rec in records:
+        role = str(rec.get("role"))
+        roles[role] = roles.get(role, 0) + 1
+    summary = f"""# OpenOFC strategic solver pure migration — c21c3c4\n\nStatus: **BYTE_COPY_PASS**\n\nFrozen source: `{EXPECTED_SOURCE_REPO}@{EXPECTED_SOURCE_COMMIT}`\n\n- G1 inventory payload SHA-256: `{EXPECTED_FILES_PAYLOAD_SHA256}`\n- migrated files: **{len(records)}**\n- all source/target bytes identical: **true**\n- provenance-records SHA-256: `{records_sha}`\n- provenance object SHA-256 (before embedding self-reference field): `{provenance_sha}`\n- roles: `{json.dumps(dict(sorted(roles.items())), sort_keys=True)}`\n\nThe migration preserves the exact relative path `tools/openofc_solver/...` to avoid mixing namespace/import refactors with ownership transfer.\n\nThis result proves byte identity only. Strategic authority remains temporary until independent DeepOFC tests and deterministic old-vs-new behavioral equivalence also pass.\n"""
+    args.summary_output.write_text(summary, encoding="utf-8")
+
+    print(f"OPENOFC_SOLVER_MIGRATION_COUNT={len(records)}")
+    print(f"OPENOFC_SOLVER_MIGRATION_RECORDS_SHA256={records_sha}")
+    print("OPENOFC_SOLVER_MIGRATION_BYTE_COPY=PASS")
+
+
+if __name__ == "__main__":
+    main()
