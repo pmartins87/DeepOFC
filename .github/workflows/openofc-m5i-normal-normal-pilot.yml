@@ -1,0 +1,53 @@
+name: OpenOFC M5I Normal-Normal screening pilot
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - tools/openofc_solver/run_m5i_normal_normal_pilot.py
+      - .github/workflows/openofc-m5i-normal-normal-pilot.yml
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run two-state M5I screening pilot
+        run: |
+          PYTHONPATH=tools/openofc_solver \
+            python tools/openofc_solver/run_m5i_normal_normal_pilot.py
+      - name: Validate artifact is non-certifying screening evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/m5i_normal_normal_pilot.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['authority'] == 'SCREENING_PILOT_NOT_CERTIFICATION'
+          assert data['summary']['routes_screened'] == 2
+          assert data['summary']['ready_for_real_bellman'] == 0
+          assert data['summary']['certification_claimed'] is False
+          assert all(
+              row['m5c_evidence']['evidence_kind'] == 'HELD_OUT_SCREENING_ONLY'
+              and row['promotion_allowed'] is False
+              for row in data['routes']
+          )
+          print('OPENOFC_M5I_PILOT_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5i-normal-normal-screening-pilot
+          path: artifacts/m5i_normal_normal_pilot.json
+          if-no-files-found: error
+          retention-days: 14
