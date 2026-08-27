@@ -12,6 +12,6 @@ Q1 completed and was durably recorded before Q2 activation, satisfying the preco
 
 The first Q2 workflow invocation (`33098874703`) failed in the preflight before any Q2 computation because the validator searched the human precommit document for literal driver seed IDs that were frozen in the driver rather than written in the document. No Q2 result was observed. The validator was corrected to bind human-plan declarations to the plan and seed/family/profile constants to the already-precommitted driver.
 
-Corrected Q2 invocation: `33098966144`. It is the authoritative Q2 activation run unless superseded by a documented mechanical rerun.
+Corrected Q2 invocation: `33098966144`. It is the authoritative Q2 activation run unless superseded by a documented mechanical rerun. Subsequent documentation-only branch commits do not change the frozen Q2 driver or the already-started run.
 
 The experiment remains frozen at two held-out families (`hidden-discard`, `joker`), two profile rules (`uniform`, `hash-biased-mixed`), both players, two response seeds, and 16,384 response episodes per row. Q2 cannot emit a certification-eligible reference manifest or promote a route.
