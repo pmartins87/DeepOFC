@@ -1,0 +1,53 @@
+name: OpenOFC M5L reference qualification Q0
+
+on:
+  push:
+    branches:
+      - strategy/m5h-normal-heldout-evidence
+    paths:
+      - tools/openofc_solver/M5L_REFERENCE_EVALUATOR_QUALIFICATION_CONTRACT.md
+      - tools/openofc_solver/run_m5l_three_round_q0.py
+      - .github/workflows/openofc-m5l-reference-qualification-q0.yml
+  workflow_dispatch:
+
+jobs:
+  q0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run M5L exact-BR qualification smoke
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5l_three_round_q0.py
+      - name: Validate Q0 cannot self-promote
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/m5l_three_round_q0.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          assert data['authority'] == 'QUALIFICATION_DIAGNOSTIC_NOT_CERTIFICATION'
+          assert data['qualification_stage'] == 'Q0_PIPELINE_SMOKE'
+          assert data['summary']['rows'] == 6
+          assert data['summary']['certification_eligible'] is False
+          assert data['summary']['reference_manifest_emitted'] is False
+          assert all(row['underestimation_residual'] >= 0.0 for row in data['rows'])
+          assert {row['player'] for row in data['rows']} == {0, 1}
+          assert {row['budget'] for row in data['rows']} == {64, 256, 1024}
+          print('OPENOFC_M5L_Q0_FIREWALL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5l-reference-qualification-q0
+          path: artifacts/m5l_three_round_q0.json
+          if-no-files-found: error
+          retention-days: 14
