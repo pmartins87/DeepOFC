@@ -1,0 +1,66 @@
+name: OpenOFC M5Q reach-weighted average gate
+
+on:
+  push:
+    branches:
+      - strategy/m5q-data-dependent-mccfr-bound
+    paths:
+      - tools/openofc_solver/M5Q_REACH_WEIGHTED_AVERAGE_GATE_CONTRACT.md
+      - tools/openofc_solver/m5q_reach_weighted_mccfr_average.py
+      - tools/openofc_solver/test_m5q_reach_weighted_mccfr_average.py
+      - tools/openofc_solver/run_m5q_reach_weighted_average_gate.py
+      - .github/workflows/openofc-m5q-reach-weighted-average-gate.yml
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate candidate mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5q_reach_weighted_mccfr_average.py
+      - name: Run frozen semantic gate
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5q_reach_weighted_average_gate.py
+      - name: Validate authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('artifacts/m5q_reach_weighted_average_gate.json').read_text(encoding='utf-8'))
+          summary = data['summary']
+          assert data['authority'] == 'REACH_WEIGHTED_AVERAGE_SEMANTIC_GATE_NOT_CERTIFICATION'
+          assert data['candidate_average_authority'] == 'EXACT_REDUCED_GAME_REACH_WEIGHTED_CFR_AVERAGE_REFERENCE_NOT_CERTIFICATION'
+          assert summary['reduced_game_reach_weighted_average_semantics_validated'] is True
+          assert summary['sampled_regret_training_semantics_unchanged'] is True
+          assert summary['candidate_distinct_from_local_behavioral_time_average'] is True
+          assert summary['gate_pass'] is True
+          assert summary['full_game_scalable_average_implementation_validated'] is False
+          assert summary['predictable_variance_accounting_available'] is False
+          assert summary['next_blocker'] == 'PREDICTABLE_VARIANCE_ACCOUNTING_MISSING'
+          assert summary['production_certification_eligible'] is False
+          assert summary['real_routes_certified'] == 0
+          print('OPENOFC_M5Q_REACH_WEIGHTED_AVERAGE_GATE=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5q-reach-weighted-average-gate
+          path: artifacts/m5q_reach_weighted_average_gate.json
+          if-no-files-found: error
+          retention-days: 14
