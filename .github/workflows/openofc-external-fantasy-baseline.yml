@@ -1,0 +1,113 @@
+name: OpenOFC external Fantasy baseline
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  exact-fantasy-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Benchmark real Fantasy15 dual-Joker V2
+        run: python tools/benchmark_fantasy15_v2_frame53.py | tee /tmp/f15.txt
+      - name: Benchmark synthetic Fantasy17 dual-Joker V2
+        run: python tools/benchmark_fantasy17_v2_dual_joker.py | tee /tmp/f17.txt
+      - name: Emit baseline manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, re
+
+          def elapsed(path):
+              text = Path(path).read_text(encoding="utf-8")
+              match = re.search(r"elapsed_seconds=([0-9.]+)", text)
+              if not match:
+                  raise SystemExit(f"missing elapsed_seconds in {path}")
+              return float(match.group(1)), text
+
+          f15_elapsed, f15_text = elapsed("/tmp/f15.txt")
+          f17_elapsed, f17_text = elapsed("/tmp/f17.txt")
+          paths = [
+              "deepofc/fantasy_solver.py",
+              "deepofc/fantasy_solver_v2.py",
+              "tools/benchmark_fantasy15_v2_frame53.py",
+              "tools/benchmark_fantasy17_v2_dual_joker.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-FANTASY-04A-INTERNAL-BASELINE",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "external_reference": {
+                  "repo": "ainaosyusi/ofc-pineapple-ai",
+                  "sha": "20fcbdebe0cdce3ac06e5ede639b8f78c177ceaa",
+                  "file": "src/cpp/solver.hpp",
+                  "observed_objective": "own_royalties_plus_fixed_stay_bonus_15",
+                  "score_bound_pruning": "TODO_NOT_IMPLEMENTED_IN_PINNED_SOURCE",
+              },
+              "authority": "PERFORMANCE_BASELINE_NOT_STRATEGIC_CERTIFICATION",
+              "component": "fantasy-exact-search",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "results": {
+                  "fantasy15_real_frame53": {
+                      "elapsed_seconds": f15_elapsed,
+                      "expected_optimal_points": 28,
+                      "pass": "REAL FANTASY15 DUAL-JOKER V2: PASS" in f15_text,
+                  },
+                  "fantasy17_synthetic_dual_joker": {
+                      "elapsed_seconds": f17_elapsed,
+                      "pass": "SYNTHETIC FANTASY17 DUAL-JOKER V2: PASS" in f17_text,
+                  },
+                  "historical_v1_fantasy15_seconds": 59.073160,
+                  "historical_v1_run": 31900847707,
+              },
+              "architectural_decision": {
+                  "external_solver_objective_compatible": False,
+                  "external_score_bound_proven_better": False,
+                  "rewrite_authorized": False,
+                  "next_step": "only benchmark a parity-preserving C++ shadow kernel if expected engineering gain justifies implementation cost",
+              },
+              "promotion_recommendation": "KEEP_BASELINE",
+              "real_routes_certified": 0,
+          }
+          if not payload["results"]["fantasy15_real_frame53"]["pass"]:
+              raise SystemExit("Fantasy15 baseline did not PASS")
+          if not payload["results"]["fantasy17_synthetic_dual_joker"]["pass"]:
+              raise SystemExit("Fantasy17 baseline did not PASS")
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_fantasy_baseline_04a.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "fantasy15_seconds": f15_elapsed,
+              "fantasy17_seconds": f17_elapsed,
+              "manifest_sha256": payload["sha256"],
+              "rewrite_authorized": False,
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-fantasy-baseline-04a
+          path: artifacts/external_fantasy_baseline_04a.json
+          if-no-files-found: error
+          retention-days: 30
