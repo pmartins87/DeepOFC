@@ -1,0 +1,51 @@
+name: OpenOFC external two-street 05D Q2 reach audit
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-two-street-05d-q2.yml'
+      - 'tools/openofc_solver/run_external_two_street_05d_q2.py'
+      - 'tools/openofc_solver/external_two_street_reach_audit.py'
+      - 'tools/openofc_solver/test_external_two_street_reach_audit.py'
+      - 'tools/openofc_solver/EXTERNAL_TWO_STREET_05D_Q2_REACH_WEIGHT_AUDIT_CONTRACT.md'
+      - 'tools/openofc_solver/external_two_street_counterfactual_resolve.py'
+      - 'tools/openofc_solver/external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/external_two_street_mccfr.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  conditional-reach-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate reach-audit mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_two_street_reach_audit.py
+      - name: Run 05D-Q2 conditional reach audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_two_street_05d_q2.py \
+              --output artifacts/external_two_street_05d_q2.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-two-street-05d-q2
+          path: artifacts/external_two_street_05d_q2.json
+          if-no-files-found: error
+          retention-days: 30
