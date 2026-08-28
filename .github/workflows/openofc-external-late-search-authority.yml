@@ -1,0 +1,82 @@
+name: OpenOFC external late-search authority
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  authority-firewall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Prove determinized exact search is not exact infoset policy
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_late_search_authority_firewall.py
+      - name: Emit experiment manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          paths = [
+              "tools/openofc_solver/strategic_cfr.py",
+              "tools/openofc_solver/teacher_search.py",
+              "tools/openofc_solver/test_external_late_search_authority_firewall.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-LATE-03A-AUTHORITY-FIREWALL",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "external_source": {
+                  "repo": "Saholy99/ofcp-engine",
+                  "sha": "b8e5e2e7c4db5f096bcac7c83b812c9a8d3f542d",
+                  "file": "src/ofc_solver/late_search.py",
+              },
+              "authority": "LATE_SEARCH_CLASSIFICATION_RESEARCH_ONLY",
+              "component": "late-exact-bounded-search",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "quality": {
+                  "fully_observed_terminal_exact_reference": "VALID",
+                  "determinized_hidden_world_minimax": "SCREENING_ONLY",
+                  "exact_infoset_policy": False,
+              },
+              "promotion_recommendation": "KEEP_BASELINE",
+              "real_routes_certified": 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_late_search_03a.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "manifest_sha256": payload["sha256"],
+              "promotion_recommendation": payload["promotion_recommendation"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-late-search-03a
+          path: artifacts/external_late_search_03a.json
+          if-no-files-found: error
+          retention-days: 30
