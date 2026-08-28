@@ -19,9 +19,9 @@ from deepofc.hu_two_round_joker import HUTwoRoundJokerSubgame
 from m5q_support_range_feasibility import exact_terminal_utility_range
 from m5r_prefix_subtree_br_interval import prefix_subtree_best_response_interval
 
-SCHEMA = "openofc-m5r-prefix-subtree-br-interval-case-v1"
+SCHEMA = "openofc-m5r-prefix-subtree-br-interval-case-v2"
 AUTHORITY = "RIGOROUS_PREFIX_SUBTREE_BR_INTERVAL_PILOT_NOT_ROUTE_CERTIFICATION"
-DECAY = 0.2
+DOMINANT_MASS = 0.8
 THRESHOLD_MULTIPLIERS = (0.0, 0.01, 0.05, 0.20, 1.0)
 
 
@@ -41,16 +41,22 @@ def _game(family: str):
     raise ValueError(f"unsupported family: {family}")
 
 
-def _geometric_profile(game, decay: float = DECAY):
+def _dominant_full_support_profile(game, dominant_mass: float = DOMINANT_MASS):
     profile = {}
     for info, actions in game.info_actions.items():
         ordered = tuple(sorted(actions, key=lambda action: action.key()))
-        raw = [decay**index for index in range(len(ordered))]
-        total = sum(raw)
+        if len(ordered) == 1:
+            profile[info] = {ordered[0]: 1.0}
+            continue
+        tail = (1.0 - dominant_mass) / (len(ordered) - 1)
         profile[info] = {
-            action: raw[index] / total
+            action: dominant_mass if index == 0 else tail
             for index, action in enumerate(ordered)
         }
+        if any(probability <= 0.0 for probability in profile[info].values()):
+            raise AssertionError("frozen prefix-pilot profile lost full support")
+        if abs(sum(profile[info].values()) - 1.0) > 1e-12:
+            raise AssertionError("frozen prefix-pilot profile is not normalized")
     return profile
 
 
@@ -78,7 +84,7 @@ def main() -> None:
     args = ap.parse_args()
 
     game = _game(args.family)
-    profile = _geometric_profile(game)
+    profile = _dominant_full_support_profile(game)
 
     # Validation-only exact authorities.  The prefix-pruned evaluator itself
     # never calls either routine.
@@ -130,7 +136,7 @@ def main() -> None:
     if abs(widths[0]) > 1e-10:
         raise SystemExit(f"zero-threshold exact collapse failed: width={widths[0]}")
     if resolved[0] != total_terminals:
-        raise SystemExit("zero-threshold run did not resolve the complete full-support profile")
+        raise SystemExit("zero-threshold run did not resolve the complete bounded-full-support profile")
     if resolved[-1] != 0:
         raise SystemExit("chance-threshold endpoint did not prune every terminal continuation")
     partial_rows = [
@@ -146,8 +152,9 @@ def main() -> None:
         "family": args.family,
         "player": args.player,
         "profile_rule": {
-            "name": "deterministic_geometric_full_support",
-            "decay": DECAY,
+            "name": "deterministic_dominant_bounded_full_support",
+            "dominant_mass": DOMINANT_MASS,
+            "tail_rule": "equal_mass_over_remaining_legal_actions",
         },
         "threshold_multipliers_of_chance": list(THRESHOLD_MULTIPLIERS),
         "source_manifest": _source_manifest(),
