@@ -42,8 +42,8 @@ def test_zero_threshold_uniform_collapses_to_exact_joker() -> None:
         profile,
         0,
         profile_p0_value=p0_value,
-        p0_utility_min=utility.minimum,
-        p0_utility_max=utility.maximum,
+        p0_utility_min=utility.minimum_p0_utility,
+        p0_utility_max=utility.maximum_p0_utility,
         prune_reach_threshold=0.0,
     )
 
@@ -70,8 +70,8 @@ def test_full_prefix_prune_skips_every_terminal_and_contains_exact() -> None:
         profile,
         1,
         profile_p0_value=p0_value,
-        p0_utility_min=utility.minimum,
-        p0_utility_max=utility.maximum,
+        p0_utility_min=utility.minimum_p0_utility,
+        p0_utility_max=utility.maximum_p0_utility,
         prune_reach_threshold=game.chance_probability,
     )
 
@@ -97,8 +97,8 @@ def test_geometric_profile_threshold_reduces_work_monotonically() -> None:
         profile,
         0,
         profile_p0_value=p0_value,
-        p0_utility_min=utility.minimum,
-        p0_utility_max=utility.maximum,
+        p0_utility_min=utility.minimum_p0_utility,
+        p0_utility_max=utility.maximum_p0_utility,
         prune_reach_threshold=cp * 0.02,
     )
     high = prefix_subtree_best_response_interval(
@@ -106,8 +106,8 @@ def test_geometric_profile_threshold_reduces_work_monotonically() -> None:
         profile,
         0,
         profile_p0_value=p0_value,
-        p0_utility_min=utility.minimum,
-        p0_utility_max=utility.maximum,
+        p0_utility_min=utility.minimum_p0_utility,
+        p0_utility_max=utility.maximum_p0_utility,
         prune_reach_threshold=cp * 0.20,
     )
 
