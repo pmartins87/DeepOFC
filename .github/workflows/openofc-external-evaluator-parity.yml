@@ -1,0 +1,94 @@
+name: OpenOFC external evaluator parity
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  evaluator-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run external evaluator parity vectors
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_evaluator_parity_vectors.py
+      - name: Emit experiment manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+
+          source = {
+              "repo": "ainaosyusi/ofc-pineapple-ai",
+              "sha": "20fcbdebe0cdce3ac06e5ede639b8f78c177ceaa",
+              "files": [
+                  "src/cpp/evaluator.hpp",
+                  "tests/test_evaluator_comprehensive.py",
+                  "tests/test_joker.py",
+              ],
+          }
+          paths = [
+              "tools/openofc_solver/engine.py",
+              "tools/openofc_solver/test_external_evaluator_parity_vectors.py",
+              "tools/openofc_solver/test_semantic_invariant_firewall.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-EVAL-01A-AINAOSYUSI-VECTORS",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "external_source": source,
+              "authority": "SEMANTIC_PARITY_RESEARCH_ONLY",
+              "component": "evaluator-joker",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "quality": {
+                  "published_vector_classes": [
+                      "ace-ordering",
+                      "category-ordering",
+                      "straight-boundaries",
+                      "joker-made-hands",
+                      "royalties",
+                  ],
+                  "target_vector_parity": "PASS_IF_JOB_GREEN",
+                  "external_super_joker_flush_semantics": "REJECT_INCOMPATIBLE_WITH_TARGET",
+              },
+              "promotion_recommendation": "KEEP_BASELINE",
+              "real_routes_certified": 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_evaluator_parity_01a.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "manifest_sha256": payload["sha256"],
+              "promotion_recommendation": payload["promotion_recommendation"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-evaluator-parity-01a
+          path: artifacts/external_evaluator_parity_01a.json
+          if-no-files-found: error
+          retention-days: 30
