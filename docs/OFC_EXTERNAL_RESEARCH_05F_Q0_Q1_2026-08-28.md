@@ -1,4 +1,4 @@
-# OpenOFC external research — 05F Q0/Q1/Q2 hidden-discard overlap
+# OpenOFC external research — 05F Q0/Q1/Q2/Q3 hidden-discard overlap
 
 Date: 2026-08-28
 
@@ -95,14 +95,40 @@ A TV of 0.5 with two compatible states means the uniform 50/50 prior is being us
 
 For this frozen MCCFR profile, every defined ambiguous counterfactual posterior is exactly uniform on the constructed support. Q2 therefore gives no reason to alter MCCFR's nine locally completed states in this experiment.
 
-## Decision after Q2
+## Q3 — reach-weighted Search completion A/B
 
-Q1's uniform Search remains a legitimate algorithmic baseline; Q2 does not retroactively invalidate it. It demonstrates that the baseline discards strategic signalling information. Q3 was therefore activated as a clean A/B variant: preserve all 444 original UCT-covered decisions, replace only the 8,658 synthetic Q1 completion decisions using exact counterfactual-reach hidden-state priors derived from the immutable Q1 completed Search profile, and rerun exact bilateral best response.
+Authoritative run: `33170050985`
 
-Q3 remains one-pass and fail-closed. If the updated policy materially changes its own induced posteriors, further fixed-point work is required rather than claiming self-consistency.
+- mechanics: 5/5 PASS;
+- artifact `9685398553`;
+- artifact ZIP SHA-256 `111525b83d9db175704a07b36a0db5c7c509f7c3130e8df89d70e49dd1bca29e`;
+- manifest SHA-256 `45c9b3d67409ee291e30587b494ae416dfbd6a64ddfd368308d9e2f02eea939a`.
+
+Q3 froze every one of the 444 UCT-covered decisions from Q1 and attempted to replace only the 8,658 synthetic completion decisions using the exact acting-player counterfactual posterior induced by the immutable Q1 completed Search profile.
+
+Result:
+
+- Q1 exploitability: **0.09209047925455316**;
+- Q3 exploitability: **0.09209047925455316**;
+- delta exploitability: **0.0**;
+- changed missing-information-set decisions: **0**;
+- zero-counterfactual-reach fallbacks: **792**;
+- post-Q3 uniform-vs-counterfactual TV remained mean **0.08155869849**, p95/max **0.5**.
+
+Therefore the non-uniform hidden-state posterior identified in Q2 is real, but under this particular four-world payoff surface it does not change the selected synthetic local actions. Reach weighting alone yields no strategic improvement over Q1 on this fixture.
+
+This is informative in both directions: it rejects a tempting Search-specific patch as unnecessary here, while preserving the broader observation that the fixture contains strategic signalling and that a harder support may make posterior weighting decision-relevant.
+
+## Decision after Q3
+
+- keep the Q1 uniform Search implementation as the Search baseline for this exact four-world fixture;
+- do not promote Search over MCCFR: exact exploitability still favors MCCFR decisively on 05F;
+- do not promote MCCFR to production architecture: four hand-crafted worlds are far too narrow for that conclusion;
+- next expand the benchmark so hidden-discard posterior differences affect action values, with more private types/worlds and more varied payoff geometry;
+- repeat the same protocol: mechanical ambiguity -> fixed-profile comparison -> exact bilateral BR -> posterior audit -> only then algorithmic decision.
 
 ## Interpretation firewall
 
-None of Q0-Q2 justifies replacing the current DeepOFC architecture. The support has only four deliberately designed worlds, the payoff surface appears unusually favorable to a saddle near P0 value 28, and Search still requires large off-trajectory policy materialization for exact exploitability measurement.
+None of Q0-Q3 justifies replacing the current DeepOFC architecture. The support has only four deliberately designed worlds, the payoff surface appears unusually favorable to a saddle near P0 value 28, and Search still requires large off-trajectory policy materialization for exact exploitability measurement.
 
 No real strategic route is certified: `real_routes_certified = 0`.
