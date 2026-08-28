@@ -1,0 +1,166 @@
+name: OpenOFC M5R target-width BR budget controller
+
+on:
+  push:
+    branches:
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_TARGET_WIDTH_BUDGET_CONTROLLER_CONTRACT.md
+      - tools/openofc_solver/m5r_target_width_budget_controller.py
+      - tools/openofc_solver/test_m5r_target_width_budget_controller.py
+      - tools/openofc_solver/run_m5r_target_width_budget_case.py
+      - tools/openofc_solver/m5r_deep_branch_br_interval.py
+      - .github/workflows/openofc-m5r-target-width-budget-controller.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate target-width planner mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_target_width_budget_controller.py
+
+  cases:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [joker, hidden-discard]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Run target-width budget case
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_target_width_budget_case.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_budget_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Validate fail-closed budget evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_budget_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          d = data["decision"]
+          assert data["authority"] == "RIGOROUS_TARGET_WIDTH_BUDGET_CONTROLLER_PILOT_NOT_ROUTE_CERTIFICATION"
+          assert d["target_driven_width_planning_validated_on_case"] is True
+          assert d["planner_uses_no_terminal_utility"] is True
+          assert d["guaranteed_width_cap_dominates_actual_interval"] is True
+          assert d["guaranteed_width_cap_dominates_actual_missed_br"] is True
+          assert d["cold_terminal_work_matches_plan"] is True
+          for row in data["rows"]:
+              assert row["guaranteed_missed_br_upper_bound"] <= row["target_width"] + 1e-10
+              assert row["evaluation"]["interval_width"] <= row["guaranteed_missed_br_upper_bound"] + 1e-10
+              assert row["actual_missed_br_above_lower_bound"] <= row["guaranteed_missed_br_upper_bound"] + 1e-10
+              assert row["observed_terminal_u0_invocations"] == row["plan"]["planned_resolved_terminal_histories"]
+          assert d["full_game_scalable_evaluator_validated"] is False
+          assert d["production_certification_eligible"] is False
+          assert d["real_routes_certified"] == 0
+          print("OPENOFC_M5R_TARGET_WIDTH_BUDGET_CASE=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-budget-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_budget_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-budget-*
+          path: budget-artifacts
+          merge-multiple: true
+      - name: Freeze M5R-F summary
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          files = sorted(Path("budget-artifacts").glob("*.json"))
+          assert len(files) == 4, files
+          cases = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+          pairs = {(case["family"], case["player"]) for case in cases}
+          assert pairs == {
+              ("joker", 0), ("joker", 1),
+              ("hidden-discard", 0), ("hidden-discard", 1),
+          }
+          compact = {}
+          for case in cases:
+              key = f'{case["family"]}:p{case["player"]}'
+              compact[key] = [
+                  {
+                      "target_range_fraction": row["target_range_fraction"],
+                      "target_width": row["target_width"],
+                      "guaranteed_missed_br_upper_bound": row["guaranteed_missed_br_upper_bound"],
+                      "actual_interval_width": row["evaluation"]["interval_width"],
+                      "terminal_work_fraction": row["plan"]["planned_terminal_work_fraction"],
+                      "selected_threshold": row["plan"]["selected_prune_reach_threshold"],
+                  }
+                  for row in case["rows"]
+              ]
+          payload = {
+              "schema": "openofc-m5r-target-width-budget-controller-pilot-v1",
+              "authority": "RIGOROUS_TARGET_WIDTH_BUDGET_CONTROLLER_PILOT_NOT_ROUTE_CERTIFICATION",
+              "cases": cases,
+              "compact_budget_surface": compact,
+              "decision": {
+                  "target_driven_guaranteed_missed_br_budget_validated": True,
+                  "full_game_scalable_evaluator_validated": False,
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+                  "next_blocker": "FULL_GAME_STATE_LOCAL_REMAINDER_ENVELOPES_AND_ROUTE_INTEGRATION_MISSING",
+              },
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_target_width_budget_controller_pilot.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "sha256": payload["sha256"],
+              "compact_budget_surface": compact,
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-target-width-budget-controller-pilot
+          path: artifacts/m5r_target_width_budget_controller_pilot.json
+          if-no-files-found: error
+          retention-days: 30
