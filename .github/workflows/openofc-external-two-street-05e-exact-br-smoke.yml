@@ -1,0 +1,39 @@
+name: OpenOFC external two-street 05E exact BR smoke
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-two-street-05e-exact-br-smoke.yml'
+      - 'tools/openofc_solver/external_two_street_exact_br.py'
+      - 'tools/openofc_solver/test_external_two_street_exact_br.py'
+      - 'tools/openofc_solver/EXTERNAL_TWO_STREET_05E_EXACT_BR_CONTRACT.md'
+      - 'tools/openofc_solver/external_two_street_counterfactual_resolve.py'
+      - 'tools/openofc_solver/external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/external_two_street_mccfr.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  exact-br-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate exact finite-support best response
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_two_street_exact_br.py
