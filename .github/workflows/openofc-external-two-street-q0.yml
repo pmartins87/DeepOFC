@@ -95,7 +95,7 @@ jobs:
                   "single_physical_world_per_episode": True,
                   "root_hidden_world_blind": True,
                   "canonical_infoset_keys_only": True,
-                  "exact_response_helper_inside_search": False,
+                  "no_exact_response_helper_inside_search": True,
               },
               "limitations": [
                   "tiny finite support generated from uniform conditional worlds",
