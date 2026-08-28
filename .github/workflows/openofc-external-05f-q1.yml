@@ -1,0 +1,43 @@
+name: OpenOFC external 05F Q1 strategic comparator
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/run_external_05f_q1.py'
+      - 'tools/openofc_solver/external_hidden_discard_overlap_strategic.py'
+      - '.github/workflows/openofc-external-05f-q1.yml'
+  workflow_dispatch:
+
+jobs:
+  hidden-discard-strategic-q1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate 05F mechanics and strategic core
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_hidden_discard_overlap.py \
+              tools/openofc_solver/test_external_hidden_discard_overlap_strategic.py
+      - name: Run 05F Q1 exact strategic comparison
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05f_q1.py \
+              --output artifacts/external_05f_q1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05f-q1
+          path: artifacts/external_05f_q1.json
+          if-no-files-found: error
+          retention-days: 30
