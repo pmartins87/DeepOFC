@@ -1,0 +1,30 @@
+name: OpenOFC external 05F strategic comparator smoke
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/external_hidden_discard_overlap_strategic.py'
+      - 'tools/openofc_solver/test_external_hidden_discard_overlap_strategic.py'
+      - '.github/workflows/openofc-external-05f-strategic-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  strategic-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate 05F strategic comparator
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_hidden_discard_overlap_strategic.py
