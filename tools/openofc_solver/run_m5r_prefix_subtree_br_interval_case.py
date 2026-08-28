@@ -97,8 +97,8 @@ def main() -> None:
             profile,
             args.player,
             profile_p0_value=profile_p0_value,
-            p0_utility_min=utility.minimum,
-            p0_utility_max=utility.maximum,
+            p0_utility_min=utility.minimum_p0_utility,
+            p0_utility_max=utility.maximum_p0_utility,
             prune_reach_threshold=threshold,
         )
         row = asdict(result)
@@ -156,8 +156,8 @@ def main() -> None:
             "exact_br_value": exact_br_value,
             "own_profile_value": own_profile_value,
             "exact_deviation_gain": exact_deviation_gain,
-            "p0_utility_minimum": float(utility.minimum),
-            "p0_utility_maximum": float(utility.maximum),
+            "p0_utility_minimum": float(utility.minimum_p0_utility),
+            "p0_utility_maximum": float(utility.maximum_p0_utility),
             "p0_utility_range": float(utility.utility_range),
             "total_terminal_histories": total_terminals,
             "exact_reference_outside_truncated_evaluator": True,
