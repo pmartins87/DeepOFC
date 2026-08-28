@@ -1,0 +1,38 @@
+name: OpenOFC external two-street 05D Q2 reach audit smoke
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-two-street-05d-q2-audit-smoke.yml'
+      - 'tools/openofc_solver/external_two_street_reach_audit.py'
+      - 'tools/openofc_solver/test_external_two_street_reach_audit.py'
+      - 'tools/openofc_solver/EXTERNAL_TWO_STREET_05D_Q2_REACH_WEIGHT_AUDIT_CONTRACT.md'
+      - 'tools/openofc_solver/external_two_street_counterfactual_resolve.py'
+      - 'tools/openofc_solver/external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  reach-audit-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate exact finite-support reach audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_two_street_reach_audit.py
