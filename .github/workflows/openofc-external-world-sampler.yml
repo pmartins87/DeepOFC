@@ -1,0 +1,98 @@
+name: OpenOFC external world sampler
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  physical-world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run shared physical-world tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_research_world_sampler.py
+      - name: Emit experiment manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          paths = [
+              "tools/openofc_solver/engine.py",
+              "tools/openofc_solver/strategic_cfr.py",
+              "tools/openofc_solver/external_research_world_sampler.py",
+              "tools/openofc_solver/test_external_research_world_sampler.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-SAMPLER-02A-PHYSICAL-CONSERVATION",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "external_sources": [
+                  {
+                      "repo": "Saholy99/ofcp-engine",
+                      "sha": "b8e5e2e7c4db5f096bcac7c83b812c9a8d3f542d",
+                      "file": "src/ofc_solver/sampler.py",
+                      "role": "positive engineering reference",
+                  },
+                  {
+                      "repo": "neery1218/OFCSolver",
+                      "sha": "0b34b328ee312c7d7b7edba500c36b33266a168c",
+                      "file": "solver/src/solver.cc",
+                      "role": "negative split-sampling regression reference",
+                  },
+              ],
+              "authority": "UNIFORM_CONDITIONAL_PHYSICAL_WORLD_SAMPLER_SCREENING_ONLY",
+              "component": "hidden-world-sampler",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "quality": {
+                  "single_shared_physical_world": "PASS_IF_JOB_GREEN",
+                  "54_card_target_conservation": "PASS_IF_JOB_GREEN",
+                  "deterministic_same_seed": "PASS_IF_JOB_GREEN",
+                  "posterior_conditioned_on_strategic_history": False,
+              },
+              "promotion_recommendation": "PROMOTE_SHADOW",
+              "restrictions": [
+                  "screening/search experiments only",
+                  "not a posterior-belief authority",
+                  "cannot certify exploitability or Bellman routes",
+              ],
+              "real_routes_certified": 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_world_sampler_02a.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "authority": payload["authority"],
+              "manifest_sha256": payload["sha256"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-world-sampler-02a
+          path: artifacts/external_world_sampler_02a.json
+          if-no-files-found: error
+          retention-days: 30
