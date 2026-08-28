@@ -1,0 +1,168 @@
+name: OpenOFC M5R rigorous prefix-subtree BR interval
+
+on:
+  push:
+    branches:
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_PREFIX_SUBTREE_BR_INTERVAL_CONTRACT.md
+      - tools/openofc_solver/m5r_prefix_subtree_br_interval.py
+      - tools/openofc_solver/test_m5r_prefix_subtree_br_interval.py
+      - tools/openofc_solver/run_m5r_prefix_subtree_br_interval_case.py
+      - .github/workflows/openofc-m5r-prefix-subtree-br-interval.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate prefix-subtree interval mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_prefix_subtree_br_interval.py
+
+  cases:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [joker, hidden-discard]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Run prefix-subtree interval case
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_prefix_subtree_br_interval_case.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_prefix_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Validate fail-closed case
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_prefix_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          decision = data["decision"]
+          rows = data["rows"]
+          assert data["authority"] == "RIGOROUS_PREFIX_SUBTREE_BR_INTERVAL_PILOT_NOT_ROUTE_CERTIFICATION"
+          assert decision["rigorous_prefix_remainder_bound_validated_on_case"] is True
+          assert decision["exact_collapse_at_zero_threshold_validated"] is True
+          assert decision["full_prune_containment_validated"] is True
+          assert decision["terminal_work_reduction_validated"] is True
+          assert decision["partial_work_saving_points"] >= 1
+          assert all(row["contains_exact_br"] for row in rows)
+          assert all(row["contains_exact_deviation_gain"] for row in rows)
+          assert rows[0]["resolved_terminal_histories"] == data["validation_reference"]["total_terminal_histories"]
+          assert rows[-1]["resolved_terminal_histories"] == 0
+          assert decision["full_game_scalable_evaluator_validated"] is False
+          assert decision["production_certification_eligible"] is False
+          assert decision["real_routes_certified"] == 0
+          print("OPENOFC_M5R_PREFIX_SUBTREE_CASE=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-prefix-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_prefix_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-prefix-*
+          path: prefix-artifacts
+          merge-multiple: true
+      - name: Freeze prefix-subtree pilot summary
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          files = sorted(Path("prefix-artifacts").glob("*.json"))
+          assert len(files) == 4, files
+          cases = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+          pairs = {(case["family"], case["player"]) for case in cases}
+          assert pairs == {
+              ("joker", 0), ("joker", 1),
+              ("hidden-discard", 0), ("hidden-discard", 1),
+          }
+          assert all(case["decision"]["terminal_work_reduction_validated"] for case in cases)
+          assert all(case["decision"]["real_routes_certified"] == 0 for case in cases)
+          best_partial = {}
+          for case in cases:
+              total = case["validation_reference"]["total_terminal_histories"]
+              partial = [
+                  row for row in case["rows"]
+                  if 0 < row["resolved_terminal_histories"] < total
+              ]
+              best = min(partial, key=lambda row: row["terminal_work_fraction"])
+              best_partial[f'{case["family"]}:p{case["player"]}'] = {
+                  "terminal_work_fraction": best["terminal_work_fraction"],
+                  "interval_width": best["interval_width"],
+                  "upper_deviation_gain": best["upper_deviation_gain"],
+                  "threshold_multiplier_of_chance": best["threshold_multiplier_of_chance"],
+              }
+          payload = {
+              "schema": "openofc-m5r-prefix-subtree-br-interval-pilot-v1",
+              "authority": "RIGOROUS_PREFIX_SUBTREE_BR_INTERVAL_PILOT_NOT_ROUTE_CERTIFICATION",
+              "cases": cases,
+              "best_partial_work_points": best_partial,
+              "decision": {
+                  "rigorous_prefix_remainder_bound_validated": True,
+                  "real_terminal_work_reduction_validated": True,
+                  "full_game_scalable_evaluator_validated": False,
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+                  "next_blocker": "STATE_LOCAL_SUBTREE_UTILITY_ENVELOPE_AND_DEEPER_PREFIX_PRUNING_MISSING",
+              },
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_prefix_subtree_br_interval_pilot.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "sha256": payload["sha256"],
+              "best_partial_work_points": best_partial,
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-prefix-subtree-br-interval-pilot
+          path: artifacts/m5r_prefix_subtree_br_interval_pilot.json
+          if-no-files-found: error
+          retention-days: 30
