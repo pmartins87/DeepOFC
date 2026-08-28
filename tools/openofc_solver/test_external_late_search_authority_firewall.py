@@ -29,8 +29,8 @@ def B(top: str, middle: str, bottom: str) -> Board:
 
 
 def _plan(p0_r4: tuple[Card, ...], p1_r4: tuple[Card, ...]) -> DealPlan:
-    # Earlier packets are irrelevant to the R4 authority test.  They are kept
-    # stable so the two worlds differ only in the hidden opponent R4 packet.
+    # Earlier packets are irrelevant to the R4 authority test. They are kept
+    # stable so the worlds differ only in the hidden opponent R4 packet.
     return DealPlan(
         opening=(
             parse_cards("Ac Kc Qs Js Ts"),
@@ -67,11 +67,12 @@ def _root_state(p1_r4: tuple[Card, ...]) -> HUState:
     )
 
 
-def _perfect_information_r4_best_keys(state: HUState) -> tuple[str, ...]:
-    """Solve the last round after illegally revealing both private packets.
+def _perfect_information_r4_value_vector(state: HUState) -> tuple[tuple[str, float], ...]:
+    """Solve every root action after illegally revealing both private packets.
 
-    This is a useful reference inside a determinization, but its root action is
-    not a legal exact infoset policy when the opponent packet is still hidden.
+    Each root value assumes that the hidden opponent packet is known and that
+    the opponent then chooses the worst reply for P0.  Those values are useful
+    inside one determinization, but they are not legal infoset Q-values.
     """
     root_values: list[tuple[str, float]] = []
     for root_key, root_action in legal_action_pairs(state):
@@ -84,11 +85,10 @@ def _perfect_information_r4_best_keys(state: HUState) -> tuple[str, ...]:
             assert terminal.terminal()
             reply_values.append(terminal_utility(terminal, 0))
         root_values.append((root_key, min(reply_values)))
-    best = max(value for _key, value in root_values)
-    return tuple(sorted(key for key, value in root_values if value == best))
+    return tuple(sorted(root_values))
 
 
-def test_same_infoset_can_contain_hidden_worlds_with_different_perfect_info_actions() -> None:
+def test_same_infoset_has_hidden_world_dependent_perfect_information_values() -> None:
     # Candidate unseen cards intentionally exclude all board cards, P0's packet,
     # and the synthetic prior discards used by this final-round fixture.
     occupied = set(
@@ -110,7 +110,7 @@ def test_same_infoset_can_contain_hidden_worlds_with_different_perfect_info_acti
     )
 
     reference_key = None
-    observed_best_sets: dict[tuple[str, ...], tuple[Card, ...]] = {}
+    observed_vectors: dict[tuple[tuple[str, float], ...], tuple[Card, ...]] = {}
     for packet in combinations(pool, 3):
         state = _root_state(tuple(packet))
         key = information_state_key(state)
@@ -120,21 +120,23 @@ def test_same_infoset_can_contain_hidden_worlds_with_different_perfect_info_acti
             # Opponent current packet must not change P0's legal information set.
             assert key == reference_key
 
-        best_keys = _perfect_information_r4_best_keys(state)
-        observed_best_sets.setdefault(best_keys, tuple(packet))
-        if len(observed_best_sets) >= 2:
+        vector = _perfect_information_r4_value_vector(state)
+        observed_vectors.setdefault(vector, tuple(packet))
+        if len(observed_vectors) >= 2:
             break
 
-    # At least two hidden worlds inside the exact same P0 information set cause
-    # a full-information final-round solver to prefer different P0 actions.
-    # Therefore determinize->minimax cannot be labeled an exact infoset policy.
-    assert len(observed_best_sets) >= 2
+    # The first fixture happened to retain the same argmax across all sampled
+    # worlds; that is irrelevant to the authority question.  Exact action values
+    # themselves change with the illegally revealed opponent packet while the
+    # legal P0 information state stays identical.  Therefore a state-local
+    # determinized minimax value cannot be labelled an exact infoset value.
+    assert len(observed_vectors) >= 2
 
 
 def test_fully_observed_terminal_teacher_remains_valid_reference() -> None:
     # Once both packets/actions have actually been revealed and the state is
-    # terminal, exact utility is unambiguous and zero-sum.  The authority problem
-    # is specifically the use of hidden-world knowledge *before* revelation.
+    # terminal, exact utility is unambiguous and zero-sum. The authority problem
+    # is specifically the use of hidden-world knowledge before revelation.
     state = _root_state((C("Ah"), C("Ks"), C("Td")))
     root_key, root_action = legal_action_pairs(state)[0]
     assert root_key
