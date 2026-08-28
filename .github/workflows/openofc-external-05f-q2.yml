@@ -1,0 +1,41 @@
+name: OpenOFC external 05F Q2 conditional reach
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/run_external_05f_q2.py'
+      - 'tools/openofc_solver/external_hidden_discard_overlap_reach_audit.py'
+      - '.github/workflows/openofc-external-05f-q2.yml'
+  workflow_dispatch:
+
+jobs:
+  hidden-discard-reach-q2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate 05F reach-audit mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_hidden_discard_overlap_reach_audit.py
+      - name: Run 05F Q2 conditional reach audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05f_q2.py \
+              --output artifacts/external_05f_q2.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05f-q2
+          path: artifacts/external_05f_q2.json
+          if-no-files-found: error
+          retention-days: 30
