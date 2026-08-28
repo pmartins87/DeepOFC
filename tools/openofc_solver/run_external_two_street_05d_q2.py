@@ -17,7 +17,7 @@ from external_two_street_mccfr import TwoStreetExternalSamplingMCCFR, visit_prof
 from external_two_street_reach_audit import AUTHORITY, audit_conditional_reach, summarize_reach_audit
 from test_external_two_street_infoset_search import _coherent_r3_state, _support_worlds
 
-EXPERIMENT_ID = "EXT-05D-Q2-CONDITIONAL-REACH-AUDIT"
+EXPERIMENT_ID = "EXT-05D-Q2-CONDITIONAL-REACH-AUDIT-V2"
 UCT_ITERATIONS = 5_000
 UCT_SEED = 2026082831
 MCCFR_ITERATIONS = 256
@@ -26,6 +26,7 @@ RESOLVE_MIN_ITERATIONS = 64
 SEARCH_RESOLVE_SEED = 2026082871
 MCCFR_RESOLVE_SEED = 2026082873
 Q1_RUN_ID = 33143759852
+Q1_MANIFEST_SHA256 = "f53e94cafd8c3cace5d4e00a4f6e1c6d85bf702a6058b86a6b3a47412ea65e0b"
 
 
 def _profile_sha256(profile) -> str:
@@ -38,9 +39,14 @@ def _row_digest(info_key: str) -> str:
 
 
 def _top_rows(audit, *, field: str, limit: int = 10):
+    eligible = [row for row in audit.rows if getattr(row, field) is not None]
     ranked = sorted(
-        audit.rows,
-        key=lambda row: (getattr(row, field), row.compatible_states, row.information_state_key),
+        eligible,
+        key=lambda row: (
+            float(getattr(row, field)),
+            row.compatible_states,
+            row.information_state_key,
+        ),
         reverse=True,
     )[:limit]
     return [
@@ -49,6 +55,8 @@ def _top_rows(audit, *, field: str, limit: int = 10):
             "round": row.round_index,
             "actor": row.actor,
             "compatible_states": row.compatible_states,
+            "full_reach_defined": row.full_reach_defined,
+            "counterfactual_reach_defined": row.counterfactual_reach_defined,
             "uniform_vs_full_tv": row.uniform_vs_full_tv,
             "uniform_vs_counterfactual_tv": row.uniform_vs_counterfactual_tv,
             "full_vs_counterfactual_tv": row.full_vs_counterfactual_tv,
@@ -66,9 +74,16 @@ def _all_tv_valid(audit) -> bool:
             row.uniform_vs_counterfactual_tv,
             row.full_vs_counterfactual_tv,
         ):
+            if value is None:
+                continue
             if not math.isfinite(value) or not 0.0 <= value <= 1.0:
                 return False
     return True
+
+
+def _defined_max(rows, field: str) -> float | None:
+    values = [float(getattr(row, field)) for row in rows if getattr(row, field) is not None]
+    return max(values) if values else None
 
 
 def run() -> dict:
@@ -112,8 +127,8 @@ def run() -> dict:
     search_summary = summarize_reach_audit(search_audit)
     mccfr_summary = summarize_reach_audit(mccfr_audit)
 
-    search_max_cf_gap = max((row.full_vs_counterfactual_tv for row in search_audit.rows), default=0.0)
-    mccfr_max_cf_gap = max((row.full_vs_counterfactual_tv for row in mccfr_audit.rows), default=0.0)
+    search_max_cf_gap = _defined_max(search_audit.rows, "full_vs_counterfactual_tv")
+    mccfr_max_cf_gap = _defined_max(mccfr_audit.rows, "full_vs_counterfactual_tv")
 
     source_paths = [
         "tools/openofc_solver/external_two_street_infoset_search.py",
@@ -130,7 +145,10 @@ def run() -> dict:
         "experiment_id": EXPERIMENT_ID,
         "authority": AUTHORITY,
         "component": "conditional-full-and-counterfactual-reach-audit",
-        "q1_reference_run_id": Q1_RUN_ID,
+        "q1_reference": {
+            "run_id": Q1_RUN_ID,
+            "manifest_sha256": Q1_MANIFEST_SHA256,
+        },
         "fixed_game": {
             "support_worlds": len(worlds),
             "reachable_information_states": len(reachable),
@@ -160,13 +178,21 @@ def run() -> dict:
             "max_full_vs_counterfactual_tv": mccfr_max_cf_gap,
         },
         "structural_observation": {
-            "search_full_and_counterfactual_reach_match_to_1e12": search_max_cf_gap <= 1e-12,
-            "mccfr_full_and_counterfactual_reach_match_to_1e12": mccfr_max_cf_gap <= 1e-12,
-            "meaning": "false is diagnostic and triggers a perfect-recall/information-key audit; it is not auto-corrected",
+            "search_full_and_counterfactual_reach_match_to_1e12_where_both_defined": (
+                search_max_cf_gap is not None and search_max_cf_gap <= 1e-12
+            ),
+            "mccfr_full_and_counterfactual_reach_match_to_1e12_where_both_defined": (
+                mccfr_max_cf_gap is not None and mccfr_max_cf_gap <= 1e-12
+            ),
+            "zero_own_probability_branches_traversed": True,
+            "undefined_full_reach_is_not_coerced_to_a_distribution": True,
+            "meaning": "full and counterfactual conditional beliefs are separately audited; undefined zero-mass beliefs remain explicit",
         },
         "quality": {
-            "search_audit_nonempty": search_audit.information_states > 0,
-            "mccfr_audit_nonempty": mccfr_audit.information_states > 0,
+            "search_audit_covers_all_reachable_infosets": search_audit.information_states == len(reachable),
+            "mccfr_audit_covers_all_reachable_infosets": mccfr_audit.information_states == len(reachable),
+            "search_counterfactual_reach_defined_somewhere": search_audit.counterfactual_reach_defined_information_states > 0,
+            "mccfr_counterfactual_reach_defined_somewhere": mccfr_audit.counterfactual_reach_defined_information_states > 0,
             "search_profile_completed_before_audit": search_completed.completed_information_states == len(reachable),
             "mccfr_profile_completed_before_audit": mccfr_completed.completed_information_states == len(reachable),
             "search_tv_metrics_valid": _all_tv_valid(search_audit),
@@ -181,11 +207,12 @@ def run() -> dict:
         "limitations": [
             "six-world reduced support",
             "audit conditions on the completed fixed profiles rather than the full earlier-round game",
-            "zero-reach information states have no induced posterior and are absent from positive-reach audit rows",
+            "full-reach beliefs are undefined at zero full-reach information states and remain explicitly undefined",
+            "counterfactual beliefs are undefined when chance/opponent reach is zero and remain explicitly undefined",
             "uniform-vs-reach TV is diagnostic rather than a certification threshold",
             "no best-response or exploitability authority",
         ],
-        "promotion_recommendation": "USE_REACH_TV_TO_DECIDE_WHETHER_05D_Q3_NEEDS_REACH_WEIGHTED_LOCAL_RESOLVER",
+        "promotion_recommendation": "USE_COUNTERFACTUAL_REACH_TV_TO_DECIDE_WHETHER_05D_Q3_NEEDS_REACH_WEIGHTED_LOCAL_RESOLVER",
         "real_routes_certified": 0,
     }
     if not all(payload["quality"].values()):
