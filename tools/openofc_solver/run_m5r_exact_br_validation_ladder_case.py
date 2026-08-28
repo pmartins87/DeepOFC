@@ -18,7 +18,7 @@ from deepofc.hu_three_round_sequential import HUThreeRoundSequentialSubgame
 from deepofc.hu_three_round_sequential_v2 import HUThreeRoundSequentialSubgameV2
 
 AUTHORITY = "M5R_EXACT_THREE_ROUND_BR_VALIDATION_LADDER_NOT_ROUTE_CERTIFICATION"
-SCHEMA = "openofc-m5r-exact-br-validation-ladder-case-v1"
+SCHEMA = "openofc-m5r-exact-br-validation-ladder-case-v2"
 
 
 def _canonical_bytes(payload: object) -> bytes:
@@ -56,6 +56,15 @@ def main() -> None:
             f"{response.terminal_histories} vs {expected_br_terminals}"
         )
 
+    # exact_best_response itself enumerates the complete responding-player
+    # infoset set encountered under chance + every opponent/own legal branch and
+    # raises if its returned pure-policy choices do not match that set exactly.
+    # The three-round game intentionally has no pre-materialized info_actions
+    # registry, so the old runner-level lookup was an invalid API assumption.
+    responding_infosets = len(response.choices)
+    if responding_infosets <= 0:
+        raise SystemExit(f"{args.family} BR{args.player} returned no responding infosets")
+
     started = time.perf_counter()
     replay_value, replay_terminals = exact_value_of_pure_response(game, profile, response)
     replay_seconds = time.perf_counter() - started
@@ -69,13 +78,6 @@ def main() -> None:
             f"{args.family} BR{args.player} replay mismatch: {response.value} vs {replay_value}"
         )
 
-    expected_infos = sum(1 for info in game.info_actions if info.player == args.player)
-    if len(response.choices) != expected_infos:
-        raise SystemExit(
-            f"{args.family} BR{args.player} infoset coverage mismatch: "
-            f"{len(response.choices)} vs {expected_infos}"
-        )
-
     unsigned: dict[str, object] = {
         "schema": SCHEMA,
         "authority": AUTHORITY,
@@ -84,8 +86,9 @@ def main() -> None:
         "exact_br_value": float(response.value),
         "independent_pure_replay_value": float(replay_value),
         "crosscheck_abs_error": cross_error,
-        "responding_infosets": len(response.choices),
-        "expected_responding_infosets": expected_infos,
+        "responding_infosets": responding_infosets,
+        "infoset_coverage_verified": True,
+        "infoset_coverage_authority": "exact_best_response_internal_complete_infoset_assertion",
         "exact_br_terminal_histories": response.terminal_histories,
         "expected_exact_br_terminal_histories": expected_br_terminals,
         "pure_replay_terminal_histories": replay_terminals,
