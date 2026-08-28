@@ -1,0 +1,49 @@
+name: OpenOFC external two-street 05D Q0 comparator
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-two-street-05d-q0.yml'
+      - 'tools/openofc_solver/external_two_street_mccfr.py'
+      - 'tools/openofc_solver/test_external_two_street_mccfr.py'
+      - 'tools/openofc_solver/run_external_two_street_05d_q0.py'
+      - 'tools/openofc_solver/external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/test_external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  mccfr-vs-uct-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate independent reduced-game MCCFR comparator
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_two_street_mccfr.py
+      - name: Run 05D-Q0 fixed-profile comparison
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_two_street_05d_q0.py \
+              --output artifacts/external_two_street_05d_q0.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-two-street-05d-q0
+          path: artifacts/external_two_street_05d_q0.json
+          if-no-files-found: error
+          retention-days: 30
