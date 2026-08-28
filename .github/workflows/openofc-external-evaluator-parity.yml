@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-evaluator-parity.yml'
+      - 'tools/openofc_solver/test_external_evaluator_parity_vectors.py'
+      - 'tools/openofc_solver/engine.py'
+      - 'tools/openofc_solver/test_semantic_invariant_firewall.py'
   workflow_dispatch:
 
 permissions:

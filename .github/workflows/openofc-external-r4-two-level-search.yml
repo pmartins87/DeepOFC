@@ -1,0 +1,145 @@
+name: OpenOFC external R4 two-level infoset search
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-r4-two-level-search.yml'
+      - 'tools/openofc_solver/external_r4_two_level_infoset_search.py'
+      - 'tools/openofc_solver/test_external_r4_two_level_infoset_search.py'
+      - 'tools/openofc_solver/external_r4_infoset_search.py'
+      - 'tools/openofc_solver/test_external_r4_infoset_search.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  two-level-infoset-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate two-level information-set UCT
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_r4_two_level_infoset_search.py
+      - name: Run frozen 05B pilot and emit evidence
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          from external_r4_infoset_search import exact_uniform_support_values
+          from external_r4_two_level_infoset_search import run_uniform_support_two_level_uct
+          from test_external_r4_infoset_search import _coherent_r4_state, _support
+
+          support = _support()
+          state = _coherent_r4_state(support[0])
+          exact = exact_uniform_support_values(state, support)
+          search = run_uniform_support_two_level_uct(
+              state,
+              support,
+              iterations=100_000,
+              seed=2026082806,
+              root_exploration=1.0,
+              reply_exploration=1.0,
+          )
+          exact_by_key = dict(exact.action_values)
+          selected_exact = exact_by_key[search.selected_action_key]
+          selected_root = next(
+              stat for stat in search.root_action_stats
+              if stat.action_key == search.selected_action_key
+          )
+          paths = [
+              "tools/openofc_solver/external_r4_two_level_infoset_search.py",
+              "tools/openofc_solver/test_external_r4_two_level_infoset_search.py",
+              "tools/openofc_solver/external_r4_infoset_search.py",
+              "tools/openofc_solver/strategic_cfr.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-ISMCTS-05B-R4-TWO-LEVEL",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "authority": search.authority,
+              "component": "r4-two-level-infoset-uct",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "search": {
+                  "iterations": search.iterations,
+                  "seed": search.seed,
+                  "selected_action_key": search.selected_action_key,
+                  "selected_root_mean": selected_root.mean_value,
+                  "selected_support_backed_value": search.selected_support_backed_value,
+                  "selected_support_backup_complete": search.selected_support_backup_complete,
+                  "selected_support_worlds_seen": search.selected_support_worlds_seen,
+                  "selected_support_worlds_fully_explored": search.selected_support_worlds_fully_explored,
+                  "p1_infoset_count": search.p1_infoset_count,
+                  "p1_fully_explored_infosets": search.p1_fully_explored_infosets,
+              },
+              "exact_reference": {
+                  "best_value": exact.best_value,
+                  "best_action_keys": list(exact.best_action_keys),
+                  "selected_exact_value": selected_exact,
+              },
+              "quality": {
+                  "selected_is_exact_optimum": search.selected_action_key in exact.best_action_keys,
+                  "selected_support_backup_complete": search.selected_support_backup_complete,
+                  "selected_backup_absolute_error": (
+                      abs(search.selected_support_backed_value - selected_exact)
+                      if search.selected_support_backed_value is not None else None
+                  ),
+                  "exact_p1_reply_used_inside_search": False,
+                  "root_hidden_packet_blind": True,
+                  "p1_information_state_explicit": True,
+              },
+              "limitations": [
+                  "finite hand-selected uniform hidden-packet support",
+                  "final street only",
+                  "not posterior-conditioned on prior strategic signalling",
+                  "not full-game ISMCTS",
+                  "not certification authority",
+              ],
+              "promotion_recommendation": "CONTINUE_TO_TWO_STREET_05C_SHADOW_ONLY",
+              "real_routes_certified": 0,
+          }
+          if not payload["quality"]["selected_is_exact_optimum"]:
+              raise SystemExit("05B selected action missed exact support optimum")
+          if not payload["quality"]["selected_support_backup_complete"]:
+              raise SystemExit("05B selected-action support backup is incomplete")
+          if payload["quality"]["selected_backup_absolute_error"] > 1e-12:
+              raise SystemExit("05B learned selected-action backup differs from exact support value")
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_r4_two_level_05b.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "selected_is_exact_optimum": payload["quality"]["selected_is_exact_optimum"],
+              "selected_support_backup_complete": payload["quality"]["selected_support_backup_complete"],
+              "selected_backup_absolute_error": payload["quality"]["selected_backup_absolute_error"],
+              "p1_infoset_count": search.p1_infoset_count,
+              "manifest_sha256": payload["sha256"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-r4-two-level-05b
+          path: artifacts/external_r4_two_level_05b.json
+          if-no-files-found: error
+          retention-days: 30

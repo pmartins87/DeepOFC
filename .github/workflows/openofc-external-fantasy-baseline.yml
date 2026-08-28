@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-fantasy-baseline.yml'
+      - 'deepofc/fantasy_solver.py'
+      - 'deepofc/fantasy_solver_v2.py'
+      - 'tools/benchmark_fantasy15_v2_frame53.py'
+      - 'tools/benchmark_fantasy17_v2_dual_joker.py'
+      - 'fixtures/replay/fantasy_frame000053.json'
   workflow_dispatch:
 
 permissions:

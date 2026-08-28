@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-late-search-authority.yml'
+      - 'tools/openofc_solver/test_external_late_search_authority_firewall.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+      - 'tools/openofc_solver/teacher_search.py'
   workflow_dispatch:
 
 permissions:

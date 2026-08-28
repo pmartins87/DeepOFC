@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-r4-infoset-search.yml'
+      - 'tools/openofc_solver/external_r4_infoset_search.py'
+      - 'tools/openofc_solver/test_external_r4_infoset_search.py'
+      - 'tools/openofc_solver/external_research_world_sampler.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
   workflow_dispatch:
 
 permissions:
