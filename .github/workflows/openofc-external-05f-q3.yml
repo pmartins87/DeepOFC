@@ -1,0 +1,43 @@
+name: OpenOFC external 05F Q3 reach-weighted Search
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/run_external_05f_q3.py'
+      - 'tools/openofc_solver/external_hidden_discard_reach_completion.py'
+      - '.github/workflows/openofc-external-05f-q3.yml'
+  workflow_dispatch:
+
+jobs:
+  q3-reach-weighted-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate Q3 mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_hidden_discard_reach_completion.py \
+              tools/openofc_solver/test_external_hidden_discard_overlap_strategic.py
+      - name: Run 05F Q3 exact A/B
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05f_q3.py \
+              --output artifacts/external_05f_q3.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05f-q3
+          path: artifacts/external_05f_q3.json
+          if-no-files-found: error
+          retention-days: 30
