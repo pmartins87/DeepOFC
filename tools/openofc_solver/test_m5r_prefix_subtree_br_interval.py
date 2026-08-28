@@ -10,16 +10,20 @@ from m5q_support_range_feasibility import exact_terminal_utility_range
 from m5r_prefix_subtree_br_interval import prefix_subtree_best_response_interval
 
 
-def _geometric_profile(game, decay: float = 0.2):
+def _dominant_full_support_profile(game, dominant_mass: float = 0.8):
     profile = {}
     for info, actions in game.info_actions.items():
         ordered = tuple(sorted(actions, key=lambda action: action.key()))
-        raw = [decay**index for index in range(len(ordered))]
-        total = sum(raw)
+        if len(ordered) == 1:
+            profile[info] = {ordered[0]: 1.0}
+            continue
+        tail = (1.0 - dominant_mass) / (len(ordered) - 1)
         profile[info] = {
-            action: raw[index] / total
+            action: dominant_mass if index == 0 else tail
             for index, action in enumerate(ordered)
         }
+        assert all(probability > 0.0 for probability in profile[info].values())
+        assert abs(sum(profile[info].values()) - 1.0) <= 1e-12
     return profile
 
 
@@ -83,9 +87,9 @@ def test_full_prefix_prune_skips_every_terminal_and_contains_exact() -> None:
     assert result.interval_width > 0.0
 
 
-def test_geometric_profile_threshold_reduces_work_monotonically() -> None:
+def test_concentrated_full_support_profile_reduces_work_monotonically() -> None:
     game = HUTwoRoundJokerSubgame()
-    profile = _geometric_profile(game)
+    profile = _dominant_full_support_profile(game)
     p0_value = game.expected_u0(profile)
     utility = exact_terminal_utility_range(game)
     exact = exact_best_response(game, profile, 0).value
