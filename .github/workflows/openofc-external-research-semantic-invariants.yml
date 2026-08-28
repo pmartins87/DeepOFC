@@ -1,0 +1,66 @@
+name: OpenOFC external research semantic invariants
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/engine.py'
+      - 'tools/openofc_solver/fantasy_transition.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+      - 'tools/openofc_solver/test_semantic_invariant_firewall.py'
+      - '.github/workflows/openofc-external-research-semantic-invariants.yml'
+  workflow_dispatch:
+
+jobs:
+  semantic-firewall:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run pre-training semantic invariants
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_semantic_invariant_firewall.py
+      - name: Freeze source identities
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          paths = [
+              'tools/openofc_solver/engine.py',
+              'tools/openofc_solver/fantasy_transition.py',
+              'tools/openofc_solver/strategic_cfr.py',
+              'tools/openofc_solver/test_semantic_invariant_firewall.py',
+          ]
+          payload = {
+              'schema': 'openofc-pretraining-semantic-invariant-firewall-v1',
+              'authority': 'SEMANTIC_RULE_GATE_NOT_STRATEGIC_CERTIFICATION',
+              'files': [
+                  {'path': p, 'sha256': hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              'heavy_training_allowed_by_this_gate_only': False,
+              'real_routes_certified': 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(',', ':')).encode()
+          payload['sha256'] = hashlib.sha256(raw).hexdigest()
+          Path('artifacts').mkdir(exist_ok=True)
+          Path('artifacts/pretraining_semantic_invariants.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print(json.dumps({'semantic_firewall': 'PASS', 'sha256': payload['sha256'], 'real_routes_certified': 0}, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-pretraining-semantic-invariant-firewall
+          path: artifacts/pretraining_semantic_invariants.json
+          if-no-files-found: error
+          retention-days: 30
