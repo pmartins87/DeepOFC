@@ -1,0 +1,126 @@
+name: OpenOFC external R4 infoset search
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  reduced-infoset-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate exact-support and UCT search
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_r4_infoset_search.py
+      - name: Run frozen reduced pilot and emit evidence
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          from external_r4_infoset_search import exact_uniform_support_values, run_uniform_support_root_uct
+          from test_external_r4_infoset_search import _coherent_r4_state, _support
+
+          support = _support()
+          state = _coherent_r4_state(support[0])
+          exact = exact_uniform_support_values(state, support)
+          search = run_uniform_support_root_uct(
+              state,
+              support,
+              iterations=50_000,
+              seed=2026082805,
+              exploration=1.0,
+          )
+          selected_stat = next(s for s in search.action_stats if s.action_key == search.selected_action_key)
+          exact_by_key = dict(exact.action_values)
+          paths = [
+              "tools/openofc_solver/external_r4_infoset_search.py",
+              "tools/openofc_solver/test_external_r4_infoset_search.py",
+              "tools/openofc_solver/external_research_world_sampler.py",
+              "tools/openofc_solver/strategic_cfr.py",
+          ]
+          payload = {
+              "schema": "openofc-external-component-ab-v1",
+              "experiment_id": "EXT-ISMCTS-05A-R4-REDUCED",
+              "baseline_sha": "c3430819d6cb22c8ad823791a35374d56a88a32a",
+              "external_reference": {
+                  "repo": "xeond8/OFC-Poker-Agents",
+                  "sha": "971faf5f794a3b6a0d7aadb0335f0af1fdf41b89",
+                  "file": "bot/ismcts.py",
+                  "role": "architecture inspiration only",
+              },
+              "authority": search.authority,
+              "component": "reduced-r4-infoset-search",
+              "files": [
+                  {"path": p, "sha256": hashlib.sha256(Path(p).read_bytes()).hexdigest()}
+                  for p in paths
+              ],
+              "support_packets": [sorted(str(c) for c in packet) for packet in support],
+              "exact": {
+                  "packet_count": exact.packet_count,
+                  "best_value": exact.best_value,
+                  "best_action_keys": list(exact.best_action_keys),
+                  "action_values": [[k, v] for k, v in exact.action_values],
+              },
+              "search": {
+                  "iterations": search.iterations,
+                  "seed": search.seed,
+                  "selected_action_key": search.selected_action_key,
+                  "selected_mean_value": selected_stat.mean_value,
+                  "selected_exact_value": exact_by_key[search.selected_action_key],
+                  "absolute_value_error": abs(selected_stat.mean_value - exact_by_key[search.selected_action_key]),
+                  "selected_is_exact_optimum": search.selected_action_key in exact.best_action_keys,
+                  "reply_cache_entries": search.determinized_reply_cache_entries,
+                  "action_stats": [
+                      {"key": s.action_key, "visits": s.visits, "mean": s.mean_value}
+                      for s in search.action_stats
+                  ],
+              },
+              "limitations": [
+                  "finite hand-selected uniform hidden-packet support",
+                  "root-only UCT with exact final P1 response",
+                  "not a strategic posterior conditioned on prior signalling",
+                  "not full-game ISMCTS",
+                  "not certification authority",
+              ],
+              "promotion_recommendation": "CONTINUE_TO_FULL_ISMCTS_SHADOW_ONLY",
+              "real_routes_certified": 0,
+          }
+          if not payload["search"]["selected_is_exact_optimum"]:
+              raise SystemExit("reduced infoset search missed exact support optimum")
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/external_r4_infoset_search_05a.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "experiment_id": payload["experiment_id"],
+              "exact_best_value": exact.best_value,
+              "selected_is_exact_optimum": payload["search"]["selected_is_exact_optimum"],
+              "absolute_value_error": payload["search"]["absolute_value_error"],
+              "manifest_sha256": payload["sha256"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-r4-infoset-search-05a
+          path: artifacts/external_r4_infoset_search_05a.json
+          if-no-files-found: error
+          retention-days: 30
