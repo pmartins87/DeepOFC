@@ -1,0 +1,49 @@
+name: OpenOFC external two-street infoset Q1
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - '.github/workflows/openofc-external-two-street-q1.yml'
+      - 'tools/openofc_solver/run_external_two_street_q1.py'
+      - 'tools/openofc_solver/EXTERNAL_TWO_STREET_INFOSET_SEARCH_05C_Q1_CONTRACT.md'
+      - 'tools/openofc_solver/external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/test_external_two_street_infoset_search.py'
+      - 'tools/openofc_solver/external_research_world_sampler.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONHASHSEED: "0"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  reproducibility-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate Q0 mechanical firewalls
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_two_street_infoset_search.py
+      - name: Run frozen Q1 reproducibility matrix
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_two_street_q1.py \
+              --output artifacts/external_two_street_05c_q1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-two-street-05c-q1
+          path: artifacts/external_two_street_05c_q1.json
+          if-no-files-found: error
+          retention-days: 30
