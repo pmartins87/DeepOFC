@@ -14,7 +14,7 @@ from external_two_street_infoset_search import TwoStreetWorld, _assert_root_isol
 from strategic_cfr import HUState, child_state, information_state_key, legal_action_pairs
 
 AUTHORITY = "FINITE_SUPPORT_CONDITIONAL_REACH_AUDIT_ONLY"
-SCHEMA = "openofc-external-two-street-reach-audit-v1"
+SCHEMA = "openofc-external-two-street-reach-audit-v2"
 ReadOnlyProfile = Mapping[str, Mapping[str, float]]
 
 
@@ -24,15 +24,17 @@ class ConditionalReachRow:
     round_index: int
     actor: int
     compatible_states: int
+    full_reach_defined: bool
+    counterfactual_reach_defined: bool
     full_reach_weights: tuple[tuple[str, float], ...]
     counterfactual_reach_weights: tuple[tuple[str, float], ...]
-    uniform_vs_full_tv: float
-    uniform_vs_counterfactual_tv: float
-    full_vs_counterfactual_tv: float
-    full_max_weight: float
-    counterfactual_max_weight: float
-    full_effective_support: float
-    counterfactual_effective_support: float
+    uniform_vs_full_tv: float | None
+    uniform_vs_counterfactual_tv: float | None
+    full_vs_counterfactual_tv: float | None
+    full_max_weight: float | None
+    counterfactual_max_weight: float | None
+    full_effective_support: float | None
+    counterfactual_effective_support: float | None
 
 
 @dataclass(frozen=True)
@@ -40,6 +42,8 @@ class ConditionalReachAudit:
     authority: str
     support_worlds: int
     information_states: int
+    full_reach_defined_information_states: int
+    counterfactual_reach_defined_information_states: int
     rows: tuple[ConditionalReachRow, ...]
 
 
@@ -75,17 +79,16 @@ def _normalize(weights: Mapping[str, float]) -> tuple[tuple[str, float], ...]:
     return tuple((key, positive[key] / mass) for key in sorted(positive))
 
 
-def _tv(
-    p: Mapping[str, float],
-    q: Mapping[str, float],
-) -> float:
+def _tv(p: Mapping[str, float], q: Mapping[str, float]) -> float:
     keys = set(p) | set(q)
     return 0.5 * sum(abs(float(p.get(key, 0.0)) - float(q.get(key, 0.0))) for key in keys)
 
 
 def _effective_support(weights: Mapping[str, float]) -> float:
     denom = sum(value * value for value in weights.values())
-    return (1.0 / denom) if denom > 0.0 else 0.0
+    if denom <= 0.0:
+        raise ValueError("effective support requires a normalized nonempty distribution")
+    return 1.0 / denom
 
 
 def audit_conditional_reach(
@@ -94,7 +97,12 @@ def audit_conditional_reach(
     *,
     profile: ReadOnlyProfile,
 ) -> ConditionalReachAudit:
-    """Exactly enumerate full and acting-player counterfactual reach weights."""
+    """Exactly enumerate full and acting-player counterfactual reach weights.
+
+    Every legal branch is traversed even when its behavior probability is zero.
+    This is essential: a player's own zero-probability earlier action must not
+    erase a later information state from that player's counterfactual reach.
+    """
     support = tuple(worlds)
     if len(support) < 2:
         raise ValueError("reach audit requires at least two physical worlds")
@@ -130,8 +138,9 @@ def audit_conditional_reach(
         by_key = dict(pairs)
         for action_key in action_keys:
             probability = distribution[action_key]
-            if probability <= 0.0:
-                continue
+            # Deliberately recurse at probability zero. Full reach may become
+            # zero, while the acting player's later counterfactual reach can
+            # remain positive because own reach is excluded there.
             if actor == 0:
                 walk(child_state(state, by_key[action_key]), reach_p0 * probability, reach_p1)
             else:
@@ -149,6 +158,9 @@ def audit_conditional_reach(
         cf_norm_tuple = _normalize(cf_raw)
         full_norm = dict(full_norm_tuple)
         cf_norm = dict(cf_norm_tuple)
+        full_defined = bool(full_norm)
+        cf_defined = bool(cf_norm)
+
         concrete = sorted(set(full_raw) | set(cf_raw))
         uniform = {fingerprint: 1.0 / len(concrete) for fingerprint in concrete}
         round_index, actor = metadata[info_key]
@@ -158,15 +170,17 @@ def audit_conditional_reach(
                 round_index=round_index,
                 actor=actor,
                 compatible_states=len(concrete),
+                full_reach_defined=full_defined,
+                counterfactual_reach_defined=cf_defined,
                 full_reach_weights=full_norm_tuple,
                 counterfactual_reach_weights=cf_norm_tuple,
-                uniform_vs_full_tv=_tv(uniform, full_norm),
-                uniform_vs_counterfactual_tv=_tv(uniform, cf_norm),
-                full_vs_counterfactual_tv=_tv(full_norm, cf_norm),
-                full_max_weight=max(full_norm.values(), default=0.0),
-                counterfactual_max_weight=max(cf_norm.values(), default=0.0),
-                full_effective_support=_effective_support(full_norm),
-                counterfactual_effective_support=_effective_support(cf_norm),
+                uniform_vs_full_tv=_tv(uniform, full_norm) if full_defined else None,
+                uniform_vs_counterfactual_tv=_tv(uniform, cf_norm) if cf_defined else None,
+                full_vs_counterfactual_tv=_tv(full_norm, cf_norm) if full_defined and cf_defined else None,
+                full_max_weight=max(full_norm.values()) if full_defined else None,
+                counterfactual_max_weight=max(cf_norm.values()) if cf_defined else None,
+                full_effective_support=_effective_support(full_norm) if full_defined else None,
+                counterfactual_effective_support=_effective_support(cf_norm) if cf_defined else None,
             )
         )
 
@@ -174,19 +188,26 @@ def audit_conditional_reach(
         authority=AUTHORITY,
         support_worlds=len(support),
         information_states=len(rows),
+        full_reach_defined_information_states=sum(1 for row in rows if row.full_reach_defined),
+        counterfactual_reach_defined_information_states=sum(
+            1 for row in rows if row.counterfactual_reach_defined
+        ),
         rows=tuple(rows),
     )
 
 
 def summarize_reach_audit(audit: ConditionalReachAudit) -> dict:
-    def summary(values: Sequence[float]) -> dict[str, float]:
-        ordered = sorted(float(value) for value in values)
+    def summary(values: Sequence[float | None]) -> dict[str, float | int]:
+        ordered = sorted(float(value) for value in values if value is not None)
         if not ordered:
-            return {"mean": 0.0, "max": 0.0, "p50": 0.0, "p95": 0.0}
+            return {"defined": 0, "mean": 0.0, "max": 0.0, "p50": 0.0, "p95": 0.0}
+
         def quantile(q: float) -> float:
             index = int(round(q * (len(ordered) - 1)))
             return ordered[max(0, min(index, len(ordered) - 1))]
+
         return {
+            "defined": len(ordered),
             "mean": sum(ordered) / len(ordered),
             "max": ordered[-1],
             "p50": quantile(0.50),
@@ -200,18 +221,28 @@ def summarize_reach_audit(audit: ConditionalReachAudit) -> dict:
         key = f"R{round_index}_P{actor}"
         layers[key] = {
             "information_states": len(subset),
+            "full_reach_defined_information_states": sum(1 for row in subset if row.full_reach_defined),
+            "counterfactual_reach_defined_information_states": sum(
+                1 for row in subset if row.counterfactual_reach_defined
+            ),
             "multi_state_information_states": sum(1 for row in subset if row.compatible_states > 1),
             "uniform_vs_full_tv": summary([row.uniform_vs_full_tv for row in subset]),
-            "uniform_vs_counterfactual_tv": summary([row.uniform_vs_counterfactual_tv for row in subset]),
+            "uniform_vs_counterfactual_tv": summary(
+                [row.uniform_vs_counterfactual_tv for row in subset]
+            ),
             "full_vs_counterfactual_tv": summary([row.full_vs_counterfactual_tv for row in subset]),
         }
     return {
         "authority": audit.authority,
         "support_worlds": audit.support_worlds,
         "information_states": audit.information_states,
+        "full_reach_defined_information_states": audit.full_reach_defined_information_states,
+        "counterfactual_reach_defined_information_states": audit.counterfactual_reach_defined_information_states,
         "multi_state_information_states": len(multi),
         "uniform_vs_full_tv": summary([row.uniform_vs_full_tv for row in multi]),
-        "uniform_vs_counterfactual_tv": summary([row.uniform_vs_counterfactual_tv for row in multi]),
+        "uniform_vs_counterfactual_tv": summary(
+            [row.uniform_vs_counterfactual_tv for row in multi]
+        ),
         "full_vs_counterfactual_tv": summary([row.full_vs_counterfactual_tv for row in multi]),
         "layers": layers,
     }
