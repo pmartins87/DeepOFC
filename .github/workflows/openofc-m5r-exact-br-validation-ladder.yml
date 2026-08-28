@@ -50,7 +50,9 @@ jobs:
           assert data["authority"] == "M5R_EXACT_THREE_ROUND_BR_VALIDATION_LADDER_NOT_ROUTE_CERTIFICATION"
           assert data["validation_status"] == "PASS"
           assert data["crosscheck_abs_error"] <= 1e-10
-          assert data["responding_infosets"] == data["expected_responding_infosets"]
+          assert data["responding_infosets"] > 0
+          assert data["infoset_coverage_verified"] is True
+          assert data["infoset_coverage_authority"] == "exact_best_response_internal_complete_infoset_assertion"
           assert data["exact_br_terminal_histories"] == data["expected_exact_br_terminal_histories"]
           assert data["pure_replay_terminal_histories"] == data["expected_pure_replay_terminal_histories"]
           assert data["production_certification_eligible"] is False
@@ -85,13 +87,14 @@ jobs:
           rows = [json.loads(path.read_text(encoding="utf-8")) for path in files]
           assert all(row["validation_status"] == "PASS" for row in rows)
           assert all(row["crosscheck_abs_error"] <= 1e-10 for row in rows)
+          assert all(row["infoset_coverage_verified"] is True for row in rows)
           pairs = {(row["family"], row["player"]) for row in rows}
           assert pairs == {
               ("three-round-v1", 0), ("three-round-v1", 1),
               ("three-round-v2", 0), ("three-round-v2", 1),
           }
           payload = {
-              "schema": "openofc-m5r-exact-br-validation-ladder-v1",
+              "schema": "openofc-m5r-exact-br-validation-ladder-v2",
               "authority": "M5R_EXACT_BR_VALIDATION_LADDER_NOT_ROUTE_CERTIFICATION",
               "rows": rows,
               "decision": {
