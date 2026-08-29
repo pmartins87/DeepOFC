@@ -1,0 +1,45 @@
+name: OpenOFC external 05G Q0D MCCFR native coverage scaling
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05G_Q0D_MCCFR_COVERAGE_SCALING_CONTRACT.md'
+      - 'tools/openofc_solver/external_05g_broad_support.py'
+      - 'tools/openofc_solver/external_hidden_discard_overlap_strategic.py'
+      - 'tools/openofc_solver/run_external_05g_q0b.py'
+      - 'tools/openofc_solver/run_external_05g_q0c.py'
+      - 'tools/openofc_solver/run_external_05g_q0d.py'
+      - '.github/workflows/openofc-external-05g-q0d.yml'
+  workflow_dispatch:
+
+jobs:
+  q0d-mccfr-native-coverage-scaling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate frozen 05G support firewalls
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_05g_broad_support.py
+      - name: Run 05G Q0D MCCFR native coverage scaling
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05g_q0d.py \
+              --output artifacts/external_05g_q0d.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05g-q0d
+          path: artifacts/external_05g_q0d.json
+          if-no-files-found: error
+          retention-days: 30
