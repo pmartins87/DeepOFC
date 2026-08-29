@@ -8,6 +8,7 @@ on:
       - 'tools/openofc_solver/run_external_05h_h2.py'
       - 'tools/openofc_solver/run_external_05h_h3.py'
       - 'tools/openofc_solver/run_external_05h_h4.py'
+      - 'tools/openofc_solver/test_external_05h_downstream_logic.py'
       - '.github/workflows/openofc-external-05h-downstream-core.yml'
   workflow_dispatch:
 
@@ -31,9 +32,10 @@ jobs:
             tools/openofc_solver/run_external_05h_h2.py \
             tools/openofc_solver/run_external_05h_h3.py \
             tools/openofc_solver/run_external_05h_h4.py
-      - name: Revalidate support and completion cores
+      - name: Revalidate support completion and downstream logic
         run: |
           PYTHONPATH=.:tools/openofc_solver \
             python -m pytest -q \
               tools/openofc_solver/test_external_05h_broad_support.py \
-              tools/openofc_solver/test_external_05g_uniform_backward_completion.py
+              tools/openofc_solver/test_external_05g_uniform_backward_completion.py \
+              tools/openofc_solver/test_external_05h_downstream_logic.py
