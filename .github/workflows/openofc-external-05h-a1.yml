@@ -1,0 +1,49 @@
+name: OpenOFC external 05H A1 current vs average exact BR
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05H_A1_CURRENT_VS_AVERAGE_EXACT_BR_CONTRACT.md'
+      - 'tools/openofc_solver/run_external_05h_a1.py'
+      - '.github/workflows/openofc-external-05h-a1.yml'
+  workflow_dispatch:
+
+jobs:
+  a1-current-vs-average:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      FROZEN_MCCFR_ITERATIONS: '4096'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate average-policy fidelity and 05H support
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_05h_mccfr_simple_average.py \
+              tools/openofc_solver/test_external_05h_broad_support.py
+      - name: Compile A1 comparator
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile tools/openofc_solver/run_external_05h_a1.py
+      - name: Run 05H A1 current-vs-average exact BR
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05h_a1.py \
+              --mccfr-iterations "$FROZEN_MCCFR_ITERATIONS" \
+              --output artifacts/external_05h_a1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05h-a1
+          path: artifacts/external_05h_a1.json
+          if-no-files-found: error
+          retention-days: 30
