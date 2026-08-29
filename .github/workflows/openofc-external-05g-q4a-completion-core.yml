@@ -1,0 +1,33 @@
+name: OpenOFC external 05G Q4A weighted completion core
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05G_Q4A_COUNTERFACTUAL_WEIGHTED_COMPLETION_AB_CONTRACT.md'
+      - 'tools/openofc_solver/external_05g_counterfactual_weighted_completion.py'
+      - 'tools/openofc_solver/test_external_05g_counterfactual_weighted_completion.py'
+      - '.github/workflows/openofc-external-05g-q4a-completion-core.yml'
+  workflow_dispatch:
+
+jobs:
+  q4a-weighted-completion-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run Q4A weighted-completion invariants
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_05g_uniform_backward_completion.py \
+              tools/openofc_solver/test_external_05g_counterfactual_weighted_completion.py
