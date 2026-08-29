@@ -1,0 +1,43 @@
+name: OpenOFC external 05H H0 144-world geometry
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05H_144_WORLD_BROADENING_CONTRACT.md'
+      - 'tools/openofc_solver/external_05h_broad_support.py'
+      - 'tools/openofc_solver/test_external_05h_broad_support.py'
+      - 'tools/openofc_solver/run_external_05h_h0.py'
+      - '.github/workflows/openofc-external-05h-h0.yml'
+  workflow_dispatch:
+
+jobs:
+  h0-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run 05H physical support invariants
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_05h_broad_support.py
+      - name: Run 05H H0 geometry gate
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05h_h0.py \
+              --output artifacts/external_05h_h0.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05h-h0
+          path: artifacts/external_05h_h0.json
+          if-no-files-found: error
+          retention-days: 30
