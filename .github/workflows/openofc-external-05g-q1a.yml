@@ -1,0 +1,41 @@
+name: OpenOFC external 05G Q1A native provenance router
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05G_Q1A_NATIVE_PROVENANCE_ROUTER_CONTRACT.md'
+      - 'tools/openofc_solver/run_external_05g_q1a.py'
+      - '.github/workflows/openofc-external-05g-q1a.yml'
+  workflow_dispatch:
+
+jobs:
+  q1a-native-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate frozen 05G support firewalls
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_05g_broad_support.py
+      - name: Run 05G Q1A native provenance gate
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05g_q1a.py \
+              --output artifacts/external_05g_q1a.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05g-q1a
+          path: artifacts/external_05g_q1a.json
+          if-no-files-found: error
+          retention-days: 30
