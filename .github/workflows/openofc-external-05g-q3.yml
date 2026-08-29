@@ -1,0 +1,43 @@
+name: OpenOFC external 05G Q3 counterfactual posterior audit
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05G_Q3_COUNTERFACTUAL_POSTERIOR_AUDIT_CONTRACT.md'
+      - 'tools/openofc_solver/run_external_05g_q3.py'
+      - '.github/workflows/openofc-external-05g-q3.yml'
+  workflow_dispatch:
+
+jobs:
+  q3-counterfactual-posterior-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate 05G support and completion cores
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_05g_broad_support.py \
+              tools/openofc_solver/test_external_05g_uniform_backward_completion.py
+      - name: Run 05G Q3 counterfactual posterior audit
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_05g_q3.py \
+              --output artifacts/external_05g_q3.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-05g-q3
+          path: artifacts/external_05g_q3.json
+          if-no-files-found: error
+          retention-days: 30
