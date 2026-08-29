@@ -27,13 +27,18 @@ from run_external_05g_q1a import _profile_sha256
 from run_external_05g_q1b import _materialize_completion_profile
 from run_external_05g_q1c import _exact_asymmetric_value
 from run_external_05g_q2 import _br_behavior_profile
-from run_external_05h_h1 import BUDGETS, SEEDS
+from run_external_05h_h1 import SEEDS
 from run_external_05h_h2 import _assemble_m
 
 EXPERIMENT_ID = "EXT-05H-H3-EXACT-BILATERAL-BEST-RESPONSE"
 REPLAY_TOLERANCE = 1e-9
 STRICT_NEAR_NASH = 1e-6
 LOW_NOT_STRICT_MAX = 1e-3
+FROZEN_MCCFR_ITERATIONS = 4096
+H1_FROZEN_NATIVE_SHA256 = {
+    20260829: "c495c5e07c4d5b081c31d885efc834a6fe5ea8e825d28cac54d70ac573c90f5b",
+    20260830: "0fbc66b7fe5300fbbe73d0b2971606fc175eda229c7f5ebb90680e75a28c402e",
+}
 
 
 def _band(exploitability: float) -> str:
@@ -49,8 +54,11 @@ def _sha256_file(path: str) -> str:
 
 
 def run(*, mccfr_iterations: int) -> dict:
-    if mccfr_iterations not in BUDGETS:
-        raise ValueError(f"H3 MCCFR budget must be frozen H1 candidate: {BUDGETS}")
+    if mccfr_iterations != FROZEN_MCCFR_ITERATIONS:
+        raise ValueError(
+            f"H3 is cryptographically pinned to H1-selected budget {FROZEN_MCCFR_ITERATIONS}, "
+            f"got {mccfr_iterations}"
+        )
 
     base_state = public_pre_r3_state()
     support = worlds()
@@ -76,6 +84,17 @@ def run(*, mccfr_iterations: int) -> dict:
         solver.run(mccfr_iterations)
         mccfr = solver.current_profile()
         mccfr_seconds = perf_counter() - t2
+
+        native_sha = _profile_sha256(mccfr)
+        expected_native_sha = H1_FROZEN_NATIVE_SHA256.get(seed)
+        if expected_native_sha is None:
+            raise RuntimeError(f"H3 has no frozen H1 native SHA for seed {seed}")
+        if native_sha != expected_native_sha:
+            raise RuntimeError(
+                f"H3 reconstructed native profile SHA mismatch for seed {seed}: "
+                f"expected {expected_native_sha}, got {native_sha}"
+            )
+
         m_profile, source_map = _assemble_m(
             support_rows=support_rows,
             mccfr=mccfr,
@@ -153,6 +172,9 @@ def run(*, mccfr_iterations: int) -> dict:
             "mccfr_iterations": mccfr_iterations,
             "native_runtime_seconds": mccfr_seconds,
             "native_information_states": len(mccfr),
+            "native_profile_sha256": native_sha,
+            "expected_h1_native_profile_sha256": expected_native_sha,
+            "h1_native_sha_reproduced": native_sha == expected_native_sha,
             "m_profile_sha256": _profile_sha256(m_profile),
             "m_source_counts": {
                 "MCCFR_NATIVE": sum(1 for label in source_map.values() if label == "MCCFR_NATIVE"),
@@ -211,9 +233,13 @@ def run(*, mccfr_iterations: int) -> dict:
         "support_matches_h0": len(support) == 144 and len(support_rows) == 261076,
         "completion_complete": completion.information_states == len(support_rows),
         "both_seeds_evaluated_separately": len(seed_results) == 2 and [row["seed"] for row in seed_results] == list(SEEDS),
+        "h1_4096_native_sha_reproduced_both_seeds": len(seed_results) == 2 and all(
+            row["h1_native_sha_reproduced"] for row in seed_results
+        ),
         "both_seeds_mechanical_pass": len(seed_results) == 2 and all(row["seed_pass"] for row in seed_results),
         "exact_replay_tolerance_frozen": REPLAY_TOLERANCE == 1e-9,
         "strategic_bands_precommitted": STRICT_NEAR_NASH == 1e-6 and LOW_NOT_STRICT_MAX == 1e-3,
+        "frozen_h1_budget_enforced": mccfr_iterations == FROZEN_MCCFR_ITERATIONS == 4096,
         "no_cross_seed_average_for_verdict": True,
         "no_production_authority": True,
         "real_routes_certified_zero": True,
@@ -236,6 +262,7 @@ def run(*, mccfr_iterations: int) -> dict:
             "seeds": list(SEEDS),
             "mccfr_iterations": mccfr_iterations,
             "support_sha256": support_sha256(support),
+            "h1_frozen_native_sha256": {str(seed): value for seed, value in H1_FROZEN_NATIVE_SHA256.items()},
             "replay_tolerance": REPLAY_TOLERANCE,
             "strict_near_nash_max_exploitability": STRICT_NEAR_NASH,
             "low_not_strict_max_exploitability": LOW_NOT_STRICT_MAX,
@@ -291,6 +318,8 @@ def main() -> None:
         "seed_summaries": [
             {
                 "seed": row["seed"],
+                "native_profile_sha256": row["native_profile_sha256"],
+                "h1_native_sha_reproduced": row["h1_native_sha_reproduced"],
                 "exploitability": row["best_response"]["exploitability"],
                 "nash_conv": row["best_response"]["nash_conv"],
                 "band": row["best_response"]["interpretation_band"],
