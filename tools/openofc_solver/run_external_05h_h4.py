@@ -30,10 +30,15 @@ from run_external_05g_q3 import (
     _posterior_rows,
     _seed_summary,
 )
-from run_external_05h_h1 import BUDGETS, SEEDS
+from run_external_05h_h1 import SEEDS
 from run_external_05h_h2 import _assemble_m
 
 EXPERIMENT_ID = "EXT-05H-H4-COUNTERFACTUAL-POSTERIOR-AUDIT"
+FROZEN_MCCFR_ITERATIONS = 4096
+H1_FROZEN_NATIVE_SHA256 = {
+    20260829: "c495c5e07c4d5b081c31d885efc834a6fe5ea8e825d28cac54d70ac573c90f5b",
+    20260830: "0fbc66b7fe5300fbbe73d0b2971606fc175eda229c7f5ebb90680e75a28c402e",
+}
 
 
 def _sha256_file(path: str) -> str:
@@ -41,8 +46,10 @@ def _sha256_file(path: str) -> str:
 
 
 def run(*, mccfr_iterations: int) -> dict:
-    if mccfr_iterations not in BUDGETS:
-        raise ValueError(f"H4 budget must be frozen H1 candidate: {BUDGETS}")
+    if mccfr_iterations != FROZEN_MCCFR_ITERATIONS:
+        raise ValueError(
+            f"H4 is pinned to H1-selected budget {FROZEN_MCCFR_ITERATIONS}, got {mccfr_iterations}"
+        )
 
     base_state = public_pre_r3_state()
     support = worlds()
@@ -68,6 +75,17 @@ def run(*, mccfr_iterations: int) -> dict:
         solver.run(mccfr_iterations)
         mccfr = solver.current_profile()
         mccfr_seconds = perf_counter() - t2
+
+        native_sha = _profile_sha256(mccfr)
+        expected_native_sha = H1_FROZEN_NATIVE_SHA256.get(seed)
+        if expected_native_sha is None:
+            raise RuntimeError(f"H4 has no frozen H1 native SHA for seed {seed}")
+        if native_sha != expected_native_sha:
+            raise RuntimeError(
+                f"H4 reconstructed native profile SHA mismatch for seed {seed}: "
+                f"expected {expected_native_sha}, got {native_sha}"
+            )
+
         m_profile, source_map = _assemble_m(
             support_rows=support_rows,
             mccfr=mccfr,
@@ -123,7 +141,9 @@ def run(*, mccfr_iterations: int) -> dict:
             "mccfr_iterations": mccfr_iterations,
             "native_runtime_seconds": mccfr_seconds,
             "native_information_states": len(mccfr),
-            "native_profile_sha256": _profile_sha256(mccfr),
+            "native_profile_sha256": native_sha,
+            "expected_h1_native_profile_sha256": expected_native_sha,
+            "h1_native_sha_reproduced": native_sha == expected_native_sha,
             "m_profile_sha256": _profile_sha256(m_profile),
             "m_source_map_sha256": _source_map_sha256(source_map),
             "profile_validation": validation,
@@ -132,7 +152,7 @@ def run(*, mccfr_iterations: int) -> dict:
             "posterior_diagnostics": diagnostics,
             "summary": summary,
             "interpretation": interpretation,
-            "seed_pass": firewalls and diagnostics_pass,
+            "seed_pass": firewalls and diagnostics_pass and native_sha == expected_native_sha,
         })
 
     interpretations = [row["interpretation"] for row in seed_results]
@@ -153,7 +173,11 @@ def run(*, mccfr_iterations: int) -> dict:
         "support_matches_h0": len(support) == 144 and len(support_rows) == 261076,
         "completion_complete": completion.information_states == len(support_rows),
         "both_seeds_audited_separately": len(seed_results) == 2 and [row["seed"] for row in seed_results] == list(SEEDS),
+        "h1_4096_native_sha_reproduced_both_seeds": len(seed_results) == 2 and all(
+            row["h1_native_sha_reproduced"] for row in seed_results
+        ),
         "both_seeds_pass_mechanical_firewalls": len(seed_results) == 2 and all(row["seed_pass"] for row in seed_results),
+        "frozen_h1_budget_enforced": mccfr_iterations == FROZEN_MCCFR_ITERATIONS == 4096,
         "no_policy_update": True,
         "no_best_response_choice_update": True,
         "no_ev_ranking": True,
@@ -178,6 +202,7 @@ def run(*, mccfr_iterations: int) -> dict:
             "mccfr_iterations": mccfr_iterations,
             "chance_worlds": len(support),
             "support_sha256": support_sha256(support),
+            "h1_frozen_native_sha256": {str(seed): value for seed, value in H1_FROZEN_NATIVE_SHA256.items()},
             "completion_policy_sha256": completion.policy_sha256,
             "completion_source_label": COMPLETION_SOURCE,
             "posterior_tv_epsilon": EPS,
@@ -236,6 +261,8 @@ def main() -> None:
         "seed_summaries": [
             {
                 "seed": row["seed"],
+                "native_profile_sha256": row["native_profile_sha256"],
+                "h1_native_sha_reproduced": row["h1_native_sha_reproduced"],
                 "completion_counterfactually_reachable_ambiguous_information_states": row["summary"]["completion_counterfactually_reachable_ambiguous_information_states"],
                 "completion_reachable_ambiguous_tv": row["summary"]["completion_reachable_ambiguous_tv"],
                 "interpretation": row["interpretation"],
