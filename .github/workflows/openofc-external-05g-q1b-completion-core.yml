@@ -1,0 +1,31 @@
+name: OpenOFC external 05G Q1B uniform backward completion core
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_05G_Q1B_UNIFORM_BACKWARD_COMPLETION_CONTRACT.md'
+      - 'tools/openofc_solver/external_05g_uniform_backward_completion.py'
+      - 'tools/openofc_solver/test_external_05g_uniform_backward_completion.py'
+      - '.github/workflows/openofc-external-05g-q1b-completion-core.yml'
+  workflow_dispatch:
+
+jobs:
+  q1b-completion-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate completion core on hidden-discard fixture
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_05g_uniform_backward_completion.py
