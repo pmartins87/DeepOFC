@@ -8,6 +8,10 @@ tie-safe operational interpretation based on exact top-action regret.
 
 Promotion authority is global across all 12 frozen fixtures; an individual job has
 no promotion authority.
+
+Oracle semantic requirement: P1 best response is grouped by P1 information state.
+Multiple posterior worlds may share one P1 infoset; P1 must choose one response for
+that infoset and may not best-respond independently to hidden worlds.
 """
 
 import argparse
@@ -22,6 +26,7 @@ ALLOWED_FIXTURE_SEEDS = tuple(range(65101, 65113))
 FROZEN_BUDGETS = (32, 64, 128, 256, 512, 1024)
 TOP_REGRET_TOL = 1e-9
 DISCRIMINATION_TOL = 1e-12
+ORACLE_SEMANTICS = "P1_INFOSET_GROUPED_BEST_RESPONSE_V2"
 
 
 def _stable_hit_budget(rows: list[dict]) -> int | None:
@@ -81,17 +86,15 @@ def run(fixture_seed: int) -> dict:
                 ),
             })
 
-    # Preserve the original 06R1 mixed-distribution interpretations, but make
-    # their semantics explicit so they cannot accidentally become 06R1F's
-    # operational promotion authority.
     if "recommendation" in payload:
         payload["r1_mixed_policy_recommendation"] = payload.pop("recommendation")
     if "final_budget_winners" in payload:
         payload["r1_mixed_policy_final_budget_winners"] = payload.pop("final_budget_winners")
 
-    payload["schema"] = "openofc-external-06r1f-v1"
+    payload["schema"] = "openofc-external-06r1f-v2"
     payload["experiment_id"] = "EXT-06R1F-R4-TOP-ACTION-SAMPLE-EFFICIENCY"
     payload["authority"] = "BELIEF_CORRECT_R4_TOP_ACTION_SAMPLE_EFFICIENCY_DIAGNOSTIC"
+    payload["oracle_semantics"] = ORACLE_SEMANTICS
     payload["r1f_fixture"] = {
         "name": spec.name,
         "seed": seed,
@@ -151,6 +154,7 @@ def main() -> None:
     print(json.dumps({
         "experiment_id": payload["experiment_id"],
         "fixture": payload["r1f_fixture"],
+        "oracle_semantics": payload["oracle_semantics"],
         "stable_hits": payload["stable_hits"],
         "manifest_sha256": payload["manifest_sha256"],
         "real_routes_certified": 0,
