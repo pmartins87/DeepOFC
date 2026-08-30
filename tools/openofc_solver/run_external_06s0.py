@@ -203,17 +203,31 @@ def run() -> dict:
     recall_state = child_state(recall_state, legal_action_pairs(recall_state)[0][1])
     recall_state = child_state(recall_state, legal_action_pairs(recall_state)[0][1])
     _r1key, r1action = legal_action_pairs(recall_state)[0]
-    discarded = recall_state.plan.incoming(1, 0)[r1action.discard_index]  # type: ignore[index]
+    assert r1action.discard_index is not None
+    discarded = recall_state.plan.incoming(1, 0)[r1action.discard_index]
     recall_state = child_state(recall_state, r1action)
     recall_state = child_state(recall_state, legal_action_pairs(recall_state)[0][1])
     canonical_recall_payload = json.loads(canonical_information_state(recall_state)[0])
+    canonical_discards = [Card.parse(token) for token in canonical_recall_payload["own_discards"]]
+    if discarded.joker:
+        discard_identity_preserved = (
+            len(canonical_discards) == 1
+            and canonical_discards[0].joker == discarded.joker
+        )
+    else:
+        # A global suit canonicalizer may rename the regular-card suit, but it
+        # must preserve the remembered card rank and regular-card identity type.
+        discard_identity_preserved = (
+            len(canonical_discards) == 1
+            and canonical_discards[0].joker == 0
+            and canonical_discards[0].rank == discarded.rank
+        )
     perfect_recall_pass = (
         len(canonical_recall_payload["own_discards"]) == 1
         and len(canonical_recall_payload["public_history"]) == 4
         and canonical_recall_payload["round"] == 2
         and canonical_recall_payload["player"] == 0
-        and discarded.joker == sum(token.startswith("JK") for token in canonical_recall_payload["own_discards"])
-        if discarded.joker else len(canonical_recall_payload["own_discards"]) == 1
+        and discard_identity_preserved
     )
 
     # Representation-level firewalls: suit permutation must not erase non-suit facts.
