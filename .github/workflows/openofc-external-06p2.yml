@@ -1,0 +1,48 @@
+name: OpenOFC external 06P2 R1 root stability-compute
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_06P2_R1_ROOT_STABILITY_COMPUTE_CONTRACT.md'
+      - 'tools/openofc_solver/run_external_06p2.py'
+      - 'tools/openofc_solver/external_06p0_conditioned_uct.py'
+      - 'tools/openofc_solver/external_06r0_conditioned_solver.py'
+      - '.github/workflows/openofc-external-06p2.yml'
+  workflow_dispatch:
+
+jobs:
+  r1-root-stability-compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile frozen 06P2 runner
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile tools/openofc_solver/run_external_06p2.py
+      - name: Revalidate practical-search mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q \
+              tools/openofc_solver/test_external_06p0_conditioned_uct.py \
+              tools/openofc_solver/test_external_06r0_conditioned_solver.py
+      - name: Run frozen 06P2 probe
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06p2.py \
+              --output artifacts/external_06p2.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: external-06p2-r1-root-stability-compute
+          path: artifacts/external_06p2.json
+          if-no-files-found: error
