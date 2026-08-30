@@ -1,11 +1,6 @@
 name: OpenOFC external 06R1
 on:
   workflow_dispatch:
-  push:
-    branches: [research/external-ofc-solver-audit-20260827]
-    paths:
-      - 'tools/openofc_solver/*06r1*'
-      - '.github/workflows/openofc-external-06r1.yml'
 permissions:
   contents: read
 jobs:
