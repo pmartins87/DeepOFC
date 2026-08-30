@@ -1,0 +1,49 @@
+name: OpenOFC external 06A full-game mechanics
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_06A_FULL_GAME_MECHANICAL_CERTIFICATION_CONTRACT.md'
+      - 'tools/openofc_solver/strategic_cfr.py'
+      - 'tools/openofc_solver/test_strategic_cfr.py'
+      - 'tools/openofc_solver/run_external_06a.py'
+      - '.github/workflows/openofc-external-06a.yml'
+  workflow_dispatch:
+
+jobs:
+  certify-full-game-mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile strategic core and 06A runner
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile \
+              tools/openofc_solver/strategic_cfr.py \
+              tools/openofc_solver/run_external_06a.py
+      - name: Run strategic CFR mechanical tests
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_strategic_cfr.py
+      - name: Run frozen 06A certification
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06a.py \
+              --output artifacts/external_06a.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-06a
+          path: artifacts/external_06a.json
+          if-no-files-found: error
+          retention-days: 30
