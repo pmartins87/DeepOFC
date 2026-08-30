@@ -1,0 +1,22 @@
+name: OpenOFC R4 direct world equivalence
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/external-ofc-solver-audit-20260827]
+    paths:
+      - 'tools/openofc_solver/r4_exact_worlds_direct.py'
+      - 'tools/openofc_solver/test_r4_exact_worlds_direct.py'
+      - '.github/workflows/openofc-r4-direct-world-equivalence.yml'
+permissions:
+  contents: read
+jobs:
+  equivalence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - run: PYTHONPATH=.:tools/openofc_solver python -m pytest -q tools/openofc_solver/test_r4_exact_worlds_direct.py
