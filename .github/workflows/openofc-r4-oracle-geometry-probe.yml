@@ -1,0 +1,26 @@
+name: OpenOFC R4 oracle geometry probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/external-ofc-solver-audit-20260827]
+    paths:
+      - 'tools/openofc_solver/r4_oracle_geometry_probe.py'
+      - '.github/workflows/openofc-r4-oracle-geometry-probe.yml'
+permissions:
+  contents: read
+jobs:
+  geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run geometry probe
+        run: PYTHONPATH=.:tools/openofc_solver python tools/openofc_solver/r4_oracle_geometry_probe.py
