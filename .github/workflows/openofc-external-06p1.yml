@@ -1,0 +1,44 @@
+name: OpenOFC external 06P1 exact strength-compute frontier
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_06P1_EXACT_STRENGTH_COMPUTE_FRONTIER_CONTRACT.md'
+      - 'tools/openofc_solver/run_external_06p1.py'
+      - '.github/workflows/openofc-external-06p1.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-strength-compute-frontier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile frozen 06P1 runner
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile tools/openofc_solver/run_external_06p1.py
+      - name: Revalidate exact strategic core
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_strategic_cfr.py
+      - name: Run frozen 06P1 exact frontier
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06p1.py \
+              --output artifacts/external_06p1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: external-06p1-exact-strength-compute-frontier
+          path: artifacts/external_06p1.json
+          if-no-files-found: error
