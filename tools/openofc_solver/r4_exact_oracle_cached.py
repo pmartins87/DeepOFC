@@ -3,9 +3,15 @@ from __future__ import annotations
 """Semantics-preserving memoized exact R4 P0 oracle.
 
 This is an engineering accelerator, not a new strategic method. It computes
-exactly the same Hero-root value against P1 best response as the 06R1 oracle,
-but memoizes resolved final boards and directly materializes already-certified
-R4 posterior worlds so Joker substitution and prefix replay are not repeated.
+exactly the same Hero-root value against P1 best response as the belief-correct
+06R1 oracle, but memoizes resolved final boards and directly materializes
+already-certified R4 posterior worlds so Joker substitution and prefix replay
+are not repeated.
+
+Critical semantic rule: P1 chooses ONE response per P1 information state. Two
+posterior worlds may map to the same P1 infoset because P1 does not observe all
+of P0's hidden information. Those worlds must be grouped before best response;
+minimizing independently per world would give P1 illicit hidden-world knowledge.
 """
 
 from functools import lru_cache
@@ -62,8 +68,13 @@ def exact_r4_p0_oracle_cached(
     values: list[tuple[str, float]] = []
     p1_counts: list[tuple[str, int]] = []
     for canonical_root_action, _root_action in root_pairs:
-        total = 0.0
-        p1_infos: set[str] = set()
+        # Match external_06r1_belief_correct.exact_r4_p0_oracle exactly:
+        # group posterior worlds by P1's raw information state, accumulate the
+        # utility of each legal P1 action across all worlds in that infoset, and
+        # only then let P1 choose the minimizing action for that infoset.
+        grouped: dict[str, dict[str, float]] = {}
+        action_sets: dict[str, tuple[str, ...]] = {}
+
         for world in worlds:
             _world_key, world_pairs = _canonical_pairs(world)
             world_map = dict(world_pairs)
@@ -74,28 +85,32 @@ def exact_r4_p0_oracle_cached(
                 raise AssertionError("R4 P0 action must lead to R4 P1")
 
             p1_key = information_state_key(child)
-            if p1_key in p1_infos:
-                # At R4, P1's own three hidden discards plus current packet and
-                # public state uniquely identify a world in this Hero posterior.
-                raise AssertionError("R4 P1 infoset spans multiple posterior worlds")
-            p1_infos.add(p1_key)
+            pairs = tuple(legal_action_pairs(child))
+            keys = tuple(key for key, _action in pairs)
+            previous = action_sets.get(p1_key)
+            if previous is None:
+                action_sets[p1_key] = keys
+                grouped[p1_key] = {key: 0.0 for key in keys}
+            elif previous != keys:
+                raise AssertionError("same P1 infoset produced different actions")
 
             incoming = child.plan.incoming(4, 1)
-            response_values = []
-            for _p1_action_key, p1_action in legal_action_pairs(child):
+            for p1_action_key, p1_action in pairs:
                 opponent_final = apply_action(child.boards[1], incoming, p1_action)
                 value = exact_points_from_boards(child.boards[0], opponent_final)
                 if not math.isfinite(value):
                     raise AssertionError("cached exact terminal value is non-finite")
-                response_values.append(value)
-            if not response_values:
-                raise AssertionError("R4 P1 state has no legal response")
-            total += min(response_values)
+                grouped[p1_key][p1_action_key] += value
 
-        if len(p1_infos) != world_count:
-            raise AssertionError("R4 P1 information-state uniqueness accounting failed")
-        values.append((canonical_root_action, total / world_count))
-        p1_counts.append((canonical_root_action, len(p1_infos)))
+        # All enumerated posterior worlds have equal chance weight under the
+        # frozen payoff-blind prefix posterior. min(sum) within each infoset is
+        # equivalent to choosing the minimum conditional expectation there;
+        # division by world_count then applies the infoset reach probability.
+        value = sum(min(action_sums.values()) for action_sums in grouped.values()) / world_count
+        if not math.isfinite(value):
+            raise AssertionError("cached exact root value is non-finite")
+        values.append((canonical_root_action, value))
+        p1_counts.append((canonical_root_action, len(grouped)))
 
     values.sort(key=lambda row: row[0])
     best_value = max(value for _key, value in values)
