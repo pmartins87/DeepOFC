@@ -17,6 +17,8 @@ from pathlib import Path
 EXPECTED_FIXTURE_SEEDS = tuple(range(65101, 65113))
 EXPECTED_BUDGETS = (32, 64, 128, 256, 512, 1024)
 EXPECTED_LEARNER_SEEDS = (20260830, 20260831)
+EXPECTED_SCHEMA = "openofc-external-06r1f-v2"
+EXPECTED_ORACLE_SEMANTICS = "P1_INFOSET_GROUPED_BEST_RESPONSE_V2"
 TOP_TOL = 1e-9
 DISCRIMINATION_TOL = 1e-12
 
@@ -25,8 +27,10 @@ def _load(paths: list[Path]) -> list[dict]:
     payloads = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
     by_seed = {}
     for payload in payloads:
-        if payload.get("schema") != "openofc-external-06r1f-v1":
+        if payload.get("schema") != EXPECTED_SCHEMA:
             raise AssertionError("unexpected 06R1F schema")
+        if payload.get("oracle_semantics") != EXPECTED_ORACLE_SEMANTICS:
+            raise AssertionError("06R1F oracle semantics drift")
         seed = int(payload["r1f_fixture"]["seed"])
         if seed in by_seed:
             raise AssertionError(f"duplicate fixture seed {seed}")
@@ -154,9 +158,10 @@ def run(paths: list[Path]) -> dict:
         }
 
     payload = {
-        "schema": "openofc-external-06r1f-aggregate-v1",
+        "schema": "openofc-external-06r1f-aggregate-v2",
         "experiment_id": "EXT-06R1F-R4-TOP-ACTION-SAMPLE-EFFICIENCY-AGGREGATE",
         "authority": "FROZEN_06R1F_GLOBAL_PROMOTION_AUTHORITY",
+        "oracle_semantics": EXPECTED_ORACLE_SEMANTICS,
         "fixture_seeds": list(EXPECTED_FIXTURE_SEEDS),
         "terminal_budgets": list(EXPECTED_BUDGETS),
         "learner_seeds": list(EXPECTED_LEARNER_SEEDS),
