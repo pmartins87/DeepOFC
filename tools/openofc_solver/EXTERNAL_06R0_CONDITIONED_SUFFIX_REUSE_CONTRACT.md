@@ -112,6 +112,8 @@ A `FUTURE_RESAMPLED_CONDITIONED` fixture is `USEFUL_LOCAL_REUSE` at 8,192 iterat
 1. strict-downstream repeat-update fraction is at least `0.01` (1%);
 2. maximum strict-downstream visits is at least `3`.
 
+Because two learner seeds are frozen, a fixture counts as passing in the verdict router **only if both learner seeds independently satisfy both thresholds**.
+
 The 1% threshold is intentionally an order of magnitude above the 0.1% later-round reuse-starvation threshold frozen in 06S1.
 
 ## Frozen verdict router
