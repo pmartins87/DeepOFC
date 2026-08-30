@@ -1,0 +1,43 @@
+name: OpenOFC external 06R3
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/external-ofc-solver-audit-20260827]
+    paths:
+      - '.github/dispatch/openofc-external-06r3.trigger'
+permissions:
+  contents: read
+jobs:
+  v2-exact-exploitability:
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [MCCFR, ISUCT]
+        learner_seed: [20260830, 20260831]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile frozen runner
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m py_compile tools/openofc_solver/v2_information_set_uct.py tools/openofc_solver/run_external_06r3_v2.py tools/openofc_solver/aggregate_external_06r3_v2.py
+      - name: Revalidate V2 and ISUCT smoke gates
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m pytest -q tests/test_hu_three_round_sequential_v2.py tools/openofc_solver/test_external_06r3_v2_isuct.py
+      - name: Run frozen 06R3 cell
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python tools/openofc_solver/run_external_06r3_v2.py --method ${{ matrix.method }} --seed ${{ matrix.learner_seed }} --output artifacts/external_06r3_${{ matrix.method }}_${{ matrix.learner_seed }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: external-06r3-${{ matrix.method }}-${{ matrix.learner_seed }}
+          path: artifacts/external_06r3_${{ matrix.method }}_${{ matrix.learner_seed }}.json
+          if-no-files-found: error
+          retention-days: 90
