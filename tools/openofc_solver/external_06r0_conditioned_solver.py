@@ -2,17 +2,16 @@ from __future__ import annotations
 
 """06R0 conditioned-suffix research helpers.
 
-The strategic core remains untouched.  This module creates payoff-blind observed
+The strategic core remains untouched. This module creates payoff-blind observed
 root fixtures, re-samples only not-yet-fixed future deal packets, and runs the
 already-certified exact-suit outcome-sampling learner from those conditioned
-roots.  It is a reuse-geometry diagnostic, not a posterior-correct resolver.
+roots. It is a reuse-geometry diagnostic, not a posterior-correct resolver.
 """
 
 from dataclasses import dataclass
 import hashlib
 import json
 import random
-from typing import Sequence
 
 from engine import full_deck
 from external_06s0_suit_automorphism import (
@@ -108,12 +107,21 @@ def plan_sha256(plan: DealPlan) -> str:
     ).hexdigest()
 
 
-def resample_unseen_future(root: HUState, rng: random.Random) -> HUState:
+def resample_unseen_future(
+    root: HUState,
+    rng: random.Random,
+    *,
+    validate_information: bool = False,
+) -> HUState:
     """Sample not-yet-fixed deal packets while preserving the exact root infoset.
 
     This intentionally leaves all already-fixed past packets untouched. It is a
     future-only chance model for the 06R0 geometry gate, not a Bayesian model of
     earlier hidden opponent discards.
+
+    Expensive information-firewall validation is optional so the search hot loop
+    does not pay for repeated proof work. The runner executes dedicated probes
+    before any measured cell.
     """
     if root.terminal() or not 1 <= root.round_index <= 4:
         raise ValueError("conditioned root must be a non-terminal R1..R4 state")
@@ -161,7 +169,8 @@ def resample_unseen_future(root: HUState, rng: random.Random) -> HUState:
         discards=root.discards,
         public_history=root.public_history,
     )
-    validate_same_root_information(root, sampled)
+    if validate_information:
+        validate_same_root_information(root, sampled)
     return sampled
 
 
@@ -262,7 +271,7 @@ def root_probe(root: HUState, *, sample_seed: int, samples: int = 32) -> dict:
     plan_hashes: set[str] = set()
     exact_information = True
     for _ in range(samples):
-        sampled = resample_unseen_future(root, rng)
+        sampled = resample_unseen_future(root, rng, validate_information=True)
         plan_hashes.add(plan_sha256(sampled.plan))
         exact_information = exact_information and (
             information_state_key(sampled) == raw_key
