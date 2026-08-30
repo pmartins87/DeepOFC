@@ -1,0 +1,35 @@
+name: OpenOFC R4 exact oracle cached
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/external-ofc-solver-audit-20260827]
+    paths:
+      - 'tools/openofc_solver/r4_exact_oracle_cached.py'
+      - 'tools/openofc_solver/run_r4_exact_oracle_cached.py'
+      - 'tools/openofc_solver/test_r4_exact_oracle_cached.py'
+      - '.github/workflows/openofc-r4-exact-oracle-cached.yml'
+permissions:
+  contents: read
+jobs:
+  cached-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m py_compile tools/openofc_solver/r4_exact_oracle_cached.py tools/openofc_solver/run_r4_exact_oracle_cached.py
+      - name: Test cached scoring
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m pytest -q tools/openofc_solver/test_r4_exact_oracle_cached.py
+      - name: Run cached full oracle
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python tools/openofc_solver/run_r4_exact_oracle_cached.py
