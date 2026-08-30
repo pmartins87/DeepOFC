@@ -1,0 +1,30 @@
+name: OpenOFC external 06R2 core
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/external-ofc-solver-audit-20260827]
+    paths:
+      - 'tools/openofc_solver/*06r2*'
+      - '.github/workflows/openofc-external-06r2-core.yml'
+permissions:
+  contents: read
+jobs:
+  heldout-panel-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile neutral core
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m py_compile tools/openofc_solver/external_06r2_heldout_panel.py
+      - name: Revalidate posterior and heldout panels
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m pytest -q tools/openofc_solver/test_external_06r1_belief_correct.py tools/openofc_solver/test_external_06r2_heldout_panel.py
