@@ -2,22 +2,19 @@ from __future__ import annotations
 
 """Semantics-preserving memoized exact R4 P0 oracle.
 
-This is an engineering accelerator, not a new strategic method.  It computes
+This is an engineering accelerator, not a new strategic method. It computes
 exactly the same Hero-root value against P1 best response as the 06R1 oracle,
-but memoizes resolved final boards so Joker substitution work is not repeated.
+but memoizes resolved final boards and directly materializes already-certified
+R4 posterior worlds so Joker substitution and prefix replay are not repeated.
 """
 
 from functools import lru_cache
 import math
 
 from engine import Board, apply_action, resolve_board
-from external_06r1_belief_correct import (
-    BeliefSupport,
-    R4ExactOracle,
-    _canonical_pairs,
-    iter_exact_r4_p0_worlds,
-)
+from external_06r1_belief_correct import BeliefSupport, R4ExactOracle, _canonical_pairs
 from external_06r0_conditioned_solver import ConditionedFixtureSpec
+from r4_exact_worlds_direct import iter_exact_r4_p0_worlds_direct
 from strategic_cfr import HUState, child_state, information_state_key, legal_action_pairs
 
 
@@ -57,7 +54,7 @@ def exact_r4_p0_oracle_cached(
     if root_key != support.root_canonical_information_state_key:
         raise AssertionError("oracle root canonical key differs from belief support")
 
-    worlds = tuple(iter_exact_r4_p0_worlds(root, spec, support))
+    worlds = tuple(iter_exact_r4_p0_worlds_direct(root, spec, support))
     if not worlds:
         raise AssertionError("exact R4 posterior has no worlds")
     world_count = len(worlds)
@@ -80,7 +77,6 @@ def exact_r4_p0_oracle_cached(
             if p1_key in p1_infos:
                 # At R4, P1's own three hidden discards plus current packet and
                 # public state uniquely identify a world in this Hero posterior.
-                # Fail closed if that empirical property ever changes.
                 raise AssertionError("R4 P1 infoset spans multiple posterior worlds")
             p1_infos.add(p1_key)
 
