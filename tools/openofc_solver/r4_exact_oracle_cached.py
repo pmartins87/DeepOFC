@@ -14,7 +14,7 @@ from engine import Board, apply_action, resolve_board
 from external_06r1_belief_correct import (
     BeliefSupport,
     R4ExactOracle,
-    _canonical_root_pairs,
+    _canonical_pairs,
     iter_exact_r4_p0_worlds,
 )
 from external_06r0_conditioned_solver import ConditionedFixtureSpec
@@ -53,7 +53,7 @@ def exact_r4_p0_oracle_cached(
 ) -> R4ExactOracle:
     if root.round_index != 4 or root.actor != 0:
         raise ValueError("cached exact oracle requires R4 P0")
-    root_key, root_pairs = _canonical_root_pairs(root)
+    root_key, root_pairs = _canonical_pairs(root)
     if root_key != support.root_canonical_information_state_key:
         raise AssertionError("oracle root canonical key differs from belief support")
 
@@ -68,7 +68,7 @@ def exact_r4_p0_oracle_cached(
         total = 0.0
         p1_infos: set[str] = set()
         for world in worlds:
-            _world_key, world_pairs = _canonical_root_pairs(world)
+            _world_key, world_pairs = _canonical_pairs(world)
             world_map = dict(world_pairs)
             if canonical_root_action not in world_map:
                 raise AssertionError("posterior world changed root canonical action set")
