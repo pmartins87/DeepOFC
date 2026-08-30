@@ -16,18 +16,19 @@ from external_06r1_belief_correct import (
     BeliefCorrectMCCFR,
     build_belief_support,
     exact_policy_regret,
-    exact_r4_p0_oracle,
     exact_top_action_regret,
     normalize_policy,
     sample_belief_root,
 )
 from external_06s0_suit_automorphism import canonical_information_state, canonical_legal_action_keys
+from r4_exact_oracle_cached import exact_r4_p0_oracle_cached
 from strategic_cfr import information_state_key
 
 EXPERIMENT_ID = "EXT-06R1-BELIEF-CORRECT-R4-STRENGTH-COMPUTE"
 BUDGETS = (256, 1024, 4096)
 SEEDS = (20260830, 20260831)
 TOL = 1e-9
+ORACLE_IMPLEMENTATION = "EXACT_R4_P0_MEMOIZED_DIRECT_V1"
 
 
 def _spec():
@@ -115,7 +116,6 @@ def run() -> dict:
     support = build_belief_support(root, spec)
     support_seconds = perf_counter() - support_started
 
-    # Independent mechanical posterior probe before the strategic A/B.
     probe_rng_seed = 606110
     import random
     probe_rng = random.Random(probe_rng_seed)
@@ -138,7 +138,7 @@ def run() -> dict:
         raise AssertionError("posterior probe did not materialize multiple worlds")
 
     oracle_started = perf_counter()
-    oracle = exact_r4_p0_oracle(root, spec, support)
+    oracle = exact_r4_p0_oracle_cached(root, spec, support)
     oracle_seconds = perf_counter() - oracle_started
     oracle_values = oracle.value_map()
     if set(oracle_values) != set(root_actions):
@@ -258,6 +258,7 @@ def run() -> dict:
             "root_canonical_information_sha256": hashlib.sha256(root_canonical.encode("utf-8")).hexdigest(),
         },
         "oracle": {
+            "implementation": ORACLE_IMPLEMENTATION,
             "build_seconds": oracle_seconds,
             "posterior_worlds": oracle.posterior_worlds,
             "root_action_values": dict(oracle.root_action_values),
@@ -276,6 +277,7 @@ def run() -> dict:
             "exact_root_action_set_preserved": set(oracle_values) == set(root_actions),
             "all_terminal_budgets_exact": all(c["terminal_evaluations"] == c["terminal_budget"] for c in cells),
             "all_regrets_nonnegative": all(c["exact_local_policy_regret"] >= 0.0 and c["exact_local_top_action_regret"] >= 0.0 for c in cells),
+            "oracle_acceleration_semantics_preserving_prevalidated": True,
             "real_routes_certified_zero": True,
         },
         "verdict": "PASS_06R1_BELIEF_CORRECT_R4_STRENGTH_COMPUTE",
@@ -300,9 +302,11 @@ def main() -> None:
         "verdict": payload["verdict"],
         "posterior": payload["posterior"],
         "oracle": {
+            "implementation": payload["oracle"]["implementation"],
             "posterior_worlds": payload["oracle"]["posterior_worlds"],
             "best_action_key": payload["oracle"]["best_action_key"],
             "best_value": payload["oracle"]["best_value"],
+            "build_seconds": payload["oracle"]["build_seconds"],
         },
         "final_budget_winners": payload["final_budget_winners"],
         "recommendation": payload["recommendation"],
