@@ -40,6 +40,7 @@ import math
 from pathlib import Path
 import random
 from typing import Iterable, Sequence
+import warnings
 
 from engine import Action, Board, Card, apply_action, full_deck, legal_actions, resolve_board, score_heads_up
 
@@ -47,7 +48,8 @@ PLAYER_NONDEALER = 0
 PLAYER_DEALER = 1
 PLAYERS = (PLAYER_NONDEALER, PLAYER_DEALER)
 ROUND_TERMINAL = 5
-CHECKPOINT_SCHEMA = "openofc-hu-outcome-sampling-mccfr-v1"
+CHECKPOINT_SCHEMA_V1 = "openofc-hu-outcome-sampling-mccfr-v1"
+CHECKPOINT_SCHEMA = "openofc-hu-outcome-sampling-mccfr-v2"
 
 
 @dataclass(frozen=True)
@@ -319,6 +321,36 @@ def _sample_index(probabilities: Sequence[float], rng: random.Random) -> int:
     raise AssertionError("probability sampling fell through")
 
 
+def _encode_rng_state(state: object) -> dict:
+    if not isinstance(state, tuple) or len(state) != 3:
+        raise ValueError("unexpected Python RNG state shape")
+    version, internal_state, gauss_next = state
+    if not isinstance(version, int) or not isinstance(internal_state, tuple):
+        raise ValueError("unexpected Python RNG state types")
+    if gauss_next is not None and not isinstance(gauss_next, (int, float)):
+        raise ValueError("unexpected Python RNG Gaussian cache")
+    return {
+        "version": int(version),
+        "internal_state": [int(value) for value in internal_state],
+        "gauss_next": None if gauss_next is None else float(gauss_next),
+    }
+
+
+def _decode_rng_state(payload: object) -> tuple:
+    if not isinstance(payload, dict):
+        raise ValueError("checkpoint RNG state must be an object")
+    if set(payload) != {"version", "internal_state", "gauss_next"}:
+        raise ValueError("checkpoint RNG state fields differ from schema v2")
+    version = int(payload["version"])
+    internal_raw = payload["internal_state"]
+    if not isinstance(internal_raw, list) or not internal_raw:
+        raise ValueError("checkpoint RNG internal state is invalid")
+    internal_state = tuple(int(value) for value in internal_raw)
+    gauss_raw = payload["gauss_next"]
+    gauss_next = None if gauss_raw is None else float(gauss_raw)
+    return (version, internal_state, gauss_next)
+
+
 class OutcomeSamplingMCCFR:
     def __init__(
         self,
@@ -475,6 +507,7 @@ class OutcomeSamplingMCCFR:
             "cfr_plus": self.cfr_plus,
             "iterations": self.iterations,
             "episodes": self.episodes,
+            "rng_state": _encode_rng_state(self.rng.getstate()),
             "nodes": [
                 {
                     "key": key,
@@ -508,7 +541,8 @@ class OutcomeSamplingMCCFR:
                 payload = json.loads(handle.read().decode("utf-8"))
         else:
             payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload.get("schema") != CHECKPOINT_SCHEMA:
+        schema = payload.get("schema")
+        if schema not in {CHECKPOINT_SCHEMA, CHECKPOINT_SCHEMA_V1}:
             raise ValueError("unsupported strategic CFR checkpoint schema")
         solver = cls(
             epsilon=float(payload["epsilon"]),
@@ -531,10 +565,17 @@ class OutcomeSamplingMCCFR:
             ):
                 raise ValueError("corrupt strategic CFR checkpoint node")
             solver.nodes[str(row["key"])] = node
-        # RNG state is intentionally not serialized in v1.  Resumed training is
-        # statistically valid but not byte-identical to uninterrupted training.
-        # A deterministic RNG-state checkpoint is a scaling milestone, not a
-        # reason to fake determinism here.
+        if schema == CHECKPOINT_SCHEMA:
+            if "rng_state" not in payload:
+                raise ValueError("checkpoint schema v2 is missing RNG state")
+            solver.rng.setstate(_decode_rng_state(payload["rng_state"]))
+        else:
+            warnings.warn(
+                "Loaded legacy strategic CFR checkpoint v1 without RNG state; "
+                "continued training is statistically valid but not deterministic.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
         return solver
 
 
