@@ -1,0 +1,64 @@
+name: OpenOFC external 06R0 conditioned suffix reuse
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'docs/OFC_PRACTICAL_STRENGTH_COMPUTE_POLICY_2026-08-30.md'
+      - 'tools/openofc_solver/EXTERNAL_06R0_CONDITIONED_SUFFIX_REUSE_CONTRACT.md'
+      - 'tools/openofc_solver/external_06r0_conditioned_solver.py'
+      - 'tools/openofc_solver/run_external_06r0.py'
+      - 'tools/openofc_solver/test_external_06r0_conditioned_solver.py'
+      - 'tools/openofc_solver/external_06s0_suit_automorphism.py'
+      - 'tools/openofc_solver/external_06s1_suit_canonical_solver.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+      - '.github/workflows/openofc-external-06r0.yml'
+  workflow_dispatch:
+
+jobs:
+  conditioned-suffix-reuse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate strategic core
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_strategic_cfr.py
+      - name: Revalidate exact suit automorphism
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06s0.py \
+              --output artifacts/external_06s0_revalidation.json
+      - name: Test 06R0 conditioned sampler and solver
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_external_06r0_conditioned_solver.py
+      - name: Compile 06R0 research code
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile \
+              tools/openofc_solver/external_06r0_conditioned_solver.py \
+              tools/openofc_solver/run_external_06r0.py
+      - name: Run frozen 06R0 conditioned suffix reuse gate
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06r0.py \
+              --output artifacts/external_06r0.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-06r0
+          path: |
+            artifacts/external_06s0_revalidation.json
+            artifacts/external_06r0.json
+          if-no-files-found: error
+          retention-days: 30
