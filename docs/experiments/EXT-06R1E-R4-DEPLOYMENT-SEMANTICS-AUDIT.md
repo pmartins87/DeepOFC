@@ -86,6 +86,25 @@ Otherwise the result is **NO_PROMOTION**. Mixed-policy regret is secondary diagn
 
 This rule is frozen before any 06R1F oracle output is observed.
 
+## Post-freeze oracle implementation discovery
+
+The first 06R1F execution exposed a separate implementation issue before any aggregate result could be interpreted. Fixture `65109` stopped at the exact-oracle firewall with:
+
+`AssertionError: R4 P1 infoset spans multiple posterior worlds`
+
+This failure was valuable: the reference belief-correct oracle in `external_06r1_belief_correct.py` already has the correct semantics — it groups posterior worlds by P1 information state and lets P1 choose one response per infoset. The memoized/direct accelerator in `r4_exact_oracle_cached.py` had added a stronger assumption that every P1 infoset uniquely identified one posterior world. That assumption is false in general.
+
+Why it matters: if multiple worlds share the same P1 infoset, minimizing separately inside each world would grant P1 knowledge of hidden information it does not possess. The safe assertion prevented such leakage, but it also proved that the accelerator was not universally semantics-preserving.
+
+The cached oracle has therefore been corrected to reproduce the original grouped best-response calculation while retaining board-resolution memoization and direct world materialization. A dedicated regression compares the corrected accelerator against the original reference oracle on fixture `65109`, specifically because that fixture contains many-worlds-per-P1-infoset structure.
+
+Consequences for provenance:
+
+- **06R1F run 1 is non-authoritative and cannot be aggregated**; it used the old cached-oracle implementation and was interrupted by its own safety assertion.
+- **06R1F v2** is explicitly bound to `P1_INFOSET_GROUPED_BEST_RESPONSE_V2`.
+- The 06R1D fixtures that completed under the old accelerator satisfied its one-world-per-P1-infoset assertion. On those particular fixtures, grouping and per-world minimization are mathematically identical, so this discovery does not retroactively change their exact action values; it does show that those fixtures were a special subset and cannot justify the uniqueness assumption globally.
+- No method promotion is allowed until the grouped-oracle regression passes and the complete 12-fixture 06R1F v2 suite is available.
+
 ## Scope firewall
 
 06R1E/06R1F are external solver-selection experiments. They do not modify the canonical strategy, do not certify a full-game equilibrium, do not certify Fantasy, and do not add any REAL route.
