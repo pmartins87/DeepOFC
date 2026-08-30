@@ -1,0 +1,50 @@
+name: OpenOFC external 06S0 exact suit automorphism
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - 'tools/openofc_solver/EXTERNAL_06S0_EXACT_SUIT_AUTOMORPHISM_CONTRACT.md'
+      - 'tools/openofc_solver/external_06s0_suit_automorphism.py'
+      - 'tools/openofc_solver/run_external_06s0.py'
+      - 'tools/openofc_solver/engine.py'
+      - 'tools/openofc_solver/strategic_cfr.py'
+      - '.github/workflows/openofc-external-06s0.yml'
+  workflow_dispatch:
+
+jobs:
+  certify-exact-suit-automorphism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revalidate strategic information firewall
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_strategic_cfr.py
+      - name: Compile exact-symmetry proof surface
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m py_compile \
+              tools/openofc_solver/external_06s0_suit_automorphism.py \
+              tools/openofc_solver/run_external_06s0.py
+      - name: Run frozen 06S0 exact global-suit automorphism proof
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_external_06s0.py \
+              --output artifacts/external_06s0.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-external-06s0
+          path: artifacts/external_06s0.json
+          if-no-files-found: error
+          retention-days: 30
