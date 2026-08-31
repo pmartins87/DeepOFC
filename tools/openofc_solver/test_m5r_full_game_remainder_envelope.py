@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from deepofc.scoring import pairwise_points_standard
+from deepofc.scoring import is_foul, pairwise_points_standard
 from deepofc.state import Card, PlayerBoard
 from m5r_full_game_remainder_envelope import (
     GLOBAL_RAW_POINT_ABS_BOUND,
@@ -76,7 +76,11 @@ def test_one_complete_board_tightens_global_envelope() -> None:
 
 def test_p0_callback_matches_primary_envelope() -> None:
     hero, opponent = _valid_pair()
-    partial = PlayerBoard(top=opponent.top, middle=opponent.middle, bottom=opponent.bottom[:-1])
+    partial = PlayerBoard(
+        top=opponent.top,
+        middle=opponent.middle,
+        bottom=opponent.bottom[:-1],
+    )
     envelope = raw_point_remainder_envelope(hero, partial)
     assert p0_raw_point_interval(hero, partial) == (
         float(envelope.lower_raw_points),
@@ -87,21 +91,10 @@ def test_p0_callback_matches_primary_envelope() -> None:
 def test_complete_both_foul_fails_closed_instead_of_inventing_utility() -> None:
     hero = _foul_board()
     opponent = PlayerBoard(
-        top=_cards("As", "Ks", "Qs"),
-        middle=_cards("3d", "3h", "7d", "9c", "Jd"),
-        bottom=_cards("4d", "5d", "6c", "8c", "Tc"),
+        top=_cards("Qs", "Qh", "Qd"),
+        middle=_cards("4c", "4d", "8c", "Ts", "Jd"),
+        bottom=_cards("Kc", "Kd", "5h", "9c", "Tc"),
     )
-    # Opponent is also fouled: a Top high-card hand can still outrank a weaker
-    # Middle only by category ordering if Middle is high card; choose a direct
-    # assertion so this fixture cannot silently change semantics later.
-    from deepofc.scoring import is_foul
-
-    if not is_foul(opponent, equality_allowed=True):
-        opponent = PlayerBoard(
-            top=_cards("As", "Ad", "Kd"),
-            middle=_cards("3d", "3h", "7d", "9c", "Jd"),
-            bottom=_cards("4d", "4h", "6c", "8c", "Tc"),
-        )
     assert is_foul(hero, equality_allowed=True)
     assert is_foul(opponent, equality_allowed=True)
     with pytest.raises(UndefinedBothFoulSettlement):
