@@ -3,6 +3,7 @@ name: OpenOFC M5R exact BR validation ladder
 on:
   push:
     branches:
+      - research/external-ofc-solver-audit-20260827
       - strategy/m5r-frozen-policy-br-certification
     paths:
       - tools/openofc_solver/M5R_EXACT_BR_VALIDATION_LADDER_CONTRACT.md
