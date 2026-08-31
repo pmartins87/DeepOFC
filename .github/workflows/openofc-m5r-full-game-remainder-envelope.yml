@@ -1,0 +1,148 @@
+name: OpenOFC M5R full-game state-local remainder envelope
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_FULL_GAME_REMAINDER_ENVELOPE_CONTRACT.md
+      - tools/openofc_solver/m5r_full_game_remainder_envelope.py
+      - tools/openofc_solver/test_m5r_full_game_remainder_envelope.py
+      - tools/openofc_solver/run_m5r_full_game_remainder_envelope_case.py
+      - .github/workflows/openofc-m5r-full-game-remainder-envelope.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate scoring-derived remainder mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_full_game_remainder_envelope.py
+
+  cases:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [joker, hidden-discard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Exhaust exact-family containment
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_full_game_remainder_envelope_case.py \
+              --family '${{ matrix.family }}' \
+              --output 'artifacts/m5r_remainder_${{ matrix.family }}.json'
+      - name: Validate fail-closed case artifact
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_remainder_${{ matrix.family }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          d = data["decision"]
+          assert data["authority"] == "RIGOROUS_STATE_LOCAL_REMAINDER_CONTAINMENT_PILOT_NOT_ROUTE_CERTIFICATION"
+          assert data["scoring_bound"]["global_raw_point_abs_bound"] == 103
+          assert data["scoring_bound"]["both_foul_settlement_policy"] == "FAIL_CLOSED_UNDEFINED"
+          assert d["scoring_derived_global_bound_validated"] is True
+          assert d["state_local_terminal_containment_validated"] is True
+          assert d["zero_sum_swapped_perspective_containment_validated"] is True
+          assert d["strict_state_local_tightening_observed"] is True
+          assert d["uses_canonical_full_game_player_board"] is True
+          assert d["depends_on_policy_or_hidden_discard_identity"] is False
+          assert d["route_level_br_integration_validated"] is False
+          assert d["production_certification_eligible"] is False
+          assert d["real_routes_certified"] == 0
+          assert d["next_blocker"] == "ROUTE_LEVEL_BR_INTEGRATION_OF_STATE_LOCAL_ENVELOPES_MISSING"
+          print("OPENOFC_M5R_REMAINDER_CASE=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-remainder-${{ matrix.family }}
+          path: artifacts/m5r_remainder_${{ matrix.family }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-remainder-*
+          path: remainder-artifacts
+          merge-multiple: true
+      - name: Freeze state-local remainder-envelope result
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          files = sorted(Path("remainder-artifacts").glob("*.json"))
+          assert len(files) == 2, files
+          cases = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+          assert {case["family"] for case in cases} == {"joker", "hidden-discard"}
+          for case in cases:
+              d = case["decision"]
+              assert d["state_local_terminal_containment_validated"] is True
+              assert d["strict_state_local_tightening_observed"] is True
+              assert d["real_routes_certified"] == 0
+          payload = {
+              "schema": "openofc-m5r-full-game-remainder-envelope-pilot-v1",
+              "authority": "RIGOROUS_FULL_GAME_STATE_LOCAL_REMAINDER_ENVELOPE_PILOT_NOT_ROUTE_CERTIFICATION",
+              "cases": cases,
+              "decision": {
+                  "full_game_canonical_state_local_remainder_envelope_validated": True,
+                  "route_level_br_integration_validated": False,
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+                  "next_blocker": "ROUTE_LEVEL_BR_INTEGRATION_OF_STATE_LOCAL_ENVELOPES_MISSING",
+              },
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_full_game_remainder_envelope_pilot.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "sha256": payload["sha256"],
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-full-game-remainder-envelope-pilot
+          path: artifacts/m5r_full_game_remainder_envelope_pilot.json
+          if-no-files-found: error
+          retention-days: 30
