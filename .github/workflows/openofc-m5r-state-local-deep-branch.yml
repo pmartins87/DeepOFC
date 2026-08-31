@@ -1,0 +1,160 @@
+name: OpenOFC M5R state-local deep-BR integration
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+      - strategy/m5r-frozen-policy-br-certification
+    paths:
+      - tools/openofc_solver/M5R_STATE_LOCAL_DEEP_BRANCH_INTEGRATION_CONTRACT.md
+      - tools/openofc_solver/m5r_state_local_deep_branch_br_interval.py
+      - tools/openofc_solver/test_m5r_state_local_deep_branch_br_interval.py
+      - tools/openofc_solver/run_m5r_state_local_deep_branch_case.py
+      - .github/workflows/openofc-m5r-state-local-deep-branch.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate state-local deep-BR mechanics
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python -m pytest -q tools/openofc_solver/test_m5r_state_local_deep_branch_br_interval.py
+
+  cells:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [joker, hidden-discard]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Validate exact containment and tightening
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_state_local_deep_branch_case.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/state_local_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Validate authority boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/state_local_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          d = data["decision"]
+          assert data["authority"] == "RIGOROUS_STATE_LOCAL_DEEP_BRANCH_INTEGRATION_PILOT_NOT_ROUTE_CERTIFICATION"
+          assert d["zero_threshold_exact_equivalence"] is True
+          assert d["exact_br_containment_validated"] is True
+          assert d["equal_threshold_work_equivalence"] is True
+          assert d["state_local_never_wider_than_scoring_global_in_tested_cell"] is True
+          assert d["route_evidence_interface_validated"] is False
+          assert d["production_certification_eligible"] is False
+          assert d["real_routes_certified"] == 0
+          assert d["next_blocker"] == "ROUTE_EVIDENCE_INTERFACE_FOR_STATE_LOCAL_BR_UPPER_BOUNDS_MISSING"
+          print("OPENOFC_M5R_STATE_LOCAL_CELL=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-state-local-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/state_local_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cells
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-state-local-*
+          path: state-local-artifacts
+          merge-multiple: true
+      - name: Freeze state-local BR integration result
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          files = sorted(Path("state-local-artifacts").glob("*.json"))
+          assert len(files) == 4, files
+          cells = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+          assert {(c["family"], c["player"]) for c in cells} == {
+              ("joker", 0), ("joker", 1), ("hidden-discard", 0), ("hidden-discard", 1)
+          }
+          for cell in cells:
+              d = cell["decision"]
+              assert d["zero_threshold_exact_equivalence"] is True
+              assert d["exact_br_containment_validated"] is True
+              assert d["equal_threshold_work_equivalence"] is True
+              assert d["state_local_never_wider_than_scoring_global_in_tested_cell"] is True
+              assert d["real_routes_certified"] == 0
+          strict_cells = sum(bool(c["decision"]["strict_interval_tightening_observed"]) for c in cells)
+          deep_cells = sum(bool(c["decision"]["deep_pruning_exercised"]) for c in cells)
+          assert strict_cells >= 1
+          assert deep_cells >= 1
+          payload = {
+              "schema": "openofc-m5r-state-local-deep-branch-pilot-v1",
+              "authority": "RIGOROUS_STATE_LOCAL_DEEP_BRANCH_INTEGRATION_PILOT_NOT_ROUTE_CERTIFICATION",
+              "cells": cells,
+              "summary": {
+                  "strict_tightening_cells": strict_cells,
+                  "deep_pruning_cells": deep_cells,
+              },
+              "decision": {
+                  "state_local_deep_br_integration_validated": True,
+                  "route_evidence_interface_validated": False,
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+                  "next_blocker": "ROUTE_EVIDENCE_INTERFACE_FOR_STATE_LOCAL_BR_UPPER_BOUNDS_MISSING",
+              },
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_state_local_deep_branch_pilot.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "sha256": payload["sha256"],
+              "strict_tightening_cells": strict_cells,
+              "deep_pruning_cells": deep_cells,
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-state-local-deep-branch-pilot
+          path: artifacts/m5r_state_local_deep_branch_pilot.json
+          if-no-files-found: error
+          retention-days: 30
