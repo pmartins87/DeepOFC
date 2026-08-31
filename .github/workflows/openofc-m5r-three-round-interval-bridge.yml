@@ -1,0 +1,165 @@
+name: OpenOFC M5R three-round interval bridge
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - tools/openofc_solver/M5R_THREE_ROUND_INTERVAL_BRIDGE_CONTRACT.md
+      - tools/openofc_solver/m5r_three_round_interval_bridge.py
+      - tools/openofc_solver/run_m5r_three_round_interval_bridge.py
+      - .github/workflows/openofc-m5r-three-round-interval-bridge.yml
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile bridge surface
+        run: |
+          python -m py_compile \
+            tools/openofc_solver/m5r_three_round_interval_bridge.py \
+            tools/openofc_solver/run_m5r_three_round_interval_bridge.py
+
+  cells:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [three-round-v1, three-round-v2]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run conservative interval cell
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_three_round_interval_bridge.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_interval_bridge_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Enforce authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_interval_bridge_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert data["verdict"] == "PASS_M5R_THREE_ROUND_INTERVAL_BRIDGE_CELL"
+          assert data["decision"]["zero_threshold_exact"] is True
+          assert data["decision"]["all_intervals_contain_exact_br"] is True
+          assert data["decision"]["positive_threshold_work_reduction_exercised"] is True
+          assert data["decision"]["own_action_pruning_count"] == 0
+          assert data["decision"]["full_game_scalable_evaluator_validated"] is False
+          assert data["production_certification_eligible"] is False
+          assert data["real_routes_certified"] == 0
+          print("OPENOFC_M5R_INTERVAL_BRIDGE_CELL=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-interval-bridge-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_interval_bridge_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cells
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-interval-bridge-*
+          path: bridge-artifacts
+          merge-multiple: true
+      - name: Freeze bridge result
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          paths = sorted(Path("bridge-artifacts").glob("*.json"))
+          assert len(paths) == 4, paths
+          cells = [json.loads(path.read_text(encoding="utf-8")) for path in paths]
+          expected = {
+              ("three-round-v1", 0), ("three-round-v1", 1),
+              ("three-round-v2", 0), ("three-round-v2", 1),
+          }
+          assert {(c["family"], c["player"]) for c in cells} == expected
+          assert all(c["verdict"] == "PASS_M5R_THREE_ROUND_INTERVAL_BRIDGE_CELL" for c in cells)
+          assert all(c["decision"]["all_intervals_contain_exact_br"] for c in cells)
+          assert all(c["decision"]["zero_threshold_exact"] for c in cells)
+          assert all(c["decision"]["positive_threshold_work_reduction_exercised"] for c in cells)
+          assert all(c["decision"]["own_action_pruning_count"] == 0 for c in cells)
+
+          positive = [
+              row for cell in cells for row in cell["intervals"]
+              if row["prune_reach_threshold"] > 0.0
+          ]
+          payload = {
+              "schema": "openofc-m5r-three-round-interval-bridge-aggregate-v1",
+              "authority": "M5R_REDUCED_EXACT_LADDER_INTERVAL_METHODOLOGY_ONLY",
+              "cells": cells,
+              "summary": {
+                  "cells": 4,
+                  "positive_threshold_intervals": len(positive),
+                  "all_exact_values_contained": all(row["contains_exact_br"] for row in positive),
+                  "max_positive_interval_width": max(row["interval_width"] for row in positive),
+                  "min_positive_terminal_work_fraction": min(
+                      row["terminal_utility_evaluations"] / cell["exact_reference"]["terminal_histories"]
+                      for cell in cells
+                      for row in cell["intervals"]
+                      if row["prune_reach_threshold"] > 0.0
+                  ),
+                  "state_local_envelope_calls": sum(row["state_local_envelope_calls"] for row in positive),
+                  "pruned_opponent_branches": sum(row["pruned_opponent_branches"] for row in positive),
+              },
+              "decision": {
+                  "reduced_exact_ladder_interval_methodology_validated": True,
+                  "full_game_scalable_evaluator_validated": False,
+                  "production_certification_eligible": False,
+                  "real_routes_certified": 0,
+                  "next_blocker": "TRANSFER_VALIDATED_CONSERVATIVE_MISSED_DEVIATION_BOUND_TO_FROZEN_FULL_GAME_M5B_EVALUATOR",
+              },
+              "verdict": "PASS_M5R_THREE_ROUND_INTERVAL_BRIDGE",
+              "production_certification_eligible": False,
+              "real_routes_certified": 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          payload["sha256"] = hashlib.sha256(raw).hexdigest()
+          out = Path("artifacts/m5r_three_round_interval_bridge.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "verdict": payload["verdict"],
+              "summary": payload["summary"],
+              "sha256": payload["sha256"],
+              "next_blocker": payload["decision"]["next_blocker"],
+              "real_routes_certified": 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-three-round-interval-bridge
+          path: artifacts/m5r_three_round_interval_bridge.json
+          if-no-files-found: error
+          retention-days: 30
