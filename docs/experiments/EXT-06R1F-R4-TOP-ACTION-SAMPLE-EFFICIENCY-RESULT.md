@@ -30,11 +30,11 @@ The dedicated semantic regression completed successfully before interpretation o
 - workflow run: `33335388261`
 - verdict: `PASS_GROUPED_CACHED_ORACLE_SEMANTICS`
 - reference-versus-cached maximum root-value difference: `0.0`
-- posterior worlds: `3332`
-- P1 information sets per root action: `3211`
+- posterior worlds: `173558`
+- P1 information sets per root action: `162932`
 - regression ZIP SHA-256: `9577028df319a4d4d3a3fe1eecebf92b63437504493f86b735c0a10f002f61aa`
 
-The fact that `3211 < 3332` proves that the regression exercises the many-worlds-per-P1-infoset case that invalidated the old uniqueness assumption.
+The fact that `162932 < 173558` proves that the regression exercises the many-worlds-per-P1-infoset case that invalidated the old uniqueness assumption.
 
 ## Authoritative 06R1F v2 execution
 
