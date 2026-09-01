@@ -1,0 +1,186 @@
+name: OpenOFC M5R continuation-aware interval transfer validation
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - .github/dispatch/openofc-m5r-continuation-transfer-validation.trigger
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile continuation transfer surface
+        run: |
+          python -m py_compile \
+            tools/openofc_solver/m5r_continuation_remainder_envelope.py \
+            tools/openofc_solver/m5r_continuation_transfer_manifest.py \
+            tools/openofc_solver/run_m5r_continuation_transfer_validation.py \
+            tools/openofc_solver/m5r_three_round_interval_bridge.py
+      - name: Validate pre-frozen transfer manifest
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python - <<'PY'
+          from hu_continuation import all_states, swap_players
+          from m5r_continuation_transfer_manifest import (
+              manifest_payload,
+              structured_vector,
+              zero_vector,
+          )
+          zero = zero_vector()
+          structured = structured_vector()
+          assert len(zero) == len(structured) == len(all_states()) == 50
+          assert all(v == 0.0 for v in zero.values())
+          assert any(v != 0.0 for v in structured.values())
+          assert all(abs(v + structured[swap_players(s)]) <= 1e-15 for s, v in structured.items())
+          payload = manifest_payload()
+          assert payload['production_certification_eligible'] is False
+          assert payload['real_routes_certified'] == 0
+          print('OPENOFC_M5R_CONTINUATION_TRANSFER_MANIFEST=PASS', payload['sha256'])
+          PY
+
+  cells:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [three-round-v1, three-round-v2]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run continuation-aware exact/interval validation cell
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_continuation_transfer_validation.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_continuation_transfer_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Enforce transfer authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_continuation_transfer_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding='utf-8'))
+          assert data['verdict'] == 'PASS_M5R_CONTINUATION_TRANSFER_VALIDATION_CELL'
+          assert data['decision']['structured_vector_player_exchange_antisymmetry'] is True
+          assert data['decision']['distinct_terminal_states_independently_raw_score_crosschecked'] is True
+          assert data['decision']['exact_next_state_candidate_membership_crosschecked'] is True
+          assert data['decision']['zero_threshold_exact'] is True
+          assert data['decision']['positive_threshold_contains_exact_br'] is True
+          assert data['decision']['positive_threshold_reduces_work'] is True
+          assert data['decision']['own_action_pruning_count'] == 0
+          assert data['decision']['full_game_scalable_evaluator_validated'] is False
+          assert data['production_certification_eligible'] is False
+          assert data['real_routes_certified'] == 0
+          print('OPENOFC_M5R_CONTINUATION_TRANSFER_CELL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-continuation-transfer-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_continuation_transfer_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cells
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-continuation-transfer-*
+          path: transfer-artifacts
+          merge-multiple: true
+      - name: Freeze continuation transfer validation result
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          paths = sorted(Path('transfer-artifacts').glob('*.json'))
+          assert len(paths) == 4, paths
+          cells = [json.loads(path.read_text(encoding='utf-8')) for path in paths]
+          expected = {
+              ('three-round-v1', 0), ('three-round-v1', 1),
+              ('three-round-v2', 0), ('three-round-v2', 1),
+          }
+          assert {(c['family'], c['player']) for c in cells} == expected
+          assert all(c['verdict'] == 'PASS_M5R_CONTINUATION_TRANSFER_VALIDATION_CELL' for c in cells)
+          manifests = {c['manifest_sha256'] for c in cells}
+          vectors = {c['structured_vector_sha256'] for c in cells}
+          assert len(manifests) == len(vectors) == 1
+          assert all(c['positive_threshold']['contains_exact_br'] for c in cells)
+          assert all(c['zero_threshold']['contains_exact_br'] for c in cells)
+          assert all(c['production_certification_eligible'] is False for c in cells)
+          assert all(c['real_routes_certified'] == 0 for c in cells)
+
+          payload = {
+              'schema': 'openofc-m5r-continuation-transfer-validation-aggregate-v1',
+              'authority': 'M5R_TRACTABLE_CONTINUATION_BOUND_TRANSFER_VALIDATION_ONLY',
+              'manifest_sha256': next(iter(manifests)),
+              'structured_vector_sha256': next(iter(vectors)),
+              'cells': cells,
+              'summary': {
+                  'cells': 4,
+                  'all_zero_threshold_exact': all(c['decision']['zero_threshold_exact'] for c in cells),
+                  'all_positive_intervals_contain_exact_br': all(c['positive_threshold']['contains_exact_br'] for c in cells),
+                  'maximum_positive_interval_width': max(c['positive_threshold']['width'] for c in cells),
+                  'minimum_positive_interval_width': min(c['positive_threshold']['width'] for c in cells),
+                  'maximum_positive_terminal_work_fraction': max(c['positive_threshold']['terminal_work_fraction'] for c in cells),
+                  'minimum_positive_terminal_work_fraction': min(c['positive_threshold']['terminal_work_fraction'] for c in cells),
+                  'unique_terminal_state_crosschecks': sum(c['exact']['unique_terminal_states_independently_crosschecked'] for c in cells),
+                  'exact_terminal_history_calls': sum(c['exact']['terminal_calls'] for c in cells),
+              },
+              'decision': {
+                  'tractable_continuation_bound_transfer_validated': True,
+                  'full_game_scalable_evaluator_validated': False,
+                  'production_certification_eligible': False,
+                  'real_routes_certified': 0,
+                  'next_blocker': 'BUILD_AND_VALIDATE_FROZEN_FULL_GAME_NORMAL_NORMAL_BR_BOUND_EVALUATOR_AGAINST_MATERIALIZED_POLICY_AND_CONTINUATION_SHA',
+              },
+              'verdict': 'PASS_M5R_CONTINUATION_TRANSFER_VALIDATION',
+              'production_certification_eligible': False,
+              'real_routes_certified': 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+          payload['sha256'] = hashlib.sha256(raw).hexdigest()
+          out = Path('artifacts/m5r_continuation_transfer_validation.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + '\n', encoding='utf-8')
+          print(json.dumps({
+              'verdict': payload['verdict'],
+              'summary': payload['summary'],
+              'manifest_sha256': payload['manifest_sha256'],
+              'sha256': payload['sha256'],
+              'next_blocker': payload['decision']['next_blocker'],
+              'real_routes_certified': 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-continuation-transfer-validation
+          path: artifacts/m5r_continuation_transfer_validation.json
+          if-no-files-found: error
+          retention-days: 30
