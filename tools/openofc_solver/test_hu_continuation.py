@@ -12,6 +12,7 @@ from hu_continuation import (
     all_states,
     canonical_player_exchange,
     canonical_states,
+    canonical_terminal_points_p0,
     continuation_adjusted_terminal_utility,
     expand_antisymmetric_values,
     hand_kernel_kind,
@@ -38,12 +39,38 @@ def _normal_qq_board() -> Board:
     )
 
 
+def _normal_trips_board() -> Board:
+    # Valid board: trips Top < straight Middle < flush Bottom.
+    return Board(
+        top=(C("Qc"), C("Qd"), C("Qh")),
+        middle=(C("4c"), C("5d"), C("6c"), C("7d"), C("8c")),
+        bottom=(C("Ah"), C("Kh"), C("9h"), C("7h"), C("2h")),
+    )
+
+
 def _refantasy_board() -> Board:
     return Board(
         top=(C("Jh"), C("Jd"), C("Js")),
         middle=(C("4c"), C("5d"), C("6c"), C("7d"), C("8d")),
         bottom=(C("Tc"), C("Td"), C("Th"), C("9s"), C("9d")),
     )
+
+
+def _joker_duplication_score_pair() -> tuple[Board, Board]:
+    # Under the project-frozen with-replacement rule, Hero's Bottom Joker copies
+    # As and makes flush A,A,9,7,2.  The migrated legacy engine forbids copying
+    # the already-present As, tops out at A,K,9,7,2, and therefore ties Villain.
+    hero = Board(
+        top=(C("Qc"), C("Qd"), C("3s")),
+        middle=(C("4c"), C("5d"), C("6c"), C("7d"), C("8c")),
+        bottom=(C("As"), C("9s"), C("7s"), C("2s"), C("JK1")),
+    )
+    villain = Board(
+        top=(C("Qh"), C("Qs"), C("3d")),
+        middle=(C("4h"), C("5c"), C("6h"), C("7c"), C("8d")),
+        bottom=(C("Ah"), C("Kh"), C("9h"), C("7h"), C("2h")),
+    )
+    return hero, villain
 
 
 def test_catalog_is_exactly_50_hu_states() -> None:
@@ -93,8 +120,8 @@ def test_kernel_partition_and_relative_role_mapping() -> None:
     }
 
     state = HUContinuationState(button=0, p0_fantasy_cards=15, p1_fantasy_cards=0)
-    assert identity_for_role(state, 0) == 1  # nondealer
-    assert identity_for_role(state, 1) == 0  # dealer/button
+    assert identity_for_role(state, 0) == 1
+    assert identity_for_role(state, 1) == 0
     assert role_for_identity(state, 0) == 1
     assert role_for_identity(state, 1) == 0
     assert modes_in_role_order(state) == (0, 15)
@@ -112,8 +139,36 @@ def test_exact_dual_player_transition() -> None:
         _normal_qq_board(),
         _refantasy_board(),
     )
-    # Standard helper alternates the HU button; p0 enters F14 and p1 keeps F16.
     assert nxt == HUContinuationState(1, 14, 16)
+
+
+def test_normal_top_trips_enters_fantasy17_on_canonical_path() -> None:
+    current = HUContinuationState(button=0, p0_fantasy_cards=0, p1_fantasy_cards=0)
+    nxt = next_state_from_terminal_boards(
+        current,
+        _normal_trips_board(),
+        _normal_qq_board(),
+    )
+    assert nxt == HUContinuationState(1, 17, 14)
+
+
+def test_continuation_uses_canonical_with_replacement_joker_score() -> None:
+    hero, villain = _joker_duplication_score_pair()
+    # Historical engine is preserved as migration provenance and demonstrates
+    # the exact bug that reached the continuation-aware strategic objective.
+    assert score_heads_up(hero, villain).points == 0
+    assert canonical_terminal_points_p0(hero, villain) == 1
+
+    current = HUContinuationState(0, 0, 0)
+    values = zero_continuation_values()
+    u0 = continuation_adjusted_terminal_utility(
+        current, hero, villain, values, update_player=0
+    )
+    u1 = continuation_adjusted_terminal_utility(
+        current, hero, villain, values, update_player=1
+    )
+    assert u0 == 1.0
+    assert u1 == -1.0
 
 
 def test_parameterized_terminal_backup_is_zero_sum() -> None:
@@ -123,7 +178,7 @@ def test_parameterized_terminal_backup_is_zero_sum() -> None:
     values = zero_continuation_values()
     nxt = next_state_from_terminal_boards(current, board0, board1)
     values[nxt] = 2.75
-    immediate = float(score_heads_up(board0, board1).points)
+    immediate = float(canonical_terminal_points_p0(board0, board1))
     u0 = continuation_adjusted_terminal_utility(
         current, board0, board1, values, update_player=0
     )
@@ -151,6 +206,8 @@ def main() -> None:
     test_exact_player_exchange_reduces_50_to_25_signed_states()
     test_kernel_partition_and_relative_role_mapping()
     test_exact_dual_player_transition()
+    test_normal_top_trips_enters_fantasy17_on_canonical_path()
+    test_continuation_uses_canonical_with_replacement_joker_score()
     test_parameterized_terminal_backup_is_zero_sum()
     test_relative_value_normalization_covers_all_states()
     print("OPENOFC_HU_CONTINUATION_TEST=PASS")
