@@ -1,0 +1,192 @@
+name: OpenOFC M5R three-round calibrated interval frontier
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - tools/openofc_solver/M5R_CALIBRATED_INTERVAL_FRONTIER_CONTRACT.md
+      - tools/openofc_solver/m5r_calibrated_threshold_manifest.py
+      - tools/openofc_solver/run_m5r_three_round_calibrated_interval_frontier.py
+      - .github/workflows/openofc-m5r-three-round-calibrated-interval-frontier.yml
+      - .github/dispatch/openofc-m5r-calibrated-interval-frontier.trigger
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile calibrated frontier surface
+        run: |
+          python -m py_compile \
+            tools/openofc_solver/m5r_calibrated_threshold_manifest.py \
+            tools/openofc_solver/run_m5r_three_round_calibrated_interval_frontier.py \
+            tools/openofc_solver/m5r_three_round_interval_bridge.py
+      - name: Validate frozen manifest structure
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python - <<'PY'
+          from m5r_calibrated_threshold_manifest import (
+              THRESHOLD_HEX_BY_FAMILY,
+              manifest_payload,
+              positive_thresholds,
+          )
+          assert len(positive_thresholds('three-round-v1')) == 8
+          assert len(positive_thresholds('three-round-v2')) == 5
+          assert list(THRESHOLD_HEX_BY_FAMILY) == ['three-round-v1', 'three-round-v2']
+          payload = manifest_payload()
+          assert payload['production_certification_eligible'] is False
+          assert payload['real_routes_certified'] == 0
+          print('OPENOFC_M5R_CALIBRATED_THRESHOLD_MANIFEST=PASS', payload['sha256'])
+          PY
+
+  cells:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [three-round-v1, three-round-v2]
+        player: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONHASHSEED: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run pre-frozen calibrated interval frontier cell
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_m5r_three_round_calibrated_interval_frontier.py \
+              --family '${{ matrix.family }}' \
+              --player '${{ matrix.player }}' \
+              --output 'artifacts/m5r_calibrated_frontier_${{ matrix.family }}_p${{ matrix.player }}.json'
+      - name: Enforce authority firewall
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("artifacts/m5r_calibrated_frontier_${{ matrix.family }}_p${{ matrix.player }}.json")
+          data = json.loads(path.read_text(encoding='utf-8'))
+          assert data['verdict'] == 'PASS_M5R_CALIBRATED_INTERVAL_FRONTIER_CELL'
+          assert data['decision']['exact_reference_reproduced'] is True
+          assert data['decision']['all_intervals_contain_exact_br'] is True
+          assert data['decision']['terminal_work_nonincreasing'] is True
+          assert data['decision']['positive_work_reduction_exercised'] is True
+          assert data['decision']['own_action_pruning_count'] == 0
+          assert data['decision']['production_threshold_selected'] is False
+          assert data['decision']['full_game_scalable_evaluator_validated'] is False
+          assert data['production_certification_eligible'] is False
+          assert data['real_routes_certified'] == 0
+          print('OPENOFC_M5R_CALIBRATED_FRONTIER_CELL=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m5r-calibrated-frontier-${{ matrix.family }}-p${{ matrix.player }}
+          path: artifacts/m5r_calibrated_frontier_${{ matrix.family }}_p${{ matrix.player }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: cells
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m5r-calibrated-frontier-*
+          path: frontier-artifacts
+          merge-multiple: true
+      - name: Freeze calibrated frontier aggregate
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          paths = sorted(Path('frontier-artifacts').glob('*.json'))
+          assert len(paths) == 4, paths
+          cells = [json.loads(path.read_text(encoding='utf-8')) for path in paths]
+          expected = {
+              ('three-round-v1', 0), ('three-round-v1', 1),
+              ('three-round-v2', 0), ('three-round-v2', 1),
+          }
+          assert {(c['family'], c['player']) for c in cells} == expected
+          assert all(c['verdict'] == 'PASS_M5R_CALIBRATED_INTERVAL_FRONTIER_CELL' for c in cells)
+          manifest_shas = {c['threshold_manifest_sha256'] for c in cells}
+          assert len(manifest_shas) == 1, manifest_shas
+          assert all(c['decision']['production_threshold_selected'] is False for c in cells)
+          assert all(c['production_certification_eligible'] is False for c in cells)
+          assert all(c['real_routes_certified'] == 0 for c in cells)
+
+          rows = [
+              (cell, row)
+              for cell in cells
+              for row in cell['frontier']
+              if row['prune_reach_threshold'] > 0.0
+          ]
+          payload = {
+              'schema': 'openofc-m5r-three-round-calibrated-interval-frontier-aggregate-v1',
+              'authority': 'M5R_REDUCED_CALIBRATED_INTERVAL_FRONTIER_ONLY_NOT_CERTIFICATION',
+              'threshold_manifest_sha256': next(iter(manifest_shas)),
+              'cells': cells,
+              'summary': {
+                  'cells': 4,
+                  'positive_frontier_rows': len(rows),
+                  'all_exact_values_contained': all(row['contains_exact_br'] for _, row in rows),
+                  'minimum_positive_interval_width': min(row['interval_width'] for _, row in rows),
+                  'maximum_positive_interval_width': max(row['interval_width'] for _, row in rows),
+                  'minimum_positive_terminal_work_fraction': min(row['terminal_work_fraction'] for _, row in rows),
+                  'maximum_positive_terminal_work_fraction': max(row['terminal_work_fraction'] for _, row in rows),
+                  'rows_with_nonzero_terminal_work': sum(
+                      row['terminal_utility_evaluations'] > 0 for _, row in rows
+                  ),
+                  'rows_with_work_reduction': sum(
+                      row['terminal_work_fraction'] < 1.0 for _, row in rows
+                  ),
+              },
+              'decision': {
+                  'pre_frozen_reduced_frontier_measured': True,
+                  'production_threshold_selected': False,
+                  'full_game_scalable_evaluator_validated': False,
+                  'production_certification_eligible': False,
+                  'real_routes_certified': 0,
+                  'next_blocker': 'INTERPRET_FRONTIER_THEN_PRECOMMIT_FULL_GAME_CONTINUATION_BOUND_TRANSFER_GATE',
+              },
+              'verdict': 'PASS_M5R_CALIBRATED_INTERVAL_FRONTIER',
+              'production_certification_eligible': False,
+              'real_routes_certified': 0,
+          }
+          raw = json.dumps(payload, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+          payload['sha256'] = hashlib.sha256(raw).hexdigest()
+          out = Path('artifacts/m5r_three_round_calibrated_interval_frontier.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + '\n', encoding='utf-8')
+          print(json.dumps({
+              'verdict': payload['verdict'],
+              'summary': payload['summary'],
+              'threshold_manifest_sha256': payload['threshold_manifest_sha256'],
+              'sha256': payload['sha256'],
+              'next_blocker': payload['decision']['next_blocker'],
+              'real_routes_certified': 0,
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-m5r-three-round-calibrated-interval-frontier
+          path: artifacts/m5r_three_round_calibrated_interval_frontier.json
+          if-no-files-found: error
+          retention-days: 30
