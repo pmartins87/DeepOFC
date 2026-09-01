@@ -1,31 +1,36 @@
 from __future__ import annotations
 
-"""Exact HU cross-hand Fantasy state plumbing.
+"""HU cross-hand Fantasy state plumbing.
 
-This module is intentionally small and exact. It does not guess the value of a
-Fantasy hand and it does not claim to solve the infinite-horizon game. Instead
-it defines the complete 50-state HU meta-state surface and the exact transition
-from two completed boards into the next hand.
-
-A later one-hand equilibrium oracle can therefore optimize
+The continuation objective is
 
     current_hand_points + continuation_value[next_state]
 
-without hard-coding a Fantasy bonus. The continuation vector is an explicit
-input until the outer average-reward/fixed-point solve is implemented.
+and therefore the immediate terminal score MUST use the same canonical Joker
+semantics as the live DeepOFC game model.  The historical M4/M5 continuation
+module originally imported ``tools/openofc_solver/engine.py`` for scoring; that
+engine predates the project-frozen 2026-08-15 Joker-with-replacement rule and
+can differ by real OFC points when a Joker's strongest nominal substitution
+copies an already-present card.
 
-Player exchange is also an exact zero-sum automorphism for this state surface:
-swapping player identities and the button maps every state to a partner whose
-player-0 value has the opposite sign. None of the 50 states is self-mapped
-because the button changes, so only 25 signed canonical representatives need to
-be solved while table funds are not part of the state.
+Normal -> Fantasy qualification is likewise routed through the canonical
+``deepofc.simulator`` implementation.  Existing Fantasy -> re-Fantasy deal-size
+semantics remain delegated to the historical transition module until that rule
+surface is independently source-reconciled; this keeps the current change
+narrow and fixes the Normal x Normal strategic path without silently rewriting
+Fantasy retention rules.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 from itertools import product
 from typing import Mapping
 
-from engine import Board, score_heads_up
+from deepofc.scoring import pairwise_points_standard
+from deepofc.simulator import normal_fantasy_entry_cards as canonical_normal_fantasy_entry_cards
+from deepofc.state import Card as CanonicalCard
+from deepofc.state import PlayerBoard as CanonicalPlayerBoard
+from engine import Board
 from fantasy_transition import (
     VALID_FANTASY_COUNTS,
     VARIANT_ULTIMATE,
@@ -47,9 +52,8 @@ KERNEL_FANTASY_FANTASY = "FANTASY_FANTASY"
 class HUContinuationState:
     """State carried from one HU hand to the next.
 
-    `button` is the player who owns the dealer/button in that hand (0 or 1).
-    `p0_fantasy_cards` and `p1_fantasy_cards` are 0 for normal play or one of
-    14/15/16/17 for the exact Fantasy deal size.
+    ``button`` is the persistent player who owns the dealer/button in that hand.
+    Fantasy counts are 0 for normal play or one of 14/15/16/17.
     """
 
     button: int
@@ -89,7 +93,6 @@ def all_states() -> tuple[HUContinuationState, ...]:
 
 
 def hand_kernel_kind(state: HUContinuationState) -> str:
-    """Classify which strategic one-hand kernel owns a meta-state."""
     f0 = state.p0_fantasy_cards > 0
     f1 = state.p1_fantasy_cards > 0
     if not f0 and not f1:
@@ -115,7 +118,6 @@ def role_for_identity(state: HUContinuationState, player: int) -> int:
 
 
 def modes_in_role_order(state: HUContinuationState) -> tuple[int, int]:
-    """Return (nondealer_mode, dealer_mode) for relative-role one-hand solvers."""
     return (
         state.mode_for(identity_for_role(state, 0)),
         state.mode_for(identity_for_role(state, 1)),
@@ -126,7 +128,6 @@ def utility_from_nondealer_perspective_to_p0(
     state: HUContinuationState,
     nondealer_utility: float,
 ) -> float:
-    """Convert a relative-role HU zero-sum utility to persistent player 0."""
     return (
         float(nondealer_utility)
         if identity_for_role(state, 0) == 0
@@ -135,7 +136,6 @@ def utility_from_nondealer_perspective_to_p0(
 
 
 def swap_players(state: HUContinuationState) -> HUContinuationState:
-    """Exact player-label exchange automorphism."""
     return HUContinuationState(
         button=1 - state.button,
         p0_fantasy_cards=state.p1_fantasy_cards,
@@ -146,13 +146,6 @@ def swap_players(state: HUContinuationState) -> HUContinuationState:
 def canonical_player_exchange(
     state: HUContinuationState,
 ) -> tuple[HUContinuationState, int]:
-    """Return canonical player-exchange representative and player-0 value sign.
-
-    If sign is +1, V(state)=V(canonical). If sign is -1,
-    V(state)=-V(canonical). This reduction is exact for the declared zero-sum
-    50-state model; if asymmetric table funds are later added, funds must also be
-    swapped before this automorphism remains valid.
-    """
     partner = swap_players(state)
     if state <= partner:
         return state, 1
@@ -169,7 +162,6 @@ def canonical_states() -> tuple[HUContinuationState, ...]:
 def expand_antisymmetric_values(
     canonical_values: Mapping[HUContinuationState, float],
 ) -> dict[HUContinuationState, float]:
-    """Expand 25 canonical persistent-player values to the full 50-state map."""
     reps = canonical_states()
     missing = [state for state in reps if state not in canonical_values]
     if missing:
@@ -182,15 +174,71 @@ def expand_antisymmetric_values(
 
 
 def default_next_button(current_button: int) -> int:
-    """Standard HU button alternation helper.
-
-    The strategic integration layer may pass an explicit next button when live
-    evidence requires it. Keeping this helper separate prevents the terminal
-    Fantasy rule itself from depending on UI/dealer-marker inference.
-    """
     if current_button not in (0, 1):
         raise ValueError("HU button must be player 0 or player 1")
     return 1 - current_button
+
+
+@lru_cache(maxsize=250_000)
+def _canonical_board(board: Board) -> CanonicalPlayerBoard:
+    """Convert the migrated solver Board into the canonical physical-card board."""
+
+    def convert_row(cards) -> tuple[CanonicalCard, ...]:
+        return tuple(CanonicalCard.from_code(str(card)) for card in cards)
+
+    return CanonicalPlayerBoard(
+        top=convert_row(board.top),
+        middle=convert_row(board.middle),
+        bottom=convert_row(board.bottom),
+    )
+
+
+@lru_cache(maxsize=250_000)
+def canonical_terminal_points_p0(board0: Board, board1: Board) -> int:
+    """Canonical raw hand points from persistent player 0's perspective.
+
+    This is intentionally a thin adapter around ``deepofc.scoring`` so every
+    continuation-aware strategic kernel shares the same with-replacement Joker,
+    board-aware foul, royalty and scoop semantics as the canonical simulator.
+    Simultaneous both-foul remains fail-closed in that source of truth.
+    """
+
+    score = pairwise_points_standard(
+        _canonical_board(board0),
+        _canonical_board(board1),
+        equality_allowed=True,
+    )
+    return int(score.total_points)
+
+
+def _next_fantasy_cards(
+    board: Board,
+    *,
+    current_fantasy_cards: int,
+    variant: str,
+) -> int:
+    """Return next mode while keeping the current change source-narrow.
+
+    Normal-hand entry uses the canonical DeepOFC rule (QQ=14, KK=15, AA=16,
+    Top trips=17 after board-aware Joker resolution).  Re-Fantasy retention is
+    left on the migrated transition contract for now because its exact Ultimate
+    deal-size rule is a separate source question and is not needed to correct
+    the first playable Normal x Normal route.
+    """
+
+    if current_fantasy_cards == NORMAL:
+        next_cards = canonical_normal_fantasy_entry_cards(
+            _canonical_board(board),
+            equality_allowed=True,
+        )
+        return NORMAL if next_cards is None else int(next_cards)
+    return int(
+        transition_from_board(
+            board,
+            current_fantasy_cards=current_fantasy_cards,
+            variant=variant,
+        ).next_cards
+    )
 
 
 def next_state_from_terminal_boards(
@@ -201,13 +249,14 @@ def next_state_from_terminal_boards(
     next_button: int | None = None,
     variant: str = VARIANT_ULTIMATE,
 ) -> HUContinuationState:
-    """Apply exact Fantasy/re-Fantasy qualification for both HU players."""
-    t0 = transition_from_board(
+    """Apply the terminal qualification transition for both persistent players."""
+
+    p0_next = _next_fantasy_cards(
         board0,
         current_fantasy_cards=current.p0_fantasy_cards,
         variant=variant,
     )
-    t1 = transition_from_board(
+    p1_next = _next_fantasy_cards(
         board1,
         current_fantasy_cards=current.p1_fantasy_cards,
         variant=variant,
@@ -219,8 +268,8 @@ def next_state_from_terminal_boards(
     )
     return HUContinuationState(
         button=button,
-        p0_fantasy_cards=t0.next_cards,
-        p1_fantasy_cards=t1.next_cards,
+        p0_fantasy_cards=p0_next,
+        p1_fantasy_cards=p1_next,
     )
 
 
@@ -234,12 +283,8 @@ def continuation_adjusted_terminal_utility(
     next_button: int | None = None,
     variant: str = VARIANT_ULTIMATE,
 ) -> float:
-    """Exact one-step Bellman backup for a supplied continuation vector.
+    """Exact one-step Bellman backup conditional on the supplied continuation vector."""
 
-    This function is exact *conditional on* the provided continuation values.
-    It does not certify those values. Values are always represented from player
-    0's zero-sum perspective; player 1 receives the sign-reversed utility.
-    """
     if update_player not in (0, 1):
         raise ValueError("HU player must be 0 or 1")
     nxt = next_state_from_terminal_boards(
@@ -251,13 +296,12 @@ def continuation_adjusted_terminal_utility(
     )
     if nxt not in continuation_values:
         raise KeyError(f"continuation value missing for {nxt.as_key()}")
-    immediate_p0 = float(score_heads_up(board0, board1).points)
+    immediate_p0 = float(canonical_terminal_points_p0(board0, board1))
     total_p0 = immediate_p0 + float(continuation_values[nxt])
     return total_p0 if update_player == 0 else -total_p0
 
 
 def zero_continuation_values() -> dict[HUContinuationState, float]:
-    """Convenience baseline equivalent to current-hand-only utility."""
     return {state: 0.0 for state in all_states()}
 
 
@@ -266,13 +310,6 @@ def normalize_relative_values(
     *,
     reference: HUContinuationState | None = None,
 ) -> tuple[float, dict[HUContinuationState, float]]:
-    """Normalize one full 50-state Bellman image for relative-value iteration.
-
-    For an average-reward stochastic game the bias vector is defined only up to
-    an additive constant. This helper performs only that algebraic normalization;
-    it does not produce the Bellman image itself and therefore makes no
-    convergence claim.
-    """
     states = all_states()
     missing = [state for state in states if state not in raw_values]
     if missing:
