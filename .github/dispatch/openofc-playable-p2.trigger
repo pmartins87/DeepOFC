@@ -1,1 +1,1 @@
-playable-p2-normal-normal-candidate-v1
+playable-p2-normal-normal-candidate-v2-aggregate-dependencies
