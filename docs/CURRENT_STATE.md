@@ -1,8 +1,8 @@
 # DeepOFC canonical current state
 
-Date: 2026-08-27
+Date: 2026-09-02
 Status: active development; not production-ready
-Canonical status schema: `deepofc-current-state-v4`
+Canonical status schema: `deepofc-current-state-v5`
 
 This document is the single entry point for the current project state. Historical milestone documents remain evidence, but when their status wording conflicts with this file, this file wins until the conflict is deliberately reconciled.
 
@@ -10,10 +10,33 @@ This document is the single entry point for the current project state. Historica
 
 DeepOFC has two active engineering tracks that must converge before production:
 
-1. **Strategy / solver** — the continuation/Bellman architecture is implemented through **M5G** and is now canonically owned by `pmartins87/DeepOFC/main`. The former strategic staging tree from `pmartins87/myoh_private@c21c3c4f1017c83df07eb22230318a8131bf40d1` completed corrected fixed-point inventory, 126/126 byte-identical migration, 20/20 deterministic old-vs-new equivalence, canonical PR CI, merge and post-merge main CI. The remaining strategic blocker is real held-out evidence/certification.
+1. **Strategy / solver** — the continuation/Bellman architecture is implemented through **M5G** and is canonically owned by DeepOFC. The finite PLAYABLE lane has now completed P1 mechanics and P2 immutable Normal x Normal policy materialization. Formal 50-state certification remains a separate research lane and no longer blocks the first playable candidate.
 2. **Runtime / OpenHoldem** — recognition, reconstruction, transaction safety, drag/Confirm execution and field recovery remain a separately gated runtime problem. Existing v5.x field labels are not canonical project versions unless bound to source commit, policy, tablemap, recognizer/calibration and build/artifact provenance.
 
 The repository-governance drift discovered on 2026-08-27 did **not** imply lost work. The M4/M5 strategic tree had been persisted in the OpenHoldem repository. That tree has now been migrated without semantic rewriting, equivalence-proven and transferred back into the intended strategic repository.
+
+## PLAYABLE critical path — P2 COMPLETE
+
+The finite roadmap in `docs/PLAYABLE_AI_EXIT_ROADMAP_2026-09-01.md` supersedes
+the former assumption that 50/50 formal route certification must precede the
+first playable AI.
+
+- P1 mechanics/scoring: complete for the PLAYABLE Normal x Normal objective;
+- P2 policy package: complete in workflow run `33597399958`;
+- source commit: `3d04fe96fa41e2eb2709b01dc7f8c02e709eb163`;
+- package manifest SHA-256:
+  `f10c079a61ba08832cfc334afb9c055e023dfc9c23a24140d02b2f7bd8413898`;
+- B0 model: `9cc5d4f09387bee64ea18e91677653e164e878c2153c2f12b232f777ca202f71`;
+- B1 model: `5b65fc728c90c65cf17b4462140ea843d80085166e738cb0204460200d337779`;
+- independent ZIP digest/reload/manifest reconstruction: PASS;
+- repeated training reproduced both model and snapshot identities exactly.
+- durable package path:
+  `artifacts/playable_p2_normal_normal_candidate_20260902/`.
+
+P3 is now the critical path: canonical observation -> visible information key
+-> legal action set -> deterministic policy action -> runtime drag/verification.
+The P2 policy is a first strong engineering candidate, not a formal Nash or
+all-Fantasy certificate.
 
 ## Repository authority
 
@@ -179,6 +202,17 @@ The R0–R13 roadmap remains the production-readiness framework.
 4. Keep canonical current-state, handoff and manifest documents synchronized with future strategic milestones.
 
 ### Strategy
+
+PLAYABLE lane:
+
+1. Export the canonical observation -> policy key/action adapter.
+2. Bind and import the P2 artifact in `myoh_private` without moving strategic
+   source authority out of DeepOFC.
+3. Prove recorded-state -> canonical state -> legal policy action determinism.
+4. Wire action -> drag plan -> fresh-scrape verification in shadow mode.
+5. Run one controlled Normal x Normal hand path with fail-closed recognition.
+
+FORMAL lane, non-blocking for first PLAYABLE:
 
 1. Generate independent held-out Normal × Normal deviation/uncertainty evidence.
 2. Generate independent held-out Normal × Fantasy deviation/uncertainty evidence.

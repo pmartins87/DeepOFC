@@ -1,6 +1,6 @@
 # DeepOFC handoff
 
-Updated: 2026-08-27
+Updated: 2026-09-02
 
 This is the operational continuation document for the next chat/session/agent. Do not reconstruct project state from branch names or chat labels alone.
 
@@ -14,7 +14,7 @@ This is the operational continuation document for the next chat/session/agent. D
 
 ## One-line state
 
-DeepOFC is an advanced but strategically uncertified KKPoker OFC Joker Ultimate project. The continuation/Bellman architecture reaches **M5G**. The former OpenHoldem strategic staging tree has completed provenance-preserving transfer into `DeepOFC/main` through corrected fixed-point inventory, **126/126 byte-identical migration**, **20/20 deterministic old-vs-new equivalence**, canonical PR CI PASS, merge PR #13 and post-merge `main` CI PASS. The repository migration is complete; the next substantive blocker is real held-out evidence and 50/50 exact-V route certification.
+DeepOFC is an advanced but formally uncertified KKPoker OFC Joker Ultimate project. Repository migration and the finite PLAYABLE stages P1/P2 are complete. Run `33597399958` froze the first deployable Normal x Normal B0/B1 policy package under manifest `f10c079a61ba08832cfc334afb9c055e023dfc9c23a24140d02b2f7bd8413898`. The critical path is now P3 runtime wiring; 50/50 exact-V route certification continues separately and does not block the first playable AI.
 
 ## Canonical strategic authority
 
@@ -33,6 +33,28 @@ Frozen historical provenance:
 - solver tree: `73523862dac5b704d6f9878edefaa36212f20bc9`
 
 Future strategic development belongs in DeepOFC. The runtime repository should consume explicit versioned/exported policy artifacts rather than become the sole owner of strategic source.
+
+## Current PLAYABLE milestone
+
+P2 completed in GitHub Actions run `33597399958` at source commit
+`3d04fe96fa41e2eb2709b01dc7f8c02e709eb163`.
+
+- final artifact: `openofc-playable-p2-normal-normal-candidate`;
+- artifact ID: `9834102061`;
+- durable package: `artifacts/playable_p2_normal_normal_candidate_20260902/`;
+- archive digest:
+  `52d7d9b674f5b5566baa8fe36fe89dd46c8caaffbf94fa00e57e905531edc7d1`;
+- aggregate manifest:
+  `f10c079a61ba08832cfc334afb9c055e023dfc9c23a24140d02b2f7bd8413898`;
+- B0/B1 training: 4,096 MCCFR iterations each;
+- repeated-run model/snapshot identity: exact;
+- authority: `PLAYABLE_CANDIDATE_NOT_FORMALLY_CERTIFIED`;
+- REAL routes certified: 0.
+
+Next work is P3 only: define the observation -> canonical key/legal-action
+adapter, import the immutable package into `myoh_private`, bind its identity to
+runtime/tablemap/recognizer/build provenance, then run deterministic recorded
+shadow replays before one controlled hand.
 
 ## Completed migration gates
 
@@ -114,7 +136,7 @@ The migrated tree contains architecture through M5G:
 
 M5G only assembles routes that already satisfy the real certification contract. It cannot replace missing held-out evidence or decide production thresholds.
 
-## Next substantive strategic queue
+## Formal strategic queue (separate, non-blocking for first PLAYABLE)
 
 A full real surface requires **50 real-certified exact-V routes**:
 

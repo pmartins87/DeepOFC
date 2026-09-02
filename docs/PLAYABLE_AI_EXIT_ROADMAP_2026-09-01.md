@@ -87,8 +87,9 @@ Implementation status:
 - [x] complete visible-information generalizer payload, objective, configuration,
       seeds, source commit, snapshot and materialization identities are bound;
 - [x] B0/B1 aggregate manifest and non-certification firewall implemented;
-- [ ] frozen 4,096-iteration B0/B1 training workflow completed and artifact SHA
-      preserved;
+- [x] frozen 4,096-iteration B0/B1 training workflow completed and artifact SHA
+      preserved: run `33597399958`, manifest
+      `f10c079a61ba08832cfc334afb9c055e023dfc9c23a24140d02b2f7bd8413898`;
 
 **P2 exit:** one immutable policy artifact exists and can answer a canonical
 Normal x Normal decision state deterministically.
@@ -134,4 +135,4 @@ silently folded into this first exit criterion.
 
 ## Current position
 
-`P1 DONE -> P2 frozen training/artifact -> P3 -> PLAYABLE DONE`
+`P1 DONE -> P2 DONE -> P3 state/policy/action/runtime wiring -> PLAYABLE DONE`

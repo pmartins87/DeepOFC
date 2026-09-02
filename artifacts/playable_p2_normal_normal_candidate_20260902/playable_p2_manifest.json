@@ -1,0 +1,30 @@
+{
+  "authority": "PLAYABLE_CANDIDATE_NOT_FORMALLY_CERTIFIED",
+  "formal_certification": false,
+  "production_certification_eligible": false,
+  "real_routes_certified": 0,
+  "routes": [
+    {
+      "button": 0,
+      "file": "playable_p2_route_b0.json.gz",
+      "file_sha256": "8ecf7a2dd6455e3022fab3e4c26100f5cbbd48508acd1fdebf694a8b30db714a",
+      "model_sha256": "9cc5d4f09387bee64ea18e91677653e164e878c2153c2f12b232f777ca202f71",
+      "policy_snapshot_sha256": "c6f3f212189e03232345f7ae5dcf30ed0a89e00aa1928a6451d6aab23dcfc92d",
+      "route_sha256": "5f8600bc035197f00de68969c8e0f025a10f1094888999f134f83586f8aa98e1",
+      "state": "B0:P0F0:P1F0"
+    },
+    {
+      "button": 1,
+      "file": "playable_p2_route_b1.json.gz",
+      "file_sha256": "d47f45f09d266f295a8d62ca137ace58e1e26c2383c3484c978143b3d8cf9eac",
+      "model_sha256": "5b65fc728c90c65cf17b4462140ea843d80085166e738cb0204460200d337779",
+      "policy_snapshot_sha256": "31f745f80b9141f7e0dc41905ca57746a259e420ccee2314eb255a1b54fc7302",
+      "route_sha256": "4d8d53adf077c0fe4759a7ed876261542adb60983f278bb3cd4de535eed27f0d",
+      "state": "B1:P0F0:P1F0"
+    }
+  ],
+  "schema": "openofc-playable-p2-normal-normal-manifest-v1",
+  "sha256": "f10c079a61ba08832cfc334afb9c055e023dfc9c23a24140d02b2f7bd8413898",
+  "source_commit": "3d04fe96fa41e2eb2709b01dc7f8c02e709eb163",
+  "verdict": "PASS_PLAYABLE_P2_ARTIFACT_IDENTITY"
+}
