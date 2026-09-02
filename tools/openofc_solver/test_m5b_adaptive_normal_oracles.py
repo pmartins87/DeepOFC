@@ -6,6 +6,7 @@ import pytest
 
 from fantasy_fantasy_payoff import continuation_fingerprint
 from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
     HUContinuationState,
     KERNEL_NORMAL_NORMAL,
     zero_continuation_values,
@@ -95,6 +96,10 @@ def test_normal_normal_materialization_exposes_exact_frozen_m5a_candidate() -> N
     _checked, continuation_sha = continuation_fingerprint(values)
     assert materialized.report.continuation_sha256 == continuation_sha
     assert materialized.fixed_oracle.snapshot.training_continuation_sha256 == continuation_sha
+    assert (
+        materialized.fixed_oracle.snapshot.both_foul_policy
+        == BOTH_FOUL_NET_ZERO_INFERENCE
+    )
 
 
 def test_normal_normal_materialization_is_deterministic_for_same_config_state_v() -> None:

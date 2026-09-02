@@ -22,7 +22,7 @@ from fantasy_fantasy_kernel import (
     terminal_utility,
     validate_arrangement,
 )
-from hu_continuation import HUContinuationState
+from hu_continuation import BOTH_FOUL_FAIL_CLOSED, HUContinuationState
 from strategic_continuation_cfr import validate_continuation_values
 
 AUTHORITY = "EXACT_BOUNDED_FANTASY_FANTASY_SUPPORT_PAYOFF_MATRIX"
@@ -83,6 +83,8 @@ def build_exact_support_payoff_matrix(
     p0_support: Sequence[FantasyArrangement],
     p1_support: Sequence[FantasyArrangement],
     continuation_values: Mapping[HUContinuationState, float],
+    *,
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED,
 ) -> FantasySupportPayoffMatrix:
     candidates0 = tuple(p0_support)
     candidates1 = tuple(p1_support)
@@ -111,6 +113,7 @@ def build_exact_support_payoff_matrix(
                 arrangement1,
                 checked,
                 update_player=0,
+                both_foul_policy=both_foul_policy,
             )
             # Independent sign check catches perspective/continuation mistakes.
             reverse = terminal_utility(
@@ -119,6 +122,7 @@ def build_exact_support_payoff_matrix(
                 arrangement1,
                 checked,
                 update_player=1,
+                both_foul_policy=both_foul_policy,
             )
             if abs(float(value) + float(reverse)) > 1e-9:
                 raise AssertionError("Fantasy support payoff lost zero-sum parity")

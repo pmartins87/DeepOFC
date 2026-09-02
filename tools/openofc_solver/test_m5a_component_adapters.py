@@ -3,7 +3,11 @@ from __future__ import annotations
 import math
 
 from fantasy_fantasy_payoff import continuation_fingerprint
-from hu_continuation import HUContinuationState, zero_continuation_values
+from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
+    HUContinuationState,
+    zero_continuation_values,
+)
 from m4w_outcome_model import (
     SparseFantasyOutcomeModel,
     policy_api_has_hidden_opponent_argument as m4w_hidden_api,
@@ -29,6 +33,7 @@ def test_normal_normal_fixed_policy_oracle_is_deterministic_and_sha_bound() -> N
         model,
         training_continuation_values=values,
         provenance="m5a-nn-unit-fixture",
+        both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
     )
     oracle = NormalNormalFixedPolicyOracle(
         model,

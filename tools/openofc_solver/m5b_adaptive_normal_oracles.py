@@ -27,6 +27,8 @@ from typing import Mapping
 
 from fantasy_fantasy_payoff import continuation_fingerprint
 from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
+    VALID_BOTH_FOUL_POLICIES,
     HUContinuationState,
     KERNEL_NORMAL_FANTASY,
     KERNEL_NORMAL_NORMAL,
@@ -58,7 +60,7 @@ from strategic_policy_distillation import distill_solver_nodes
 
 AUTHORITY_NN = "TRAIN_AT_CURRENT_V_NORMAL_NORMAL_PROBE_NOT_CERTIFIED"
 AUTHORITY_NF = "TRAIN_AT_CURRENT_V_NORMAL_FANTASY_PROBE_NOT_CERTIFIED"
-CONFIG_SCHEMA = "openofc-m5b-adaptive-normal-config-v1"
+CONFIG_SCHEMA = "openofc-m5b-adaptive-normal-config-v2"
 MATERIALIZATION_SCHEMA = "openofc-m5b-adaptive-normal-materialization-v1"
 MASK64 = (1 << 64) - 1
 
@@ -96,6 +98,7 @@ class AdaptiveNormalConfig:
     huber_delta: float = 1.0
     epsilon: float = 0.6
     base_seed: int = 20260827
+    both_foul_policy: str = BOTH_FOUL_NET_ZERO_INFERENCE
 
     def __post_init__(self) -> None:
         if min(
@@ -116,6 +119,8 @@ class AdaptiveNormalConfig:
             raise ValueError("M5B adaptive model hyperparameters are invalid")
         if not 0.0 < self.epsilon <= 1.0:
             raise ValueError("M5B adaptive epsilon must be in (0,1]")
+        if self.both_foul_policy not in VALID_BOTH_FOUL_POLICIES:
+            raise ValueError("M5B adaptive both-foul policy is invalid")
 
     def payload(self) -> dict[str, object]:
         return {
@@ -130,6 +135,7 @@ class AdaptiveNormalConfig:
             "huber_delta": self.huber_delta,
             "epsilon": self.epsilon,
             "base_seed": int(self.base_seed) & MASK64,
+            "both_foul_policy": self.both_foul_policy,
         }
 
     @property
@@ -300,7 +306,11 @@ class AdaptiveNormalNormalOracle:
             self.config.base_seed, "m5b-nn-eval", state
         )
         solver = SuitCanonicalContinuationMCCFR(
-            objective=ContinuationObjective(state, checked),
+            objective=ContinuationObjective(
+                state,
+                checked,
+                both_foul_policy=self.config.both_foul_policy,
+            ),
             epsilon=self.config.epsilon,
             seed=solver_seed,
             cfr_plus=True,
@@ -324,6 +334,7 @@ class AdaptiveNormalNormalOracle:
             model,
             training_continuation_values=checked,
             provenance=f"{self.oracle_id}|{continuation_sha}",
+            both_foul_policy=self.config.both_foul_policy,
         )
         fixed = NormalNormalFixedPolicyOracle(
             model,

@@ -19,7 +19,11 @@ from fantasy_fantasy_policy_model import (
     load_checkpoint,
     save_checkpoint,
 )
-from hu_continuation import HUContinuationState, zero_continuation_values
+from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
+    HUContinuationState,
+    zero_continuation_values,
+)
 
 
 def meta() -> HUContinuationState:
@@ -56,7 +60,11 @@ def fixture():
     support0 = two_arrangements(world.plan.packet_for(0))
     support1 = two_arrangements(world.plan.packet_for(1))
     matrix = build_exact_support_payoff_matrix(
-        world, support0, support1, zero_continuation_values()
+        world,
+        support0,
+        support1,
+        zero_continuation_values(),
+        both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
     )
     return world, support0, support1, matrix
 

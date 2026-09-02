@@ -337,7 +337,12 @@ def _rollout(
             )
         selected = _sample_index(probabilities, rng)
         node = child_state(node, pairs[selected][1])
-    return _terminal_p0_value(state, node, continuation_values)
+    return _terminal_p0_value(
+        state,
+        node,
+        continuation_values,
+        both_foul_policy=candidate.snapshot.both_foul_policy,
+    )
 
 
 def _aggregate_gain(

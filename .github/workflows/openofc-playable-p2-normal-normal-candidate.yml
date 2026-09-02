@@ -1,0 +1,136 @@
+name: OpenOFC PLAYABLE P2 Normal-Normal candidate
+
+on:
+  push:
+    branches:
+      - research/external-ofc-solver-audit-20260827
+    paths:
+      - .github/dispatch/openofc-playable-p2.trigger
+  workflow_dispatch:
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate scoring policy and artifact roundtrip
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python -m pytest -q \
+            tools/openofc_solver/test_hu_continuation.py \
+            tools/openofc_solver/test_strategic_continuation_cfr.py \
+            tools/openofc_solver/test_m5b_adaptive_normal_oracles.py \
+            tools/openofc_solver/test_playable_p2_candidate.py \
+            tests/test_scoring.py
+
+  train:
+    needs: mechanics
+    strategy:
+      fail-fast: false
+      matrix:
+        button: [0, 1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Train and freeze route
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_playable_p2_train_route.py \
+              --button '${{ matrix.button }}' \
+              --source-commit '${{ github.sha }}' \
+              --output 'artifacts/playable_p2_route_b${{ matrix.button }}.json.gz'
+      - name: Enforce PLAYABLE authority firewall
+        run: |
+          PYTHONPATH=.:tools/openofc_solver python - <<'PY'
+          from pathlib import Path
+          from playable_p2_candidate import AUTHORITY, load_route
+
+          path = Path("artifacts/playable_p2_route_b${{ matrix.button }}.json.gz")
+          route = load_route(path)
+          assert route.state.button == ${{ matrix.button }}
+          assert route.source_commit == "${{ github.sha }}"
+          assert route.snapshot.both_foul_policy == "MUTUAL_AUTO_SCOOP_NET_ZERO_INFERENCE"
+          print("OPENOFC_PLAYABLE_P2_ROUTE=PASS", route.route_sha256)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-playable-p2-b${{ matrix.button }}
+          path: artifacts/playable_p2_route_b${{ matrix.button }}.json.gz
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: openofc-playable-p2-b*
+          path: artifacts
+          merge-multiple: true
+      - name: Freeze package manifest
+        run: |
+          PYTHONPATH=.:tools/openofc_solver \
+            python tools/openofc_solver/run_playable_p2_aggregate.py \
+              --route artifacts/playable_p2_route_b0.json.gz \
+              --route artifacts/playable_p2_route_b1.json.gz \
+              --output artifacts/playable_p2_manifest.json
+      - name: Enforce package identity and non-certification
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          path = Path("artifacts/playable_p2_manifest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          unsigned = dict(data)
+          expected = unsigned.pop("sha256")
+          actual = hashlib.sha256(
+              json.dumps(unsigned, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+          ).hexdigest()
+          assert expected == actual
+          assert data["verdict"] == "PASS_PLAYABLE_P2_ARTIFACT_IDENTITY"
+          assert data["authority"] == "PLAYABLE_CANDIDATE_NOT_FORMALLY_CERTIFIED"
+          assert data["source_commit"] == "${{ github.sha }}"
+          assert [row["button"] for row in data["routes"]] == [0, 1]
+          assert data["formal_certification"] is False
+          assert data["production_certification_eligible"] is False
+          assert data["real_routes_certified"] == 0
+          print("OPENOFC_PLAYABLE_P2_PACKAGE=PASS", data["sha256"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openofc-playable-p2-normal-normal-candidate
+          path: |
+            artifacts/playable_p2_route_b0.json.gz
+            artifacts/playable_p2_route_b1.json.gz
+            artifacts/playable_p2_manifest.json
+          if-no-files-found: error
+          retention-days: 90

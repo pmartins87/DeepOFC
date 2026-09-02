@@ -88,6 +88,8 @@ def _terminal_p0_value(
     meta: HUContinuationState,
     node: HUState,
     continuation_values: Mapping[HUContinuationState, float],
+    *,
+    both_foul_policy: str,
 ) -> float:
     if not node.terminal():
         raise ValueError("M5I terminal value requires a terminal HU state")
@@ -104,6 +106,7 @@ def _terminal_p0_value(
             persistent_boards[1],
             continuation_values,
             update_player=0,
+            both_foul_policy=both_foul_policy,
         )
     )
 
@@ -222,7 +225,12 @@ class LearnedResponsePolicy:
         )
 
     def _terminal_deviator_value(self, node: HUState) -> float:
-        p0 = _terminal_p0_value(self.meta, node, self.continuation_values)
+        p0 = _terminal_p0_value(
+            self.meta,
+            node,
+            self.continuation_values,
+            both_foul_policy=self.candidate.snapshot.both_foul_policy,
+        )
         return p0 if self.deviator_player == 0 else -p0
 
     def _episode(
@@ -349,7 +357,12 @@ def _rollout_profile(
             )
         selected = _sample_index(probabilities, rng)
         node = child_state(node, pairs[selected][1])
-    return _terminal_p0_value(meta, node, continuation_values)
+    return _terminal_p0_value(
+        meta,
+        node,
+        continuation_values,
+        both_foul_policy=candidate.snapshot.both_foul_policy,
+    )
 
 
 def _mean(values: Sequence[float]) -> float:

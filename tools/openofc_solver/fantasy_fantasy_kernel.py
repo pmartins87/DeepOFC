@@ -18,6 +18,7 @@ from typing import Iterable, Mapping, Sequence
 
 from engine import Board, Card, full_deck
 from hu_continuation import (
+    BOTH_FOUL_FAIL_CLOSED,
     HUContinuationState,
     KERNEL_FANTASY_FANTASY,
     continuation_adjusted_terminal_utility,
@@ -137,6 +138,7 @@ def terminal_utility(
     continuation_values: Mapping[HUContinuationState, float],
     *,
     update_player: int,
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED,
 ) -> float:
     if update_player not in (0, 1):
         raise ValueError("HU player must be 0 or 1")
@@ -148,6 +150,7 @@ def terminal_utility(
         arrangement1.board,
         continuation_values,
         update_player=update_player,
+        both_foul_policy=both_foul_policy,
     )
 
 

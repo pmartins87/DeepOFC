@@ -18,6 +18,8 @@ from typing import Mapping, Sequence
 
 from fantasy_fantasy_payoff import continuation_fingerprint
 from hu_continuation import (
+    BOTH_FOUL_FAIL_CLOSED,
+    VALID_BOTH_FOUL_POLICIES,
     HUContinuationState,
     KERNEL_NORMAL_NORMAL,
     continuation_adjusted_terminal_utility,
@@ -33,7 +35,7 @@ from strategic_feature_encoder import (
 )
 from strategic_suit_symmetry import canonical_node_view
 
-SNAPSHOT_SCHEMA = "openofc-m5a-normal-normal-policy-snapshot-v1"
+SNAPSHOT_SCHEMA = "openofc-m5a-normal-normal-policy-snapshot-v2"
 AUTHORITY = "FIXED_VISIBLE_POLICY_NORMAL_NORMAL_VALUE_NOT_BELLMAN_OPTIMAL"
 MASK64 = (1 << 64) - 1
 
@@ -67,6 +69,7 @@ class NormalNormalPolicySnapshot:
     model_sha256: str
     training_continuation_sha256: str
     provenance: str
+    both_foul_policy: str
     sha256: str
     schema: str = SNAPSHOT_SCHEMA
     authority: str = AUTHORITY
@@ -78,6 +81,8 @@ class NormalNormalPolicySnapshot:
             raise ValueError("M5A normal/normal snapshot has invalid source SHA")
         if not str(self.provenance).strip():
             raise ValueError("M5A normal/normal provenance must be non-empty")
+        if self.both_foul_policy not in VALID_BOTH_FOUL_POLICIES:
+            raise ValueError("M5A normal/normal snapshot has invalid both-foul policy")
         if self.schema != SNAPSHOT_SCHEMA or self.authority != AUTHORITY:
             raise ValueError("M5A normal/normal snapshot schema/authority mismatch")
         if self.sha256 != _sha(self.unsigned_payload()):
@@ -90,6 +95,7 @@ class NormalNormalPolicySnapshot:
             "model_sha256": self.model_sha256,
             "training_continuation_sha256": self.training_continuation_sha256,
             "provenance": self.provenance,
+            "both_foul_policy": self.both_foul_policy,
         }
 
 
@@ -98,9 +104,12 @@ def freeze_policy_snapshot(
     *,
     training_continuation_values: Mapping[HUContinuationState, float],
     provenance: str,
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED,
 ) -> NormalNormalPolicySnapshot:
     if not str(provenance).strip():
         raise ValueError("M5A normal/normal provenance must be non-empty")
+    if both_foul_policy not in VALID_BOTH_FOUL_POLICIES:
+        raise ValueError("M5A normal/normal snapshot has invalid both-foul policy")
     _checked, continuation_sha = continuation_fingerprint(
         training_continuation_values
     )
@@ -110,11 +119,13 @@ def freeze_policy_snapshot(
         "model_sha256": model_fingerprint(model),
         "training_continuation_sha256": continuation_sha,
         "provenance": str(provenance),
+        "both_foul_policy": both_foul_policy,
     }
     return NormalNormalPolicySnapshot(
         model_sha256=str(payload["model_sha256"]),
         training_continuation_sha256=continuation_sha,
         provenance=str(provenance),
+        both_foul_policy=both_foul_policy,
         sha256=_sha(payload),
     )
 
@@ -219,6 +230,7 @@ class NormalNormalFixedPolicyOracle:
                 persistent_boards[1],
                 continuation_values,
                 update_player=0,
+                both_foul_policy=self.snapshot.both_foul_policy,
             )
         )
 

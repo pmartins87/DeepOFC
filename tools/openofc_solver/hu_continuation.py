@@ -26,7 +26,7 @@ from functools import lru_cache
 from itertools import product
 from typing import Mapping
 
-from deepofc.scoring import pairwise_points_standard
+from deepofc.scoring import is_foul, pairwise_points_standard
 from deepofc.simulator import normal_fantasy_entry_cards as canonical_normal_fantasy_entry_cards
 from deepofc.state import Card as CanonicalCard
 from deepofc.state import PlayerBoard as CanonicalPlayerBoard
@@ -42,6 +42,20 @@ HU_MODES: tuple[int, ...] = (NORMAL, *VALID_FANTASY_COUNTS)
 STATE_COUNT = 2 * len(HU_MODES) * len(HU_MODES)
 PLAYER_EXCHANGE_ORBIT_COUNT = STATE_COUNT // 2
 AUTHORITY = "EXACT_HU_CONTINUATION_STATE_TRANSITION"
+
+# The official KKPoker rules say that each fouled player is automatically
+# scooped by every opponent, but do not explicitly spell out a heads-up hand in
+# which both players foul.  The canonical scorer therefore remains fail-closed
+# by default.  PLAYABLE candidates may opt into the isolated net-zero
+# interpretation: both players incur the same automatic scoop against each
+# other, neither earns royalties/Fantasy, and the pairwise net is zero.  Keeping
+# this policy explicit makes it replaceable without rewriting scoring rules.
+BOTH_FOUL_FAIL_CLOSED = "FAIL_CLOSED_UNRESOLVED"
+BOTH_FOUL_NET_ZERO_INFERENCE = "MUTUAL_AUTO_SCOOP_NET_ZERO_INFERENCE"
+VALID_BOTH_FOUL_POLICIES = (
+    BOTH_FOUL_FAIL_CLOSED,
+    BOTH_FOUL_NET_ZERO_INFERENCE,
+)
 
 KERNEL_NORMAL_NORMAL = "NORMAL_NORMAL"
 KERNEL_NORMAL_FANTASY = "NORMAL_FANTASY_ASYMMETRIC"
@@ -194,7 +208,12 @@ def _canonical_board(board: Board) -> CanonicalPlayerBoard:
 
 
 @lru_cache(maxsize=250_000)
-def canonical_terminal_points_p0(board0: Board, board1: Board) -> int:
+def canonical_terminal_points_p0(
+    board0: Board,
+    board1: Board,
+    *,
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED,
+) -> int:
     """Canonical raw hand points from persistent player 0's perspective.
 
     This is intentionally a thin adapter around ``deepofc.scoring`` so every
@@ -203,11 +222,25 @@ def canonical_terminal_points_p0(board0: Board, board1: Board) -> int:
     Simultaneous both-foul remains fail-closed in that source of truth.
     """
 
-    score = pairwise_points_standard(
-        _canonical_board(board0),
-        _canonical_board(board1),
-        equality_allowed=True,
-    )
+    if both_foul_policy not in VALID_BOTH_FOUL_POLICIES:
+        raise ValueError(f"unsupported both-foul settlement policy: {both_foul_policy}")
+    canonical0 = _canonical_board(board0)
+    canonical1 = _canonical_board(board1)
+    try:
+        score = pairwise_points_standard(
+            canonical0,
+            canonical1,
+            equality_allowed=True,
+        )
+    except NotImplementedError:
+        if not (
+            is_foul(canonical0, equality_allowed=True)
+            and is_foul(canonical1, equality_allowed=True)
+        ):
+            raise
+        if both_foul_policy == BOTH_FOUL_NET_ZERO_INFERENCE:
+            return 0
+        raise
     return int(score.total_points)
 
 
@@ -282,6 +315,7 @@ def continuation_adjusted_terminal_utility(
     update_player: int = 0,
     next_button: int | None = None,
     variant: str = VARIANT_ULTIMATE,
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED,
 ) -> float:
     """Exact one-step Bellman backup conditional on the supplied continuation vector."""
 
@@ -296,7 +330,13 @@ def continuation_adjusted_terminal_utility(
     )
     if nxt not in continuation_values:
         raise KeyError(f"continuation value missing for {nxt.as_key()}")
-    immediate_p0 = float(canonical_terminal_points_p0(board0, board1))
+    immediate_p0 = float(
+        canonical_terminal_points_p0(
+            board0,
+            board1,
+            both_foul_policy=both_foul_policy,
+        )
+    )
     total_p0 = immediate_p0 + float(continuation_values[nxt])
     return total_p0 if update_player == 0 else -total_p0
 

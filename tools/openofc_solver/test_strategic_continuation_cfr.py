@@ -3,6 +3,7 @@ from __future__ import annotations
 """Regression tests for continuation-coupled normal/normal strategic utility."""
 
 from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
     HUContinuationState,
     identity_for_role,
     next_state_from_terminal_boards,
@@ -81,6 +82,12 @@ def test_objective_fingerprint_binds_every_continuation_value() -> None:
     assert restored.current_state == a.current_state
     assert restored.fingerprint == a.fingerprint
     assert dict(restored.values) == dict(a.values)
+    playable = ContinuationObjective(
+        meta,
+        zero,
+        both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
+    )
+    assert playable.fingerprint != a.fingerprint
 
 
 def test_non_normal_meta_state_is_rejected() -> None:
@@ -97,7 +104,9 @@ def test_non_normal_meta_state_is_rejected() -> None:
 def test_one_iteration_smoke() -> None:
     solver = SuitCanonicalContinuationMCCFR(
         objective=ContinuationObjective(
-            HUContinuationState(1, 0, 0), zero_continuation_values()
+            HUContinuationState(1, 0, 0),
+            zero_continuation_values(),
+            both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
         ),
         seed=20260825,
         epsilon=0.6,

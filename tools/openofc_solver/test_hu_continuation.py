@@ -3,6 +3,7 @@ from __future__ import annotations
 from engine import Board, Card, score_heads_up
 from hu_continuation import (
     AUTHORITY,
+    BOTH_FOUL_NET_ZERO_INFERENCE,
     HUContinuationState,
     KERNEL_FANTASY_FANTASY,
     KERNEL_NORMAL_FANTASY,
@@ -53,6 +54,15 @@ def _refantasy_board() -> Board:
         top=(C("Jh"), C("Jd"), C("Js")),
         middle=(C("4c"), C("5d"), C("6c"), C("7d"), C("8d")),
         bottom=(C("Tc"), C("Td"), C("Th"), C("9s"), C("9d")),
+    )
+
+
+def _fouled_pair() -> tuple[Board, Board]:
+    first = _normal_qq_board()
+    second = _normal_trips_board()
+    return (
+        Board(top=first.top, middle=first.bottom, bottom=first.middle),
+        Board(top=second.top, middle=second.bottom, bottom=second.middle),
     )
 
 
@@ -189,6 +199,37 @@ def test_parameterized_terminal_backup_is_zero_sum() -> None:
     assert abs(u0 + u1) < 1e-12
 
 
+def test_both_foul_is_fail_closed_unless_playable_inference_is_explicit() -> None:
+    board0, board1 = _fouled_pair()
+    try:
+        canonical_terminal_points_p0(board0, board1)
+    except NotImplementedError as exc:
+        assert "both-player foul" in str(exc)
+    else:
+        raise AssertionError("canonical continuation scorer invented both-foul points")
+
+    assert (
+        canonical_terminal_points_p0(
+            board0,
+            board1,
+            both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
+        )
+        == 0
+    )
+    state = HUContinuationState(0, 0, 0)
+    values = zero_continuation_values()
+    assert (
+        continuation_adjusted_terminal_utility(
+            state,
+            board0,
+            board1,
+            values,
+            both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
+        )
+        == 0.0
+    )
+
+
 def test_relative_value_normalization_covers_all_states() -> None:
     states = all_states()
     raw = {state: float(i) / 10.0 for i, state in enumerate(states)}
@@ -209,6 +250,7 @@ def main() -> None:
     test_normal_top_trips_enters_fantasy17_on_canonical_path()
     test_continuation_uses_canonical_with_replacement_joker_score()
     test_parameterized_terminal_backup_is_zero_sum()
+    test_both_foul_is_fail_closed_unless_playable_inference_is_explicit()
     test_relative_value_normalization_covers_all_states()
     print("OPENOFC_HU_CONTINUATION_TEST=PASS")
 

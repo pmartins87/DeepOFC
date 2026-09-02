@@ -48,10 +48,18 @@ Required:
       `deepofc.scoring`.
 - [x] Normal -> Fantasy entry in the continuation path rerouted to canonical
       QQ/KK/AA/Top-trips = 14/15/16/17 semantics.
-- [ ] Focused regression/full continuation validation after the fix is green.
+- [x] Focused regression/full continuation validation after the fix is green:
+      GitHub Actions run `33457670822`, verdict
+      `PASS_M5R_CONTINUATION_TRANSFER_VALIDATION`, 4/4 cells green,
+      3,389,236 independently crosschecked unique terminal states.
+- [x] Simultaneous both-foul is isolated as an explicit PLAYABLE-only
+      `MUTUAL_AUTO_SCOOP_NET_ZERO_INFERENCE`; the canonical scorer remains
+      fail-closed because the official KKPoker page does not state this edge
+      case directly.
 
-**P1 exit:** no known concrete Normal x Normal scoring/legal mismatch remains in
-its training/decision objective.
+**P1 exit:** no silent Normal x Normal scoring/legal mismatch remains in the
+training/decision objective. The one unresolved official-source edge case is
+named, hash-bound and replaceable rather than being presented as canonical law.
 
 ## Stage P2 — materialize one immutable strong MCCFR candidate
 
@@ -72,6 +80,15 @@ Required:
 
 No new solver family comparison is permitted here unless the frozen candidate
 fails a concrete strategic acceptance criterion.
+
+Implementation status:
+
+- [x] deterministic route exporter/reloader and tamper checks implemented;
+- [x] complete visible-information generalizer payload, objective, configuration,
+      seeds, source commit, snapshot and materialization identities are bound;
+- [x] B0/B1 aggregate manifest and non-certification firewall implemented;
+- [ ] frozen 4,096-iteration B0/B1 training workflow completed and artifact SHA
+      preserved;
 
 **P2 exit:** one immutable policy artifact exists and can answer a canonical
 Normal x Normal decision state deterministically.
@@ -117,4 +134,4 @@ silently folded into this first exit criterion.
 
 ## Current position
 
-`P1 -> focused post-fix validation running -> P2 -> P3 -> PLAYABLE DONE`
+`P1 DONE -> P2 frozen training/artifact -> P3 -> PLAYABLE DONE`

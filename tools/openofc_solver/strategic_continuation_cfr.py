@@ -18,6 +18,8 @@ import math
 from typing import Mapping, Sequence
 
 from hu_continuation import (
+    BOTH_FOUL_FAIL_CLOSED,
+    VALID_BOTH_FOUL_POLICIES,
     HUContinuationState,
     KERNEL_NORMAL_NORMAL,
     all_states,
@@ -34,7 +36,8 @@ from strategic_suit_symmetry import (
 
 AUTHORITY = "STRATEGIC_APPROX_HU_NORMAL_NORMAL_WITH_CONTINUATION"
 SOLVER_KIND = "suit24-continuation-exact"
-OBJECTIVE_SCHEMA = "openofc-hu-continuation-objective-v1"
+OBJECTIVE_SCHEMA = "openofc-hu-continuation-objective-v2"
+LEGACY_OBJECTIVE_SCHEMA = "openofc-hu-continuation-objective-v1"
 
 
 def _canonical_bytes(payload: object) -> bytes:
@@ -81,10 +84,13 @@ def validate_continuation_values(
 class ContinuationObjective:
     current_state: HUContinuationState
     values: Mapping[HUContinuationState, float]
+    both_foul_policy: str = BOTH_FOUL_FAIL_CLOSED
 
     def __post_init__(self) -> None:
         if hand_kernel_kind(self.current_state) != KERNEL_NORMAL_NORMAL:
             raise ValueError("normal/normal MCCFR requires both players outside Fantasy")
+        if self.both_foul_policy not in VALID_BOTH_FOUL_POLICIES:
+            raise ValueError("normal/normal MCCFR has invalid both-foul policy")
         object.__setattr__(self, "values", validate_continuation_values(self.values))
 
     def payload(self) -> dict:
@@ -95,6 +101,7 @@ class ContinuationObjective:
         base = {
             "schema": OBJECTIVE_SCHEMA,
             "current_state": self.current_state.as_key(),
+            "both_foul_policy": self.both_foul_policy,
             "values": values,
         }
         base["sha256"] = hashlib.sha256(_canonical_bytes(base)).hexdigest()
@@ -102,7 +109,8 @@ class ContinuationObjective:
 
     @classmethod
     def from_payload(cls, payload: Mapping[str, object]) -> "ContinuationObjective":
-        if payload.get("schema") != OBJECTIVE_SCHEMA:
+        schema = payload.get("schema")
+        if schema not in (OBJECTIVE_SCHEMA, LEGACY_OBJECTIVE_SCHEMA):
             raise ValueError("unsupported continuation objective schema")
         raw = dict(payload)
         expected = str(raw.pop("sha256", ""))
@@ -116,9 +124,14 @@ class ContinuationObjective:
             _state_from_key(str(key)): float(value)
             for key, value in raw_values.items()
         }
+        if schema == OBJECTIVE_SCHEMA and "both_foul_policy" not in raw:
+            raise ValueError("v2 continuation objective is missing both-foul policy")
         return cls(
             current_state=_state_from_key(str(raw["current_state"])),
             values=values,
+            both_foul_policy=str(
+                raw.get("both_foul_policy", BOTH_FOUL_FAIL_CLOSED)
+            ),
         )
 
     @property
@@ -166,6 +179,7 @@ class SuitCanonicalContinuationMCCFR(SuitCanonicalOutcomeSamplingMCCFR):
             persistent_boards[1],
             self.objective.values,
             update_player=persistent_update,
+            both_foul_policy=self.objective.both_foul_policy,
         )
 
     def _episode(

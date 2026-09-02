@@ -5,6 +5,7 @@ import math
 import pytest
 
 from hu_continuation import (
+    BOTH_FOUL_NET_ZERO_INFERENCE,
     HUContinuationState,
     KERNEL_NORMAL_NORMAL,
     zero_continuation_values,
@@ -46,6 +47,7 @@ def candidate_for_values(values) -> NormalNormalFixedPolicyOracle:
         model,
         training_continuation_values=values,
         provenance="M5I deterministic zero-model unit candidate",
+        both_foul_policy=BOTH_FOUL_NET_ZERO_INFERENCE,
     )
     return NormalNormalFixedPolicyOracle(
         model,
