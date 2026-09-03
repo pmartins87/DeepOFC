@@ -14,15 +14,17 @@ consulted.  The full public action history is transformed too, so strategic
 signalling and perfect recall are preserved.
 """
 
+from dataclasses import dataclass
 from itertools import permutations
 import json
 import math
 from typing import Sequence
 
-from engine import Action, Card
+from engine import Action, Board, Card, legal_actions
 from strategic_cfr import (
     HUState,
     OutcomeSamplingMCCFR,
+    PublicActionEvent,
     child_state,
     terminal_utility,
 )
@@ -31,6 +33,115 @@ SUIT_PERMUTATIONS: tuple[tuple[int, int, int, int], ...] = tuple(
     permutations(range(4))
 )
 SOLVER_KIND = "suit24-exact"
+
+
+@dataclass(frozen=True)
+class HUVisibleObservation:
+    """Complete acting-player view needed by the suit-canonical policy.
+
+    Unlike :class:`HUState`, this object cannot carry an opponent packet,
+    opponent discard identity, or any future card.  It is therefore the safe
+    boundary for deployment adapters.  Boards and public-history player ids are
+    in one-hand role order: 0=non-dealer/first, 1=dealer/button/second.
+    """
+
+    round_index: int
+    actor: int
+    boards: tuple[Board, Board]
+    own_discards: tuple[Card, ...]
+    incoming: tuple[Card, ...]
+    public_history: tuple[PublicActionEvent, ...]
+
+    @classmethod
+    def from_state(cls, state: HUState) -> "HUVisibleObservation":
+        if state.terminal():
+            raise ValueError("terminal state has no visible policy observation")
+        return cls(
+            round_index=state.round_index,
+            actor=state.actor,
+            boards=state.boards,
+            own_discards=state.discards[state.actor],
+            incoming=state.plan.incoming(state.round_index, state.actor),
+            public_history=state.public_history,
+        )
+
+    def validate(self) -> None:
+        """Fail closed unless the visible node is a complete legal HU prefix."""
+
+        if self.actor not in (0, 1):
+            raise ValueError("visible HU actor must be role 0 or 1")
+        if self.round_index not in range(5):
+            raise ValueError("visible normal HU round must be 0..4")
+        if len(self.boards) != 2:
+            raise ValueError("visible HU observation requires two role-ordered boards")
+
+        expected_incoming = 5 if self.round_index == 0 else 3
+        if len(self.incoming) != expected_incoming:
+            raise ValueError(
+                f"visible round {self.round_index} requires {expected_incoming} incoming cards"
+            )
+        expected_own_discards = max(0, self.round_index - 1)
+        if len(self.own_discards) != expected_own_discards:
+            raise ValueError(
+                "visible acting-player discard history has the wrong cardinality"
+            )
+
+        expected_events = tuple(
+            (round_index, player)
+            for round_index in range(self.round_index + 1)
+            for player in (0, 1)
+            if round_index < self.round_index or player < self.actor
+        )
+        actual_events = tuple(
+            (event.round_index, event.player) for event in self.public_history
+        )
+        if actual_events != expected_events:
+            raise ValueError(
+                "visible public history is not the complete nondealer/dealer action prefix"
+            )
+
+        history_rows: list[list[list[Card]]] = [
+            [[], [], []],
+            [[], [], []],
+        ]
+        public_cards: list[Card] = []
+        for event in self.public_history:
+            expected_placements = 5 if event.round_index == 0 else 2
+            if len(event.placements) != expected_placements:
+                raise ValueError("visible public-history placement count is invalid")
+            event_cards: set[Card] = set()
+            for token, row in event.placements:
+                if int(row) not in (0, 1, 2):
+                    raise ValueError("visible public-history row is invalid")
+                card = Card.parse(str(token))
+                if str(card) != str(token):
+                    raise ValueError("visible public-history card token is not canonical")
+                if card in event_cards:
+                    raise ValueError("visible public-history event repeats a physical card")
+                event_cards.add(card)
+                history_rows[event.player][int(row)].append(card)
+                public_cards.append(card)
+
+        if len(public_cards) != len(set(public_cards)):
+            raise ValueError("visible public history repeats a physical card")
+        for player in (0, 1):
+            for row, board_cards in enumerate(self.boards[player].rows()):
+                if tuple(sorted(board_cards)) != tuple(sorted(history_rows[player][row])):
+                    raise ValueError(
+                        "visible public history does not reconcile to the current boards"
+                    )
+
+        visible_private = (*self.own_discards, *self.incoming)
+        if len(visible_private) != len(set(visible_private)):
+            raise ValueError("visible own private cards repeat a physical card")
+        if set(public_cards) & set(visible_private):
+            raise ValueError("visible private card is already present on a public board")
+
+
+def visible_observation_from_state(state: HUState) -> HUVisibleObservation:
+    observation = HUVisibleObservation.from_state(state)
+    observation.validate()
+    return observation
 
 
 def permute_card(card: Card, suit_map: Sequence[int]) -> Card:
@@ -56,15 +167,12 @@ def _board_payload(board, suit_map: Sequence[int]) -> tuple[tuple[str, ...], ...
     )
 
 
-def information_key_under_suit_map(
-    state: HUState,
+def _visible_information_key_under_suit_map_unchecked(
+    observation: HUVisibleObservation,
     suit_map: Sequence[int],
 ) -> str:
-    if state.terminal():
-        raise ValueError("terminal state has no information state")
-    player = state.actor
+    player = observation.actor
     opponent = 1 - player
-    incoming = state.plan.incoming(state.round_index, player)
     history = tuple(
         (
             event.round_index,
@@ -74,32 +182,69 @@ def information_key_under_suit_map(
                 for card, row in event.placements
             )),
         )
-        for event in state.public_history
+        for event in observation.public_history
     )
     payload = {
         "v": 2,
         "symmetry": SOLVER_KIND,
         "player": player,
         "position": "nondealer_first" if player == 0 else "dealer_button_second",
-        "round": state.round_index,
-        "self_board": _board_payload(state.boards[player], suit_map),
-        "opp_board": _board_payload(state.boards[opponent], suit_map),
+        "round": observation.round_index,
+        "self_board": _board_payload(observation.boards[player], suit_map),
+        "opp_board": _board_payload(observation.boards[opponent], suit_map),
         "own_discards": tuple(sorted(
-            _token(card, suit_map) for card in state.discards[player]
+            _token(card, suit_map) for card in observation.own_discards
         )),
-        "incoming": tuple(sorted(_token(card, suit_map) for card in incoming)),
+        "incoming": tuple(sorted(
+            _token(card, suit_map) for card in observation.incoming
+        )),
         "public_history": history,
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 
-def canonical_information_key(state: HUState) -> tuple[str, tuple[int, int, int, int]]:
-    """Return lexicographically canonical visible information and suit map."""
+def visible_information_key_under_suit_map(
+    observation: HUVisibleObservation,
+    suit_map: Sequence[int],
+) -> str:
+    observation.validate()
+    return _visible_information_key_under_suit_map_unchecked(
+        observation, suit_map
+    )
+
+
+def information_key_under_suit_map(
+    state: HUState,
+    suit_map: Sequence[int],
+) -> str:
+    return visible_information_key_under_suit_map(
+        visible_observation_from_state(state), suit_map
+    )
+
+
+def canonical_visible_information_key(
+    observation: HUVisibleObservation,
+) -> tuple[str, tuple[int, int, int, int]]:
+    """Return the canonical key using visible cards and history only."""
+
+    observation.validate()
     candidates = (
-        (information_key_under_suit_map(state, suit_map), suit_map)
+        (
+            _visible_information_key_under_suit_map_unchecked(
+                observation, suit_map
+            ),
+            suit_map,
+        )
         for suit_map in SUIT_PERMUTATIONS
     )
     return min(candidates, key=lambda item: (item[0], item[1]))
+
+
+def canonical_information_key(state: HUState) -> tuple[str, tuple[int, int, int, int]]:
+    """Return lexicographically canonical visible information and suit map."""
+    return canonical_visible_information_key(
+        HUVisibleObservation.from_state(state)
+    )
 
 
 def action_key_under_suit_map(
@@ -121,19 +266,16 @@ def action_key_under_suit_map(
     )
 
 
-def canonical_action_pairs(
-    state: HUState,
+def _canonical_visible_action_pairs_unchecked(
+    observation: HUVisibleObservation,
     suit_map: Sequence[int],
 ) -> list[tuple[str, Action]]:
-    if state.terminal():
-        return []
-    from engine import legal_actions
-
-    incoming = state.plan.incoming(state.round_index, state.actor)
     pairs = [
-        (action_key_under_suit_map(action, incoming, suit_map), action)
+        (action_key_under_suit_map(action, observation.incoming, suit_map), action)
         for action in legal_actions(
-            state.boards[state.actor], incoming, state.round_index
+            observation.boards[observation.actor],
+            observation.incoming,
+            observation.round_index,
         )
     ]
     pairs.sort(key=lambda item: item[0])
@@ -142,11 +284,38 @@ def canonical_action_pairs(
     return pairs
 
 
+def canonical_visible_action_pairs(
+    observation: HUVisibleObservation,
+    suit_map: Sequence[int],
+) -> list[tuple[str, Action]]:
+    observation.validate()
+    return _canonical_visible_action_pairs_unchecked(observation, suit_map)
+
+
+def canonical_action_pairs(
+    state: HUState,
+    suit_map: Sequence[int],
+) -> list[tuple[str, Action]]:
+    return canonical_visible_action_pairs(
+        HUVisibleObservation.from_state(state), suit_map
+    )
+
+
+def canonical_visible_node_view(
+    observation: HUVisibleObservation,
+) -> tuple[str, list[tuple[str, Action]], tuple[int, int, int, int]]:
+    key, suit_map = canonical_visible_information_key(observation)
+    return (
+        key,
+        _canonical_visible_action_pairs_unchecked(observation, suit_map),
+        suit_map,
+    )
+
+
 def canonical_node_view(
     state: HUState,
 ) -> tuple[str, list[tuple[str, Action]], tuple[int, int, int, int]]:
-    key, suit_map = canonical_information_key(state)
-    return key, canonical_action_pairs(state, suit_map), suit_map
+    return canonical_visible_node_view(HUVisibleObservation.from_state(state))
 
 
 def _sample_index(probabilities: Sequence[float], rng) -> int:

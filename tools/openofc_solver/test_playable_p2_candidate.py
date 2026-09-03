@@ -11,9 +11,11 @@ from playable_p2_candidate import (
     AUTHORITY,
     build_manifest,
     canonical_bytes,
+    load_manifest,
     load_route,
     load_route_payload,
     payload_sha256,
+    write_manifest,
 )
 from run_playable_p2_train_route import train_route
 from strategic_cfr import HUState, sample_deal_plan
@@ -117,3 +119,31 @@ def test_manifest_binds_both_button_routes(tmp_path) -> None:
     expected = unsigned.pop("sha256")
     assert payload_sha256(unsigned) == expected
     assert canonical_bytes(manifest) == canonical_bytes(dict(manifest))
+
+
+def test_manifest_loader_revalidates_both_route_files(tmp_path) -> None:
+    paths = []
+    for button in (0, 1):
+        path = tmp_path / f"route_b{button}.json.gz"
+        train_route(
+            button=button,
+            source_commit=SOURCE_COMMIT,
+            output=path,
+            config=tiny_config(),
+        )
+        paths.append(path)
+    manifest_path = tmp_path / "manifest.json"
+    written = write_manifest(manifest_path, paths)
+
+    loaded = load_manifest(manifest_path)
+    assert loaded.manifest_sha256 == written["sha256"]
+    assert loaded.source_commit == SOURCE_COMMIT
+    assert loaded.route_for_button(0).state.button == 0
+    assert loaded.route_for_button(1).state.button == 1
+    assert loaded.file_sha256_for_button(0) == written["routes"][0]["file_sha256"]
+
+    # A route-file mutation must be rejected even though the manifest itself
+    # still has a valid embedded SHA.
+    paths[1].write_bytes(paths[1].read_bytes() + b"tamper")
+    with pytest.raises(ValueError, match="manifest does not match"):
+        load_manifest(manifest_path)

@@ -186,6 +186,30 @@ class LoadedPlayableRoute:
         return min(winners)
 
 
+@dataclass(frozen=True)
+class LoadedPlayableManifest:
+    """Two-route P2 bundle after full file and embedded-identity validation."""
+
+    source_commit: str
+    manifest_sha256: str
+    route_paths: tuple[Path, Path]
+    route_file_sha256s: tuple[str, str]
+    routes: tuple[LoadedPlayableRoute, LoadedPlayableRoute]
+
+    def route_for_button(self, button: int) -> LoadedPlayableRoute:
+        if button not in (0, 1):
+            raise ValueError("P2 route button must be persistent player 0 or 1")
+        route = self.routes[button]
+        if route.state.button != button:
+            raise AssertionError("validated P2 route tuple lost button ordering")
+        return route
+
+    def file_sha256_for_button(self, button: int) -> str:
+        if button not in (0, 1):
+            raise ValueError("P2 route button must be persistent player 0 or 1")
+        return self.route_file_sha256s[button]
+
+
 def _state_from_route(payload: Mapping[str, object]) -> HUContinuationState:
     button = int(payload["button"])
     state = HUContinuationState(button, 0, 0)
@@ -363,3 +387,76 @@ def write_manifest(path: Path, route_paths: Sequence[Path]) -> dict[str, object]
         encoding="utf-8",
     )
     return payload
+
+
+def load_manifest(path: Path) -> LoadedPlayableManifest:
+    """Load a complete P2 bundle and reject any manifest/file divergence."""
+
+    manifest_path = Path(path)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("P2 manifest root must be an object")
+    raw = _verify_embedded_sha(payload, label="P2 manifest")
+    if raw.get("schema") != MANIFEST_SCHEMA or raw.get("authority") != AUTHORITY:
+        raise ValueError("unsupported P2 manifest schema/authority")
+    if raw.get("verdict") != "PASS_PLAYABLE_P2_ARTIFACT_IDENTITY":
+        raise ValueError("P2 manifest verdict is not deployable")
+    if (
+        raw.get("formal_certification") is not False
+        or raw.get("production_certification_eligible") is not False
+        or raw.get("real_routes_certified") != 0
+    ):
+        raise ValueError("P2 manifest authority firewall mismatch")
+    source_commit = str(raw.get("source_commit", ""))
+    if not SOURCE_COMMIT_PATTERN.fullmatch(source_commit):
+        raise ValueError("invalid P2 manifest source commit")
+
+    rows = raw.get("routes")
+    if not isinstance(rows, list) or len(rows) != 2:
+        raise ValueError("P2 manifest requires exactly two route rows")
+    expected_row_fields = {
+        "button",
+        "state",
+        "file",
+        "file_sha256",
+        "route_sha256",
+        "policy_snapshot_sha256",
+        "model_sha256",
+    }
+    paths_by_button: dict[int, Path] = {}
+    file_sha_by_button: dict[int, str] = {}
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != expected_row_fields:
+            raise ValueError("P2 manifest route row fields differ from schema")
+        button = int(row["button"])
+        if button not in (0, 1) or button in paths_by_button:
+            raise ValueError("P2 manifest route buttons must be unique B0/B1")
+        filename = str(row["file"])
+        if not filename or Path(filename).name != filename:
+            raise ValueError("P2 manifest route filename must be a local basename")
+        route_path = manifest_path.parent / filename
+        if not route_path.is_file():
+            raise ValueError("P2 manifest route file is missing")
+        expected_file_sha = str(row["file_sha256"])
+        if file_sha256(route_path) != expected_file_sha:
+            raise ValueError("P2 manifest does not match its route files")
+        paths_by_button[button] = route_path
+        file_sha_by_button[button] = expected_file_sha
+    if set(paths_by_button) != {0, 1}:
+        raise ValueError("P2 manifest must cover both button routes")
+
+    route_paths = (paths_by_button[0], paths_by_button[1])
+    rebuilt = build_manifest(route_paths)
+    if canonical_bytes(rebuilt) != canonical_bytes(payload):
+        raise ValueError("P2 manifest does not match its route files")
+
+    routes = (load_route(route_paths[0]), load_route(route_paths[1]))
+    if any(route.source_commit != source_commit for route in routes):
+        raise ValueError("P2 manifest/route source commit mismatch")
+    return LoadedPlayableManifest(
+        source_commit=source_commit,
+        manifest_sha256=str(payload["sha256"]),
+        route_paths=route_paths,
+        route_file_sha256s=(file_sha_by_button[0], file_sha_by_button[1]),
+        routes=routes,
+    )

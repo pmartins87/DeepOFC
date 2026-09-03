@@ -5,11 +5,14 @@ import random
 from engine import Action, Card
 from strategic_cfr import DealPlan, HUState, child_state, legal_action_pairs, sample_deal_plan
 from strategic_suit_symmetry import (
+    HUVisibleObservation,
     SuitCanonicalOutcomeSamplingMCCFR,
     canonical_action_pairs,
     canonical_information_key,
     canonical_node_view,
+    canonical_visible_node_view,
     permute_card,
+    visible_observation_from_state,
 )
 
 
@@ -103,6 +106,76 @@ def test_node_view_is_deterministic() -> None:
     assert [x for x, _ in p1] == [x for x, _ in p2]
 
 
+def test_visible_only_node_view_matches_full_state_wrapper() -> None:
+    state = HUState(plan=sample_deal_plan(random.Random(7005)))
+    while not state.terminal():
+        visible = visible_observation_from_state(state)
+        full_key, full_pairs, full_map = canonical_node_view(state)
+        visible_key, visible_pairs, visible_map = canonical_visible_node_view(visible)
+        assert visible_key == full_key
+        assert visible_map == full_map
+        assert [key for key, _action in visible_pairs] == [
+            key for key, _action in full_pairs
+        ]
+        state = child_state(state, full_pairs[len(full_pairs) // 3][1])
+
+
+def _swap_hidden_future_cards(plan: DealPlan) -> DealPlan:
+    rounds = [[list(packet) for packet in pair] for pair in plan.rounds]
+    rounds[0][1][0], rounds[3][0][0] = rounds[3][0][0], rounds[0][1][0]
+    return DealPlan(
+        opening=plan.opening,
+        rounds=tuple(
+            (tuple(sorted(pair[0])), tuple(sorted(pair[1])))
+            for pair in rounds
+        ),  # type: ignore[arg-type]
+    )
+
+
+def test_hidden_opponent_and_future_cards_cannot_change_runtime_node() -> None:
+    plan_a = sample_deal_plan(random.Random(7006))
+    plan_b = _swap_hidden_future_cards(plan_a)
+    state_a = HUState(plan=plan_a)
+    state_b = HUState(plan=plan_b)
+
+    # At the root, actor 0 sees only its own opening packet.  Actor 1's packet
+    # and every future packet can differ without changing key or legal actions.
+    view_a = canonical_visible_node_view(visible_observation_from_state(state_a))
+    view_b = canonical_visible_node_view(visible_observation_from_state(state_b))
+    assert view_a[0] == view_b[0]
+    assert [key for key, _ in view_a[1]] == [key for key, _ in view_b[1]]
+
+    # After the same public opening placement, actor 1 sees its own unchanged
+    # opening packet; the altered future cards remain outside the boundary.
+    action = legal_action_pairs(state_a)[29][1]
+    state_a = child_state(state_a, action)
+    state_b = child_state(state_b, action)
+    view_a = canonical_visible_node_view(visible_observation_from_state(state_a))
+    view_b = canonical_visible_node_view(visible_observation_from_state(state_b))
+    assert view_a[0] == view_b[0]
+    assert [key for key, _ in view_a[1]] == [key for key, _ in view_b[1]]
+
+
+def test_visible_boundary_rejects_incomplete_public_history() -> None:
+    state = HUState(plan=sample_deal_plan(random.Random(7007)))
+    state = child_state(state, legal_action_pairs(state)[0][1])
+    visible = HUVisibleObservation.from_state(state)
+    malformed = HUVisibleObservation(
+        round_index=visible.round_index,
+        actor=visible.actor,
+        boards=visible.boards,
+        own_discards=visible.own_discards,
+        incoming=visible.incoming,
+        public_history=(),
+    )
+    try:
+        canonical_visible_node_view(malformed)
+    except ValueError as exc:
+        assert "complete nondealer/dealer action prefix" in str(exc)
+    else:
+        raise AssertionError("incomplete public history must fail closed")
+
+
 def test_suit_canonical_mccfr_smoke() -> None:
     solver = SuitCanonicalOutcomeSamplingMCCFR(
         seed=7004, epsilon=0.6, cfr_plus=True
@@ -120,6 +193,9 @@ def main() -> None:
     test_initial_infoset_and_action_set_are_suit_invariant()
     test_public_history_is_canonicalized_with_cards()
     test_node_view_is_deterministic()
+    test_visible_only_node_view_matches_full_state_wrapper()
+    test_hidden_opponent_and_future_cards_cannot_change_runtime_node()
+    test_visible_boundary_rejects_incomplete_public_history()
     test_suit_canonical_mccfr_smoke()
     print("OPENOFC_STRATEGIC_SUIT_SYMMETRY_TEST=PASS")
 
